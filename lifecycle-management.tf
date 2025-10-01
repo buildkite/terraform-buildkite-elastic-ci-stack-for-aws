@@ -212,7 +212,7 @@ resource "aws_autoscaling_lifecycle_hook" "instance_terminating" {
 
   notification_metadata = jsonencode({
     stack_name = local.stack_name_full
-    queue      = var.agent_config.queue
+    queue      = var.buildkite_queue
   })
 }
 

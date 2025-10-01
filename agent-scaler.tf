@@ -5,7 +5,7 @@ resource "aws_lambda_function" "scaler" {
   description   = "Scales ${aws_autoscaling_group.agent_auto_scale_group.name} based on Buildkite metrics"
 
   s3_bucket = "buildkite-lambdas"
-  s3_key    = "buildkite-agent-scaler/v${var.agent_config.scaler_version}/handler.zip"
+  s3_key    = "buildkite-agent-scaler/v${var.buildkite_agent_scaler_version}/handler.zip"
 
   handler       = "bootstrap"
   runtime       = "provided.al2"
@@ -18,33 +18,33 @@ resource "aws_lambda_function" "scaler" {
   environment {
     variables = {
       # Required parameters
-      BUILDKITE_AGENT_TOKEN_SSM_KEY = local.use_custom_token_path ? var.agent_config.token_parameter_store_path : aws_ssm_parameter.buildkite_agent_token_parameter[0].name
-      BUILDKITE_QUEUE               = var.agent_config.queue
-      AGENTS_PER_INSTANCE           = tostring(var.agent_config.agents_per_instance)
+      BUILDKITE_AGENT_TOKEN_SSM_KEY = local.use_custom_token_path ? var.buildkite_agent_token_parameter_store_path : aws_ssm_parameter.buildkite_agent_token_parameter[0].name
+      BUILDKITE_QUEUE               = var.buildkite_queue
+      AGENTS_PER_INSTANCE           = tostring(var.agents_per_instance)
       ASG_NAME                      = aws_autoscaling_group.agent_auto_scale_group.name
 
       # Optional agent endpoint
-      BUILDKITE_AGENT_ENDPOINT = var.agent_config.endpoint
+      BUILDKITE_AGENT_ENDPOINT = var.agent_endpoint
 
       # Scaling configuration
-      DISABLE_SCALE_IN          = var.autoscaling.disable_scale_in ? "true" : "false"
-      SCALE_IN_COOLDOWN_PERIOD  = "${var.autoscaling.scale_in_cooldown_period}s"
-      SCALE_OUT_COOLDOWN_PERIOD = "${var.autoscaling.scale_out_cooldown_period}s"
-      SCALE_OUT_FACTOR          = tostring(var.autoscaling.scale_out_factor)
-      INSTANCE_BUFFER           = tostring(var.autoscaling.instance_buffer)
-      INCLUDE_WAITING           = var.autoscaling.scale_out_for_waiting_jobs ? "true" : "false"
+      DISABLE_SCALE_IN          = var.disable_scale_in ? "true" : "false"
+      SCALE_IN_COOLDOWN_PERIOD  = "${var.scale_in_cooldown_period}s"
+      SCALE_OUT_COOLDOWN_PERIOD = "${var.scale_out_cooldown_period}s"
+      SCALE_OUT_FACTOR          = tostring(var.scale_out_factor)
+      INSTANCE_BUFFER           = tostring(var.instance_buffer)
+      INCLUDE_WAITING           = var.scale_out_for_waiting_jobs ? "true" : "false"
 
       # Lambda behavior
       # Convert EventBridge schedule period to Go duration format for LAMBDA_INTERVAL
       # EventBridge uses "1 minute" but Go expects "1m" or "60s"
-      LAMBDA_INTERVAL = replace(replace(var.autoscaling.scaler_event_schedule_period, " minute", "m"), " minutes", "m")
+      LAMBDA_INTERVAL = replace(replace(var.scaler_event_schedule_period, " minute", "m"), " minutes", "m")
       LAMBDA_TIMEOUT  = "110s" # Less than function timeout to allow graceful exit
 
       # Polling configuration
-      MIN_POLL_INTERVAL = var.autoscaling.scaler_min_poll_interval
+      MIN_POLL_INTERVAL = var.scaler_min_poll_interval
 
       # Elastic CI Mode (experimental)
-      ELASTIC_CI_MODE = var.autoscaling.scaler_enable_elastic_ci_mode ? "true" : "false"
+      ELASTIC_CI_MODE = var.scaler_enable_elastic_ci_mode ? "true" : "false"
 
       # CloudWatch metrics (optional)
       CLOUDWATCH_METRICS = "false" # Can be made configurable if needed
@@ -58,7 +58,7 @@ resource "aws_lambda_function" "scaler" {
   ]
 
   tags = local.enable_cost_tags ? {
-    (var.cost_config.allocation_tag_name) = var.cost_config.allocation_tag_value
+    (var.cost_allocation_tag_name) = var.cost_allocation_tag_value
   } : {}
 }
 
@@ -66,18 +66,18 @@ resource "aws_cloudwatch_log_group" "scaler_lambda_logs" {
   count = local.has_variable_size ? 1 : 0
 
   name              = "/aws/lambda/${local.stack_name_full}-scaler"
-  retention_in_days = var.observability_config.lambda_log_retention_days
+  retention_in_days = var.lambda_log_retention_days
 
   tags = local.enable_cost_tags ? {
-    (var.cost_config.allocation_tag_name) = var.cost_config.allocation_tag_value
+    (var.cost_allocation_tag_name) = var.cost_allocation_tag_value
   } : {}
 }
 
 resource "aws_cloudwatch_event_rule" "scaler_schedule" {
   count               = local.has_variable_size ? 1 : 0
   name                = "${local.stack_name_full}-scaler-schedule"
-  description         = "Triggers Buildkite agent scaler Lambda every ${var.autoscaling.scaler_event_schedule_period}"
-  schedule_expression = "rate(${var.autoscaling.scaler_event_schedule_period})"
+  description         = "Triggers Buildkite agent scaler Lambda every ${var.scaler_event_schedule_period}"
+  schedule_expression = "rate(${var.scaler_event_schedule_period})"
 }
 
 resource "aws_cloudwatch_event_target" "scaler_lambda" {
@@ -102,7 +102,7 @@ resource "aws_iam_role" "scaler_lambda_role" {
   count = local.has_variable_size ? 1 : 0
 
   name                 = "${local.stack_name_full}-scaler-lambda-role"
-  permissions_boundary = local.use_permissions_boundary ? var.security_config.instance_role_permissions_boundary_arn : null
+  permissions_boundary = local.use_permissions_boundary ? var.instance_role_permissions_boundary_arn : null
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -156,7 +156,7 @@ resource "aws_iam_role_policy" "scaler_lambda_policy" {
           Action = [
             "ssm:GetParameter"
           ]
-          Resource = local.use_custom_token_path ? "arn:aws:ssm:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:parameter/${var.agent_config.token_parameter_store_path}" : aws_ssm_parameter.buildkite_agent_token_parameter[0].arn
+          Resource = local.use_custom_token_path ? "arn:aws:ssm:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:parameter${var.buildkite_agent_token_parameter_store_path}" : aws_ssm_parameter.buildkite_agent_token_parameter[0].arn
         }
       ],
       # KMS for encrypted SSM parameter (if using customer-managed key)
@@ -166,12 +166,12 @@ resource "aws_iam_role_policy" "scaler_lambda_policy" {
           Action = [
             "kms:Decrypt"
           ]
-          Resource = var.agent_config.token_parameter_store_kms_key
+          Resource = var.buildkite_agent_token_parameter_store_kms_key
         }
       ] : [],
       # Elastic CI Mode - Enhanced permissions for graceful scale-in
       # Split into separate conditionals to avoid type mismatch
-      var.autoscaling.scaler_enable_elastic_ci_mode ? [
+      var.scaler_enable_elastic_ci_mode ? [
         {
           Effect = "Allow"
           Action = [
@@ -180,7 +180,7 @@ resource "aws_iam_role_policy" "scaler_lambda_policy" {
           Resource = "*"
         }
       ] : [],
-      var.autoscaling.scaler_enable_elastic_ci_mode ? [
+      var.scaler_enable_elastic_ci_mode ? [
         {
           Effect = "Allow"
           Action = [
@@ -193,7 +193,7 @@ resource "aws_iam_role_policy" "scaler_lambda_policy" {
           ]
         }
       ] : [],
-      var.autoscaling.scaler_enable_elastic_ci_mode ? [
+      var.scaler_enable_elastic_ci_mode ? [
         {
           Effect = "Allow"
           Action = [

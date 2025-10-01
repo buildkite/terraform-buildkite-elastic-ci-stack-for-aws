@@ -1,7 +1,7 @@
 # Network Output
 output "vpc_id" {
   description = "VPC ID (either created or provided)"
-  value       = local.create_vpc ? aws_vpc.vpc[0].id : var.network_config.vpc_id
+  value       = local.create_vpc ? aws_vpc.vpc[0].id : var.vpc_id
 }
 
 # S3 Outputs

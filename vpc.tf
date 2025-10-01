@@ -19,7 +19,7 @@ resource "aws_internet_gateway" "gateway" {
 
 resource "aws_subnet" "subnet0" {
   count             = local.create_vpc ? 1 : 0
-  availability_zone = local.use_custom_azs ? element(split(",", var.network_config.availability_zones), 0) : element(data.aws_availability_zones.available.names, 0)
+  availability_zone = local.use_custom_azs ? element(split(",", var.availability_zones), 0) : element(data.aws_availability_zones.available.names, 0)
   cidr_block        = "10.0.1.0/24"
   vpc_id            = aws_vpc.vpc[0].id
   tags = merge(local.common_tags, {
@@ -29,7 +29,7 @@ resource "aws_subnet" "subnet0" {
 
 resource "aws_subnet" "subnet1" {
   count             = local.create_vpc ? 1 : 0
-  availability_zone = local.use_custom_azs ? element(split(",", var.network_config.availability_zones), 1) : element(data.aws_availability_zones.available.names, 1)
+  availability_zone = local.use_custom_azs ? element(split(",", var.availability_zones), 1) : element(data.aws_availability_zones.available.names, 1)
   cidr_block        = "10.0.2.0/24"
   vpc_id            = aws_vpc.vpc[0].id
   tags = merge(local.common_tags, {
@@ -66,7 +66,7 @@ resource "aws_security_group" "security_group" {
   count       = local.create_security_group ? 1 : 0
   name        = "${local.stack_name_full}-agent-sg"
   description = "Enable access to agents"
-  vpc_id      = local.create_vpc ? aws_vpc.vpc[0].id : var.network_config.vpc_id
+  vpc_id      = local.create_vpc ? aws_vpc.vpc[0].id : var.vpc_id
   tags        = local.common_tags
 
   # Allow all outbound traffic (required for agents to connect to Buildkite, download artifacts, etc.)

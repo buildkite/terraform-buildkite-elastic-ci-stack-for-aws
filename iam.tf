@@ -9,8 +9,8 @@ resource "aws_iam_instance_profile" "iam_instance_profile" {
 }
 
 resource "aws_iam_role" "iam_role" {
-  name                 = local.use_custom_role_name ? var.security_config.instance_role_name : "${local.stack_name_full}-Role"
-  permissions_boundary = local.use_permissions_boundary ? var.security_config.instance_role_permissions_boundary_arn : null
+  name                 = local.use_custom_role_name ? var.instance_role_name : "${local.stack_name_full}-Role"
+  permissions_boundary = local.use_permissions_boundary ? var.instance_role_permissions_boundary_arn : null
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -32,12 +32,12 @@ resource "aws_iam_role" "iam_role" {
 resource "aws_iam_role_policy_attachment" "instance_ecr_policy" {
   count      = local.enable_ecr ? 1 : 0
   role       = aws_iam_role.iam_role.name
-  policy_arn = local.ecr_policy_arns[var.docker_config.ecr_access_policy]
+  policy_arn = local.ecr_policy_arns[var.ecr_access_policy]
 }
 
 # Attach custom managed policies if configured
 resource "aws_iam_role_policy_attachment" "instance_managed_policies" {
-  for_each   = local.use_managed_policies ? toset(var.security_config.managed_policy_arns) : []
+  for_each   = local.use_managed_policies ? toset(var.managed_policy_arns) : []
   role       = aws_iam_role.iam_role.name
   policy_arn = each.value
 }
@@ -103,8 +103,8 @@ resource "aws_iam_role_policy" "buildkite_agent_policy" {
             "s3:ListBucket"
           ]
           Resource = [
-            local.create_secrets_bucket ? aws_s3_bucket.managed_secrets_bucket[0].arn : "arn:aws:s3:::${var.s3_config.secrets_bucket}",
-            "${local.create_secrets_bucket ? aws_s3_bucket.managed_secrets_bucket[0].arn : "arn:aws:s3:::${var.s3_config.secrets_bucket}"}/*"
+            local.create_secrets_bucket ? aws_s3_bucket.managed_secrets_bucket[0].arn : "arn:aws:s3:::${var.secrets_bucket}",
+            "${local.create_secrets_bucket ? aws_s3_bucket.managed_secrets_bucket[0].arn : "arn:aws:s3:::${var.secrets_bucket}"}/*"
           ]
         }
       ] : [],
@@ -169,7 +169,7 @@ resource "aws_iam_role" "stop_buildkite_agents" {
   count = local.enable_graceful_shutdown ? 1 : 0
 
   name_prefix          = "${local.stack_name_full}-stop-bk-"
-  permissions_boundary = local.use_permissions_boundary ? var.security_config.instance_role_permissions_boundary_arn : null
+  permissions_boundary = local.use_permissions_boundary ? var.instance_role_permissions_boundary_arn : null
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
