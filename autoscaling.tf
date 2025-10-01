@@ -199,9 +199,9 @@ resource "aws_autoscaling_group" "agent_auto_scale_group" {
     }
   }
 
-  min_size         = var.min_size
-  max_size         = var.max_size
-  default_cooldown = 60
+  min_size              = var.min_size
+  max_size              = var.max_size
+  default_cooldown      = 60
   protect_from_scale_in = true
 
   termination_policies = [
