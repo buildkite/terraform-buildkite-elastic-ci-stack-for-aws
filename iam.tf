@@ -49,75 +49,81 @@ resource "aws_iam_role_policy" "buildkite_agent_policy" {
 
   policy = jsonencode({
     Version = "2012-10-17"
-    Statement = [
-      {
-        Sid    = "Ssm"
-        Effect = "Allow"
-        Action = [
-          "ssm:DescribeInstanceProperties",
-          "ssm:ListAssociations",
-          "ssm:PutInventory",
-          "ssm:UpdateInstanceInformation",
-          "ssmmessages:CreateControlChannel",
-          "ssmmessages:CreateDataChannel",
-          "ssmmessages:OpenControlChannel",
-          "ssmmessages:OpenDataChannel",
-          "ec2messages:AcknowledgeMessage",
-          "ec2messages:DeleteMessage",
-          "ec2messages:FailMessage",
-          "ec2messages:GetEndpoint",
-          "ec2messages:GetMessages",
-          "ec2messages:SendReply"
-        ]
-        Resource = "*"
-      },
-      {
-        Sid    = "SsmParameterAccess"
-        Effect = "Allow"
-        Action = [
-          "ssm:GetParameter",
-          "ssm:GetParameters"
-        ]
-        Resource = [
-          "arn:aws:ssm:*:*:parameter/buildkite/elastic-ci-stack/${local.stack_name_full}/*",
-          local.agent_token_parameter_arn
-        ]
-      },
-      {
-        Sid    = "AutoScalingAccess"
-        Effect = "Allow"
-        Action = [
-          "autoscaling:SetInstanceHealth"
-        ]
-        Resource = "*"
-      },
-      {
-        Sid    = "S3SecretsAccess"
-        Effect = "Allow"
-        Action = [
-          "s3:GetObject",
-          "s3:GetObjectVersion",
-          "s3:ListBucket"
-        ]
-        Resource = [
-          local.create_secrets_bucket ? aws_s3_bucket.managed_secrets_bucket[0].arn : "arn:aws:s3:::${var.s3_config.secrets_bucket}",
-          "${local.create_secrets_bucket ? aws_s3_bucket.managed_secrets_bucket[0].arn : "arn:aws:s3:::${var.s3_config.secrets_bucket}"}/*"
-        ]
-      },
-      {
-        Sid    = "CloudwatchLogs"
-        Effect = "Allow"
-        Action = [
-          "logs:CreateLogGroup",
-          "logs:CreateLogStream",
-          "logs:PutLogEvents",
-          "logs:DescribeLogGroups",
-          "logs:DescribeLogStreams",
-          "logs:PutRetentionPolicy"
-        ]
-        Resource = "*"
-      }
-    ]
+    Statement = concat(
+      [
+        {
+          Sid    = "Ssm"
+          Effect = "Allow"
+          Action = [
+            "ssm:DescribeInstanceProperties",
+            "ssm:ListAssociations",
+            "ssm:PutInventory",
+            "ssm:UpdateInstanceInformation",
+            "ssmmessages:CreateControlChannel",
+            "ssmmessages:CreateDataChannel",
+            "ssmmessages:OpenControlChannel",
+            "ssmmessages:OpenDataChannel",
+            "ec2messages:AcknowledgeMessage",
+            "ec2messages:DeleteMessage",
+            "ec2messages:FailMessage",
+            "ec2messages:GetEndpoint",
+            "ec2messages:GetMessages",
+            "ec2messages:SendReply"
+          ]
+          Resource = "*"
+        },
+        {
+          Sid    = "SsmParameterAccess"
+          Effect = "Allow"
+          Action = [
+            "ssm:GetParameter",
+            "ssm:GetParameters"
+          ]
+          Resource = [
+            "arn:aws:ssm:*:*:parameter/buildkite/elastic-ci-stack/${local.stack_name_full}/*",
+            local.agent_token_parameter_arn
+          ]
+        },
+        {
+          Sid    = "AutoScalingAccess"
+          Effect = "Allow"
+          Action = [
+            "autoscaling:SetInstanceHealth"
+          ]
+          Resource = "*"
+        }
+      ],
+      local.has_secrets_bucket ? [
+        {
+          Sid    = "S3SecretsAccess"
+          Effect = "Allow"
+          Action = [
+            "s3:GetObject",
+            "s3:GetObjectVersion",
+            "s3:ListBucket"
+          ]
+          Resource = [
+            local.create_secrets_bucket ? aws_s3_bucket.managed_secrets_bucket[0].arn : "arn:aws:s3:::${var.s3_config.secrets_bucket}",
+            "${local.create_secrets_bucket ? aws_s3_bucket.managed_secrets_bucket[0].arn : "arn:aws:s3:::${var.s3_config.secrets_bucket}"}/*"
+          ]
+        }
+      ] : [],
+      [
+        {
+          Sid    = "CloudwatchLogs"
+          Effect = "Allow"
+          Action = [
+            "logs:CreateLogGroup",
+            "logs:CreateLogStream",
+            "logs:PutLogEvents",
+            "logs:DescribeLogGroups",
+            "logs:DescribeLogStreams",
+            "logs:PutRetentionPolicy"
+          ]
+          Resource = "*"
+        }
+      ]
+    )
   })
 }
 
@@ -213,7 +219,7 @@ resource "aws_iam_role_policy" "stop_buildkite_agents_modify_asg" {
     Statement = [{
       Effect   = "Allow"
       Action   = "autoscaling:UpdateAutoScalingGroup"
-      Resource = "arn:${data.aws_partition.current.partition}:autoscaling:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:autoScalingGroup:*:autoScalingGroupName/${local.stack_name_full}-AgentAutoScaleGroup-*"
+      Resource = aws_autoscaling_group.agent_auto_scale_group.arn
     }]
   })
 }
@@ -248,7 +254,7 @@ resource "aws_iam_role_policy" "stop_buildkite_agents_ssm_instances" {
       Resource = "arn:${data.aws_partition.current.partition}:ec2:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:instance/*"
       Condition = {
         StringEquals = {
-          "aws:resourceTag/aws:cloudformation:logical-id" = "AgentAutoScaleGroup"
+          "aws:ResourceTag/aws:autoscaling:groupName" = aws_autoscaling_group.agent_auto_scale_group.name
         }
       }
     }]

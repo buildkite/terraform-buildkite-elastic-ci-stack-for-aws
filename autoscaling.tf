@@ -205,7 +205,7 @@ resource "aws_autoscaling_group" "agent_auto_scale_group" {
   protect_from_scale_in = true
 
   termination_policies = [
-    "OldestLaunchConfiguration",
+    "OldestLaunchTemplate",
     "ClosestToNextInstanceHour"
   ]
 

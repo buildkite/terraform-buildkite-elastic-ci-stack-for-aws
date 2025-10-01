@@ -33,9 +33,8 @@ locals {
 
 
   # Image ID selection and parameter store settings
-  use_custom_ami          = var.instance_config.image_id != ""
-  use_ami_parameter       = var.instance_config.image_id_parameter != ""
-  use_buildkite_ami_stack = var.instance_config.image_id_parameter != ""
+  use_custom_ami    = var.instance_config.image_id != ""
+  use_ami_parameter = var.instance_config.image_id_parameter != ""
 
   # Region-specific AMI IDs by architecture (linux-amd64, linux-arm64, windows)
   buildkite_amis = {
@@ -110,7 +109,7 @@ locals {
   signing_key_arn = local.create_signing_key ? "arn:aws:kms:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:key/${aws_kms_key.pipeline_signing_kms_key[0].key_id}" : var.pipeline_signing_config.kms_key_id
 
   # Computed agent token parameter ARN (for IAM policies)
-  agent_token_parameter_arn = local.use_custom_token_path ? "arn:aws:ssm:*:*:parameter${var.agent_config.token_parameter_store_path}" : "arn:aws:ssm:*:*:parameter/buildkite/elastic-ci-stack/${local.stack_name_full}/agent-token"
+  agent_token_parameter_arn = local.use_custom_token_path ? "arn:aws:ssm:*:*:parameter/${var.agent_config.token_parameter_store_path}" : "arn:aws:ssm:*:*:parameter/buildkite/elastic-ci-stack/${local.stack_name_full}/agent-token"
 
   # Determine AMI ID from custom, parameter, or Buildkite mapping
   computed_ami_id = local.use_custom_ami ? var.instance_config.image_id : (local.use_ami_parameter ? data.aws_ssm_parameter.ami[0].value : local.selected_ami_id)

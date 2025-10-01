@@ -60,6 +60,11 @@ variable "agent_config" {
   }
 
   validation {
+    condition     = var.agent_config.token_parameter_store_path == "" || !can(regex("^/", var.agent_config.token_parameter_store_path))
+    error_message = "token_parameter_store_path must not start with '/'."
+  }
+
+  validation {
     condition     = var.agent_config.cancel_grace_period >= 0
     error_message = "Cancel grace period must be non-negative."
   }
@@ -93,6 +98,7 @@ variable "autoscaling" {
 
     # Scaler configuration
     scaler_enable_elastic_ci_mode = optional(bool, false)
+    # EventBridge rate expression format: https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-scheduled-rule-pattern.html#eb-rate-expressions
     scaler_event_schedule_period  = optional(string, "1 minute")
     scaler_min_poll_interval      = optional(string, "10s")
 
@@ -309,8 +315,13 @@ variable "network_config" {
   default = {}
 
   validation {
-    condition     = var.network_config.vpc_id == "" || length(var.network_config.subnets) > 0
-    error_message = "If vpc_id is specified, subnets must also be provided."
+    condition     = var.network_config.vpc_id == "" || length(var.network_config.subnets) >= 2
+    error_message = "If vpc_id is specified, at least 2 subnets must be provided."
+  }
+
+  validation {
+    condition     = var.network_config.availability_zones == "" || length(split(",", var.network_config.availability_zones)) >= 2
+    error_message = "At least 2 availability zones must be provided when specifying availability_zones."
   }
 }
 

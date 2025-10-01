@@ -156,7 +156,7 @@ resource "aws_iam_role_policy" "scaler_lambda_policy" {
           Action = [
             "ssm:GetParameter"
           ]
-          Resource = local.use_custom_token_path ? "arn:aws:ssm:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:parameter${var.agent_config.token_parameter_store_path}" : aws_ssm_parameter.buildkite_agent_token_parameter[0].arn
+          Resource = local.use_custom_token_path ? "arn:aws:ssm:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:parameter/${var.agent_config.token_parameter_store_path}" : aws_ssm_parameter.buildkite_agent_token_parameter[0].arn
         }
       ],
       # KMS for encrypted SSM parameter (if using customer-managed key)
