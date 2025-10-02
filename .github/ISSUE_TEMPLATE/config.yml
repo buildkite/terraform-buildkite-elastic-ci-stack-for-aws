@@ -1,8 +1,0 @@
-blank_issues_enabled: true
-contact_links:
-  - name: Buildkite Support
-    url: https://buildkite.com/support
-    about: Ask questions not specifically related to the Terraform Module for Elastic CI Stack.
-  - name: Buildkite Community Slack
-    url: https://chat.buildkite.community
-    about: Ask and answer questions with other Buildkite and Terraform Module for Elastic CI Stack users.
