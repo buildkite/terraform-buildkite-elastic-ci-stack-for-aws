@@ -10,3 +10,4 @@ crash.*.log
 .terraformrc
 terraform.rc
 .terraform.lock.hcl
+.tool-versions
