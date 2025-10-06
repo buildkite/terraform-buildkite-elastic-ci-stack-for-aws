@@ -117,8 +117,7 @@ Releases are managed by maintainers. The process includes:
 
 ## Questions?
 
-- Open a [GitHub Discussion](https://github.com/buildkite/terraform-buildkite-elastic-ci-stack-for-aws/discussions)
-- Join the [Buildkite Community Slack](https://buildkite.com/slack)
+- Open a [GitHub Issue](https://github.com/buildkite/terraform-buildkite-elastic-ci-stack-for-aws/issues)
 - Check the [Buildkite Documentation](https://buildkite.com/docs)
 
 ## License
