@@ -1,0 +1,13 @@
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+*.tfvars
+*.tfvars.json
+.terraform.tfstate.lock.info
+*tfplan*
+.terraformrc
+terraform.rc
+.terraform.lock.hcl
+.tool-versions
