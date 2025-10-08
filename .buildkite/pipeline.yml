@@ -5,7 +5,8 @@ steps:
       - docker#v5.11.0:
           image: "hashicorp/terraform:1.13"
           workdir: "/workdir"
-          entrypoint: "/bin/sh"
+          entrypoint: ""
+          shell: ["/bin/sh", "-e", "-c"]
 
   - label: ":terraform: Validate"
     command: ".buildkite/scripts/validate.sh"
@@ -13,7 +14,8 @@ steps:
       - docker#v5.11.0:
           image: "hashicorp/terraform:1.13"
           workdir: "/workdir"
-          entrypoint: "/bin/sh"
+          entrypoint: ""
+          shell: ["/bin/sh", "-e", "-c"]
 
   - label: ":lint-roller: TFLint"
     command: ".buildkite/scripts/tflint.sh"
@@ -21,7 +23,8 @@ steps:
       - docker#v5.11.0:
           image: "ghcr.io/terraform-linters/tflint:latest"
           workdir: "/workdir"
-          entrypoint: "/bin/sh"
+          entrypoint: ""
+          shell: ["/bin/sh", "-e", "-c"]
 
   - label: ":shield: Security Scan"
     command: ".buildkite/scripts/tfsec.sh"
@@ -29,7 +32,8 @@ steps:
       - docker#v5.11.0:
           image: "aquasec/tfsec:latest"
           workdir: "/workdir"
-          entrypoint: "/bin/sh"
+          entrypoint: ""
+          shell: ["/bin/sh", "-e", "-c"]
 
   - label: ":page_facing_up: Documentation Check"
     command: ".buildkite/scripts/docs-check.sh"
@@ -37,7 +41,8 @@ steps:
       - docker#v5.11.0:
           image: "quay.io/terraform-docs/terraform-docs:latest"
           workdir: "/workdir"
-          entrypoint: "/bin/sh"
+          entrypoint: ""
+          shell: ["/bin/sh", "-e", "-c"]
 
   - label: ":test_tube: Validate Examples"
     command: ".buildkite/scripts/validate-examples.sh"
@@ -45,4 +50,5 @@ steps:
       - docker#v5.11.0:
           image: "hashicorp/terraform:1.13"
           workdir: "/workdir"
-          entrypoint: "/bin/sh"
+          entrypoint: ""
+          shell: ["/bin/sh", "-e", "-c"]
