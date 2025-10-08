@@ -13,3 +13,6 @@ RUN apk add --no-cache curl && \
 RUN apk add --no-cache git
 
 WORKDIR /workspace
+
+ENTRYPOINT []
+CMD ["/bin/sh"]

@@ -13,17 +13,23 @@ steps:
           config: .buildkite/docker-compose.yml
     command: .buildkite/scripts/validate.sh
 
+  - label: ":lint-roller: TFLint Init"
+    plugins:
+      - docker#v5.11.0:
+          image: "ghcr.io/terraform-linters/tflint:latest"
+    command: ["tflint", "--init"]
+
   - label: ":lint-roller: TFLint"
     plugins:
       - docker#v5.11.0:
           image: "ghcr.io/terraform-linters/tflint:latest"
-    command: .buildkite/scripts/tflint.sh
+    command: ["tflint"]
 
   - label: ":shield: Security Scan"
     plugins:
       - docker#v5.11.0:
           image: "aquasec/tfsec:latest"
-    command: .buildkite/scripts/tfsec.sh
+    command: ["tfsec", "."]
 
   - label: ":page_facing_up: Documentation Check"
     plugins:
