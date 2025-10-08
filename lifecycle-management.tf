@@ -1,4 +1,5 @@
 # Disables AZ Rebalancing on the agent ASG to prevent mid-job termination
+#tfsec:ignore:aws-lambda-enable-tracing X-Ray tracing is optional and can be enabled by users if required for debugging
 resource "aws_lambda_function" "az_rebalancing_suspender" {
   function_name = "${local.stack_name_full}-az-rebalancing-suspender"
   description   = "Disables AZ Rebalancing on the agent ASG."
