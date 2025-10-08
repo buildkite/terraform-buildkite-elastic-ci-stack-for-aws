@@ -4,45 +4,45 @@ steps:
     plugins:
       - docker#v5.11.0:
           image: "hashicorp/terraform:1.13"
-          entrypoint: ""
-          shell: ["/bin/sh", "-e", "-c"]
+          workdir: "/workdir"
+          entrypoint: "/bin/sh"
 
   - label: ":terraform: Validate"
     command: ".buildkite/scripts/validate.sh"
     plugins:
       - docker#v5.11.0:
           image: "hashicorp/terraform:1.13"
-          entrypoint: ""
-          shell: ["/bin/sh", "-e", "-c"]
+          workdir: "/workdir"
+          entrypoint: "/bin/sh"
 
   - label: ":lint-roller: TFLint"
     command: ".buildkite/scripts/tflint.sh"
     plugins:
       - docker#v5.11.0:
           image: "ghcr.io/terraform-linters/tflint:latest"
-          entrypoint: ""
-          shell: ["/bin/sh", "-e", "-c"]
+          workdir: "/workdir"
+          entrypoint: "/bin/sh"
 
   - label: ":shield: Security Scan"
     command: ".buildkite/scripts/tfsec.sh"
     plugins:
       - docker#v5.11.0:
           image: "aquasec/tfsec:latest"
-          entrypoint: ""
-          shell: ["/bin/sh", "-e", "-c"]
+          workdir: "/workdir"
+          entrypoint: "/bin/sh"
 
   - label: ":page_facing_up: Documentation Check"
     command: ".buildkite/scripts/docs-check.sh"
     plugins:
       - docker#v5.11.0:
           image: "quay.io/terraform-docs/terraform-docs:latest"
-          entrypoint: ""
-          shell: ["/bin/sh", "-e", "-c"]
+          workdir: "/workdir"
+          entrypoint: "/bin/sh"
 
   - label: ":test_tube: Validate Examples"
     command: ".buildkite/scripts/validate-examples.sh"
     plugins:
       - docker#v5.11.0:
           image: "hashicorp/terraform:1.13"
-          entrypoint: ""
-          shell: ["/bin/sh", "-e", "-c"]
+          workdir: "/workdir"
+          entrypoint: "/bin/sh"

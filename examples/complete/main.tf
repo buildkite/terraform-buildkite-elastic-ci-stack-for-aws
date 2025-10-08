@@ -42,9 +42,9 @@ module "buildkite_agents" {
   scale_in_cooldown_period       = 600
 
   # Instance configuration - mixed On-Demand and Spot
-  instance_types          = "t3.large,t3.xlarge,t3a.large,t3a.xlarge"
-  on_demand_base_capacity = 2
-  on_demand_percentage    = 20
+  instance_types           = "t3.large,t3.xlarge,t3a.large,t3a.xlarge"
+  on_demand_base_capacity  = 2
+  on_demand_percentage     = 20
   spot_allocation_strategy = "capacity-optimized"
 
   # Instance customization
