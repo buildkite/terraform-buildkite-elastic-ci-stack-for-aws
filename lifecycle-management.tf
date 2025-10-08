@@ -4,7 +4,7 @@ resource "aws_lambda_function" "az_rebalancing_suspender" {
   description   = "Disables AZ Rebalancing on the agent ASG."
   role          = aws_iam_role.asg_process_suspender.arn
   handler       = "index.handler"
-  runtime       = "python3.13"
+  runtime       = "python3.12"
   timeout       = 30
 
   filename         = data.archive_file.az_rebalancing_suspender.output_path
@@ -215,7 +215,3 @@ resource "aws_autoscaling_lifecycle_hook" "instance_terminating" {
     queue      = var.buildkite_queue
   })
 }
-
-
-
-

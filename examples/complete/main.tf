@@ -13,7 +13,7 @@ provider "aws" {
 }
 
 module "buildkite_agents" {
-  source = "buildkite/elastic-ci-stack-for-aws/buildkite"
+  source = "../.."
 
   # Stack configuration
   stack_name = "production-buildkite-stack"
@@ -27,44 +27,59 @@ module "buildkite_agents" {
   buildkite_agent_enable_git_mirrors         = true
   buildkite_agent_disconnect_after_uptime    = 7200 # 2 hours
   buildkite_agent_enable_graceful_shutdown   = true
+  buildkite_agent_tracing_backend            = "datadog"
+  agents_per_instance                        = 2
 
-  # Network configuration - create new VPC
-  create_vpc = true
-  vpc_cidr   = "10.0.0.0/16"
+  # Auto-scaling configuration with Lambda scaler
+  buildkite_agent_scaler_version = "1.9.6"
+  scaler_enable_elastic_ci_mode  = true
+  min_size                       = 2
+  max_size                       = 20
+  instance_buffer                = 2
+  scale_in_idle_period           = 300
+  scale_out_factor               = 1.5
+  scale_out_cooldown_period      = 180
+  scale_in_cooldown_period       = 600
 
-  # Instance configuration
-  instance_type       = "t3.large"
-  min_size            = 2
-  max_size            = 20
-  desired_capacity    = 5
-  agents_per_instance = 2
+  # Instance configuration - mixed On-Demand and Spot
+  instance_types          = "t3.large,t3.xlarge,t3a.large,t3a.xlarge"
+  on_demand_base_capacity = 2
+  on_demand_percentage    = 20
+  spot_allocation_strategy = "capacity-optimized"
 
-  # Auto-scaling with Lambda scaler
-  scaler_version                = "v1.8.0"
-  scaler_enable_elastic_ci_mode = true
-  scale_in_idle_period          = 300
+  # Instance customization
+  enable_detailed_monitoring = true
+  imdsv2_tokens              = "required"
+  root_volume_size           = 100
+  root_volume_type           = "gp3"
+  root_volume_encrypted      = true
+  enable_instance_storage    = true
 
-  # Secrets management
-  create_secrets_bucket = true
-  enable_secrets_plugin = true
-
-  # Pipeline signing
-  create_signing_key          = true
-  enable_pipeline_signing     = true
-  pipeline_signing_jwks_files = ["/buildkite/pipeline-signing.json"]
-
-  # Docker support
-  enable_docker_experimental         = true
+  # Docker configuration
   enable_docker_user_namespace_remap = false
+  enable_docker_experimental         = true
+  docker_networking_protocol         = "dualstack"
 
-  # Cost optimization
-  enable_cost_allocation_tags = true
-  cost_allocation_tags = {
-    Team        = "Platform"
-    Environment = "Production"
-    ManagedBy   = "Terraform"
-  }
+  # S3 buckets for secrets and artifacts
+  secrets_bucket   = "my-buildkite-secrets"
+  artifacts_bucket = "my-buildkite-artifacts"
+
+  # ECR and plugins
+  ecr_access_policy          = "poweruser"
+  enable_secrets_plugin      = true
+  enable_ecr_plugin          = true
+  enable_docker_login_plugin = true
+
+  # Security and access
+  managed_policy_arns = [
+    "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
+  ]
 
   # Lifecycle management
-  enable_lifecycled = true
+  buildkite_terminate_instance_after_job = false
+
+  # Cost allocation tags
+  enable_cost_allocation_tags = true
+  cost_allocation_tag_name    = "Team"
+  cost_allocation_tag_value   = "Platform"
 }

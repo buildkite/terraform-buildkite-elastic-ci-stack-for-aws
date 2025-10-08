@@ -15,11 +15,3 @@ module "buildkite_stack" {
 
   instance_types = "t3.large"
 }
-
-output "auto_scaling_group_name" {
-  value = module.buildkite_stack.auto_scaling_group_name
-}
-
-output "instance_role_arn" {
-  value = module.buildkite_stack.instance_role_arn
-}
