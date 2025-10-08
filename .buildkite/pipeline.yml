@@ -1,46 +1,36 @@
 steps:
   - label: ":terraform: Format Check"
-    command: sh .buildkite/scripts/format-check.sh
-    plugins:
-      - docker-compose#v5.4.0:
-          run: terraform
-          config: .buildkite/docker-compose.yml
-
-  - label: ":terraform: Validate"
-    command: sh .buildkite/scripts/validate.sh
-    plugins:
-      - docker-compose#v5.4.0:
-          run: terraform
-          config: .buildkite/docker-compose.yml
-
-  - label: ":lint-roller: TFLint Init"
-    command: tflint --init
+    command: "sh .buildkite/scripts/format-check.sh"
     plugins:
       - docker#v5.11.0:
-          image: "ghcr.io/terraform-linters/tflint:latest"
+          image: "hashicorp/terraform:1.13"
+
+  - label: ":terraform: Validate"
+    command: "sh .buildkite/scripts/validate.sh"
+    plugins:
+      - docker#v5.11.0:
+          image: "hashicorp/terraform:1.13"
 
   - label: ":lint-roller: TFLint"
-    command: tflint
+    command: "sh .buildkite/scripts/tflint.sh"
     plugins:
       - docker#v5.11.0:
           image: "ghcr.io/terraform-linters/tflint:latest"
 
   - label: ":shield: Security Scan"
-    command: tfsec .
+    command: "sh .buildkite/scripts/tfsec.sh"
     plugins:
       - docker#v5.11.0:
           image: "aquasec/tfsec:latest"
 
   - label: ":page_facing_up: Documentation Check"
-    command: sh .buildkite/scripts/docs-check.sh
+    command: "sh .buildkite/scripts/docs-check.sh"
     plugins:
-      - docker-compose#v5.4.0:
-          run: terraform
-          config: .buildkite/docker-compose.yml
+      - docker#v5.11.0:
+          image: "quay.io/terraform-docs/terraform-docs:latest"
 
   - label: ":test_tube: Validate Examples"
-    command: sh .buildkite/scripts/validate-examples.sh
+    command: "sh .buildkite/scripts/validate-examples.sh"
     plugins:
-      - docker-compose#v5.4.0:
-          run: terraform
-          config: .buildkite/docker-compose.yml
+      - docker#v5.11.0:
+          image: "hashicorp/terraform:1.13"
