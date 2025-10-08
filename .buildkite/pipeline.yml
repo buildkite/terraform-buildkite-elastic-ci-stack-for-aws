@@ -39,10 +39,20 @@ steps:
           workdir: "/workdir"
           entrypoint: "/bin/sh"
 
-  - label: ":test_tube: Validate Examples"
-    command: ".buildkite/scripts/validate-examples.sh"
-    plugins:
-      - docker#v5.11.0:
-          image: "hashicorp/terraform:1.13"
-          workdir: "/workdir"
-          entrypoint: "/bin/sh"
+  - group: ":test_tube: Validate Examples"
+    steps:
+      - label: ":test_tube: {{matrix.example}}"
+        command: ".buildkite/scripts/validate-example.sh {{matrix.example}}"
+        matrix:
+          setup:
+            example:
+              - "basic"
+              - "complete"
+              - "existing-vpc"
+              - "scheduled-scaling"
+              - "spot-instances"
+        plugins:
+          - docker#v5.11.0:
+              image: "hashicorp/terraform:1.13"
+              workdir: "/workdir"
+              entrypoint: "/bin/sh"
