@@ -1,7 +1,7 @@
-#!/bin/bash
+#!/bin/sh
 set -euo pipefail
 
-EXAMPLE_DIR=$1
+EXAMPLE_DIR="$1"
 
 echo "Validating example: ${EXAMPLE_DIR}"
 
