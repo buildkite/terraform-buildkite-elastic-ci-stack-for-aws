@@ -61,6 +61,56 @@ The Auto Scaling Group manages EC2 instances running Buildkite agents. A Lambda 
 
 Instance configuration comes from a Launch Template (user data, IAM roles, etc). You can create a new VPC or use an existing one. Artifacts and secrets live in S3, agent tokens go in SSM Parameter Store. CloudWatch handles all the metrics and logs, plus EventBridge triggers the scaler Lambda.
 
+## Troubleshooting
+
+**Agents not connecting?** Make sure the token is correct (check SSM Parameter Store or your variables). Security groups need to allow outbound HTTPS to `agent.buildkite.com`. Look at CloudWatch Logs under `/buildkite/elastic-stack/{instance-id}` for errors, and verify the IAM role can access SSM parameters.
+
+**Scaling not working?** Check the Lambda scaler logs at `/aws/lambda/{stack-name}-scaler`. Verify it has permissions to modify the ASG and that the EventBridge rule is enabled. Also make sure `buildkite_queue` matches what's in your pipeline.
+
+**Instances failing to launch?** Check the Auto Scaling Group activity in the AWS console. The AMI needs to be available in your region, and your VPC/subnets need free IP addresses. Double-check the IAM instance profile has the right permissions.
+
+**Getting Spot interruptions?** Try using multiple instance types to improve availability. Set `on_demand_base_capacity` if you need a guaranteed baseline. Watch the CloudWatch metrics for interruption rates, and consider switching to `capacity-optimized` allocation if you haven't already.
+
+## Questions and Support
+
+Feel free to drop an email to [support@buildkite.com](mailto:support@buildkite.com) with questions. It'll also help us if you can provide the following details:
+
+### Terraform State Information
+
+```bash
+# Show your stack outputs
+terraform output
+
+# Show resource details
+terraform show
+```
+
+### Collect Logs from CloudWatch
+
+Provide Buildkite with logs from CloudWatch Logs:
+
+```
+/aws/lambda/{stack-name}-scaler
+/buildkite/elastic-stack/{instance-id}
+/buildkite/system/{instance-id}
+```
+
+You can also visit our [Buildkite Community Forum](https://forum.buildkite.community) and post a question in the [Elastic CI Stack for AWS](https://forum.buildkite.community/c/elastic-ci-stack-for-aws/) section!
+
+## Documentation
+
+- [Buildkite Elastic CI Stack for AWS Overview](https://buildkite.com/docs/agent/v3/aws/elastic-ci-stack)
+- [Buildkite Agent Documentation](https://buildkite.com/docs/agent/v3)
+- [CloudFormation Version](https://github.com/buildkite/elastic-ci-stack-for-aws) (original implementation)
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to contribute to this project.
+
+## License
+
+See [LICENSE](LICENSE) (MIT)
+
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
 
@@ -290,53 +340,3 @@ No modules.
 | <a name="output_scaler_log_group"></a> [scaler\_log\_group](#output\_scaler\_log\_group) | CloudWatch Log Group for the scaler Lambda |
 | <a name="output_vpc_id"></a> [vpc\_id](#output\_vpc\_id) | VPC ID (either created or provided) |
 <!-- END_TF_DOCS -->
-
-## Troubleshooting
-
-**Agents not connecting?** Make sure the token is correct (check SSM Parameter Store or your variables). Security groups need to allow outbound HTTPS to `agent.buildkite.com`. Look at CloudWatch Logs under `/buildkite/elastic-stack/{instance-id}` for errors, and verify the IAM role can access SSM parameters.
-
-**Scaling not working?** Check the Lambda scaler logs at `/aws/lambda/{stack-name}-scaler`. Verify it has permissions to modify the ASG and that the EventBridge rule is enabled. Also make sure `buildkite_queue` matches what's in your pipeline.
-
-**Instances failing to launch?** Check the Auto Scaling Group activity in the AWS console. The AMI needs to be available in your region, and your VPC/subnets need free IP addresses. Double-check the IAM instance profile has the right permissions.
-
-**Getting Spot interruptions?** Try using multiple instance types to improve availability. Set `on_demand_base_capacity` if you need a guaranteed baseline. Watch the CloudWatch metrics for interruption rates, and consider switching to `capacity-optimized` allocation if you haven't already.
-
-## Questions and Support
-
-Feel free to drop an email to [support@buildkite.com](mailto:support@buildkite.com) with questions. It'll also help us if you can provide the following details:
-
-### Terraform State Information
-
-```bash
-# Show your stack outputs
-terraform output
-
-# Show resource details
-terraform show
-```
-
-### Collect Logs from CloudWatch
-
-Provide Buildkite with logs from CloudWatch Logs:
-
-```
-/aws/lambda/{stack-name}-scaler
-/buildkite/elastic-stack/{instance-id}
-/buildkite/system/{instance-id}
-```
-
-You can also visit our [Buildkite Community Forum](https://forum.buildkite.community) and post a question in the [Elastic CI Stack for AWS](https://forum.buildkite.community/c/elastic-ci-stack-for-aws/) section!
-
-## Documentation
-
-- [Buildkite Elastic CI Stack for AWS Overview](https://buildkite.com/docs/agent/v3/aws/elastic-ci-stack)
-- [Buildkite Agent Documentation](https://buildkite.com/docs/agent/v3)
-- [CloudFormation Version](https://github.com/buildkite/elastic-ci-stack-for-aws) (original implementation)
-
-## Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to contribute to this project.
-
-## License
-
-See [LICENSE](LICENSE) (MIT)
