@@ -43,8 +43,8 @@ steps:
 
   - group: ":test_tube: Examples"
     steps:
-      - label: ":test_tube: {{matrix.example}} - Format"
-        command: ".buildkite/scripts/example-format-check.sh {{matrix.example}}"
+      - label: ":test_tube: example/{{matrix.example}} - Format"
+        command: "/bin/sh .buildkite/scripts/example-format-check.sh {{matrix.example}}"
         matrix:
           setup:
             example:
@@ -57,10 +57,9 @@ steps:
           - docker#v5.11.0:
               image: "hashicorp/terraform:1.13"
               workdir: "/workdir"
-              entrypoint: "/bin/sh"
 
-      - label: ":test_tube: {{matrix.example}} - Validate"
-        command: ".buildkite/scripts/example-validate.sh {{matrix.example}}"
+      - label: ":test_tube: example/{{matrix.example}} - Validate"
+        command: "/bin/sh .buildkite/scripts/example-validate.sh {{matrix.example}}"
         matrix:
           setup:
             example:
@@ -73,10 +72,9 @@ steps:
           - docker#v5.11.0:
               image: "hashicorp/terraform:1.13"
               workdir: "/workdir"
-              entrypoint: "/bin/sh"
 
-      - label: ":test_tube: {{matrix.example}} - TFLint"
-        command: ".buildkite/scripts/example-tflint.sh {{matrix.example}}"
+      - label: ":test_tube: example/{{matrix.example}} - TFLint"
+        command: "/bin/sh .buildkite/scripts/example-tflint.sh {{matrix.example}}"
         matrix:
           setup:
             example:
@@ -89,4 +87,3 @@ steps:
           - docker#v5.11.0:
               image: "ghcr.io/terraform-linters/tflint:latest"
               workdir: "/workdir"
-              entrypoint: "/bin/sh"
