@@ -1,3 +1,4 @@
+#tfsec:ignore:aws-lambda-enable-tracing X-Ray tracing is optional and can be enabled by users if required for debugging
 resource "aws_lambda_function" "scaler" {
   count = local.has_variable_size ? 1 : 0
 
@@ -62,6 +63,7 @@ resource "aws_lambda_function" "scaler" {
   } : {}
 }
 
+#tfsec:ignore:aws-cloudwatch-log-group-customer-key Using default encryption for CloudWatch Logs; CMK can be added by users if required
 resource "aws_cloudwatch_log_group" "scaler_lambda_logs" {
   count = local.has_variable_size ? 1 : 0
 
@@ -120,6 +122,7 @@ resource "aws_iam_role" "scaler_lambda_role" {
   tags = local.common_tags
 }
 
+#tfsec:ignore:aws-iam-no-policy-wildcards Lambda requires CloudWatch Logs CreateLogGroup permission with wildcard for dynamic log group creation
 resource "aws_iam_role_policy" "scaler_lambda_policy" {
   count = local.has_variable_size ? 1 : 0
 
