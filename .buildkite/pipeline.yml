@@ -1,0 +1,40 @@
+steps:
+  - label: ":terraform: Format Check"
+    plugins:
+      - docker-compose#v5.4.0:
+          run: terraform
+          config: .buildkite/docker-compose.yml
+    command: .buildkite/scripts/format-check.sh
+
+  - label: ":terraform: Validate"
+    plugins:
+      - docker-compose#v5.4.0:
+          run: terraform
+          config: .buildkite/docker-compose.yml
+    command: .buildkite/scripts/validate.sh
+
+  - label: ":lint-roller: TFLint"
+    plugins:
+      - docker#v5.11.0:
+          image: "ghcr.io/terraform-linters/tflint:latest"
+    command: .buildkite/scripts/tflint.sh
+
+  - label: ":shield: Security Scan"
+    plugins:
+      - docker#v5.11.0:
+          image: "aquasec/tfsec:latest"
+    command: .buildkite/scripts/tfsec.sh
+
+  - label: ":page_facing_up: Documentation Check"
+    plugins:
+      - docker-compose#v5.4.0:
+          run: terraform
+          config: .buildkite/docker-compose.yml
+    command: .buildkite/scripts/docs-check.sh
+
+  - label: ":test_tube: Validate Examples"
+    plugins:
+      - docker-compose#v5.4.0:
+          run: terraform
+          config: .buildkite/docker-compose.yml
+    command: .buildkite/scripts/validate-examples.sh

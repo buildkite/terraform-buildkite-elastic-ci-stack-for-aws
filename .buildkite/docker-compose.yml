@@ -1,0 +1,8 @@
+services:
+  terraform:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ..:/workspace
+    working_dir: /workspace
