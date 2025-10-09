@@ -3,6 +3,10 @@
 # This example shows time-based scaling for predictable workloads.
 # Saves costs by reducing capacity during off-hours.
 
+terraform {
+  required_version = ">= 1.0"
+}
+
 module "buildkite_stack" {
   source = "../.."
 

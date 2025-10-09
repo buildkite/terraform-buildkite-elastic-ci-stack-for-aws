@@ -3,6 +3,10 @@
 # This example shows how to use Spot instances for significant cost savings.
 # Best for workloads that can tolerate occasional interruptions.
 
+terraform {
+  required_version = ">= 1.0"
+}
+
 module "buildkite_stack" {
   source = "../.."
 
