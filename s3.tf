@@ -1,5 +1,7 @@
 
 # Managed secrets bucket for storing Buildkite pipeline secrets
+#tfsec:ignore:aws-s3-enable-bucket-encryption Encryption is configured via separate resource aws_s3_bucket_server_side_encryption_configuration
+#tfsec:ignore:aws-s3-encryption-customer-key Using AES256 (SSE-S3) instead of CMK for simplicity; users can override if needed
 resource "aws_s3_bucket" "managed_secrets_bucket" {
   count  = local.create_secrets_bucket ? 1 : 0
   bucket = "${local.stack_name_full}-secrets"
@@ -34,6 +36,9 @@ resource "aws_s3_bucket_public_access_block" "managed_secrets_bucket_pab" {
 }
 
 # Logging bucket for secrets bucket access logs
+#tfsec:ignore:aws-s3-enable-bucket-encryption Encryption is configured via separate resource aws_s3_bucket_server_side_encryption_configuration
+#tfsec:ignore:aws-s3-encryption-customer-key Using AES256 (SSE-S3) instead of CMK for simplicity; users can override if needed
+#tfsec:ignore:aws-s3-enable-bucket-logging Logging bucket itself doesn't need logging (would create recursion)
 resource "aws_s3_bucket" "managed_secrets_logging_bucket" {
   count  = local.create_secrets_bucket ? 1 : 0
   bucket = "${local.stack_name_full}-secrets-logs"

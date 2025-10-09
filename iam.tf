@@ -150,6 +150,7 @@ resource "aws_iam_role_policy_attachment" "asg_process_suspender_basic" {
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
+#tfsec:ignore:aws-iam-no-policy-wildcards autoscaling:SuspendProcesses requires wildcard as ASG ARN is not known at policy creation time
 resource "aws_iam_role_policy" "asg_process_suspender" {
   name = "suspend-asg-processes"
   role = aws_iam_role.asg_process_suspender.id

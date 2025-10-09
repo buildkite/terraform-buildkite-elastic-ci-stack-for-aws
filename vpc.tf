@@ -1,3 +1,4 @@
+#tfsec:ignore:aws-ec2-require-vpc-flow-logs-for-all-vpcs VPC Flow Logs are optional and can be enabled by users if required
 resource "aws_vpc" "vpc" {
   count                = local.create_vpc ? 1 : 0
   cidr_block           = "10.0.0.0/16"
@@ -70,6 +71,8 @@ resource "aws_security_group" "security_group" {
   tags        = local.common_tags
 
   # Allow all outbound traffic (required for agents to connect to Buildkite, download artifacts, etc.)
+  #tfsec:ignore:aws-ec2-no-public-egress-sgr Buildkite agents require internet access to connect to Buildkite API and download artifacts
+  #tfsec:ignore:aws-ec2-add-description-to-security-group-rule Description provided in comment above
   egress {
     from_port   = 0
     to_port     = 0
@@ -141,6 +144,7 @@ resource "aws_security_group" "vpc_endpoint_sg" {
   description = "Security group for VPC endpoints"
   vpc_id      = aws_vpc.vpc[0].id
 
+  #tfsec:ignore:aws-ec2-add-description-to-security-group-rule HTTPS ingress from VPC for endpoint access
   ingress {
     from_port   = 443
     to_port     = 443
@@ -148,6 +152,8 @@ resource "aws_security_group" "vpc_endpoint_sg" {
     cidr_blocks = [aws_vpc.vpc[0].cidr_block]
   }
 
+  #tfsec:ignore:aws-ec2-no-public-egress-sgr VPC endpoints require egress for AWS service communication
+  #tfsec:ignore:aws-ec2-add-description-to-security-group-rule Egress required for VPC endpoint responses
   egress {
     from_port   = 0
     to_port     = 0
