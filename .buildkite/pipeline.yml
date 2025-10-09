@@ -3,6 +3,7 @@ steps:
     steps:
       - label: ":terraform: Format Check"
         command: ".buildkite/scripts/format-check.sh"
+        if_changed: "**.tf"
         plugins:
           - docker#v5.11.0:
               image: "hashicorp/terraform:1.13"
@@ -11,6 +12,10 @@ steps:
 
       - label: ":terraform: Validate"
         command: ".buildkite/scripts/validate.sh"
+        if_changed:
+          - "*.tf"
+          - "*.tfvars"
+          - "scripts/*"
         plugins:
           - docker#v5.11.0:
               image: "hashicorp/terraform:1.13"
@@ -19,6 +24,9 @@ steps:
 
       - label: ":lint-roller: TFLint"
         command: ".buildkite/scripts/tflint.sh"
+        if_changed:
+          - "*.tf"
+          - ".tflint.hcl"
         plugins:
           - docker#v5.11.0:
               image: "ghcr.io/terraform-linters/tflint:latest"
@@ -27,6 +35,7 @@ steps:
 
       - label: ":shield: Security Scan"
         command: ".buildkite/scripts/tfsec.sh"
+        if_changed: "*.tf"
         plugins:
           - docker#v5.11.0:
               image: "aquasec/tfsec:latest"
@@ -35,56 +44,38 @@ steps:
 
       - label: ":page_facing_up: Documentation Check"
         command: ".buildkite/scripts/docs-check.sh"
+        if_changed:
+          - "*.tf"
+          - "README.md"
         plugins:
           - docker#v5.11.0:
               image: "quay.io/terraform-docs/terraform-docs:latest"
               workdir: "/workdir"
               entrypoint: "/bin/sh"
 
-  - group: ":test_tube: Examples"
+  - group: ":terraform: Examples"
     steps:
-      - label: ":test_tube: Terraform Format on example/{{matrix.example}}"
-        command: ".buildkite/scripts/example-format-check.sh {{matrix.example}}"
-        matrix:
-          setup:
-            example:
-              - "basic"
-              - "complete"
-              - "existing-vpc"
-              - "scheduled-scaling"
-              - "spot-instances"
+      - label: ":terraform: Format Check Examples"
+        command: ".buildkite/scripts/examples-format-check.sh"
+        if_changed: "examples/**"
         plugins:
           - docker#v5.11.0:
               image: "hashicorp/terraform:1.13"
               workdir: "/workdir"
               entrypoint: "/bin/sh"
 
-      - label: ":test_tube: Validate Terraform on example/{{matrix.example}}"
-        command: ".buildkite/scripts/example-validate.sh {{matrix.example}}"
-        matrix:
-          setup:
-            example:
-              - "basic"
-              - "complete"
-              - "existing-vpc"
-              - "scheduled-scaling"
-              - "spot-instances"
+      - label: ":terraform: Validate Examples"
+        command: ".buildkite/scripts/examples-validate.sh"
+        if_changed: "examples/**"
         plugins:
           - docker#v5.11.0:
               image: "hashicorp/terraform:1.13"
               workdir: "/workdir"
               entrypoint: "/bin/sh"
 
-      - label: ":test_tube: TFLint on example/{{matrix.example}}"
-        command: ".buildkite/scripts/example-tflint.sh {{matrix.example}}"
-        matrix:
-          setup:
-            example:
-              - "basic"
-              - "complete"
-              - "existing-vpc"
-              - "scheduled-scaling"
-              - "spot-instances"
+      - label: ":lint-roller: TFLint Examples"
+        command: ".buildkite/scripts/examples-tflint.sh"
+        if_changed: "examples/**"
         plugins:
           - docker#v5.11.0:
               image: "ghcr.io/terraform-linters/tflint:latest"
