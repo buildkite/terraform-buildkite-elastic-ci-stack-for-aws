@@ -2,34 +2,25 @@
 
 [![Build status](https://badge.buildkite.com/0bc5e03d8be71076d09f3e25396e7f53e97321953f9e9f7ada.svg)](https://buildkite.com/buildkite/terraform-buildkite-elastic-ci-stack-for-aws)
 
-# Buildkite Elastic CI Stack for AWS (Terraform)
+# Buildkite Elastic CI Stack for AWS Terraform Module
 
-A Terraform module for deploying auto-scaling Buildkite agents on AWS EC2. This module provides the same architecture as the [CloudFormation Elastic CI Stack](https://github.com/buildkite/elastic-ci-stack-for-aws), implemented using Terraform.
+> [!NOTE]
+> Prefer Cloudformation? See [elastic-ci-stack-for-aws](https://github.com/buildkite/elastic-ci-stack-for-aws)
 
-For CloudFormation-based deployments, see the [original stack](https://github.com/buildkite/elastic-ci-stack-for-aws).
+[Buildkite](https://buildkite.com/) provides a platform for running fast, secure, and scalable continuous integration pipelines on your own infrastructure.
 
-## Features
+The Buildkite Elastic CI Stack for AWS gives you a private, autoscaling [Buildkite Agent](https://buildkite.com/docs/agent) cluster. Use it to parallelize large test suites across thousands of nodes, run tests and deployments for Linux or Windows based services and apps, or run AWS ops tasks.
 
-### Auto-scaling
+## Getting started
 
-Agents scale automatically based on build queue depth. Spot instances reduce costs, and scheduled scaling handles predictable workload patterns.
+Learn more about the Elastic CI Stack for AWS and how to get started with it from the Buildkite Docs:
 
-### Security
+- [Elastic CI Stack for AWS overview](https://buildkite.com/docs/agent/v3/aws/elastic-ci-stack) page, for a summary of the stack's architecture and supported features.
+- [Linux and Windows setup for the Elastic CI Stack for AWS](https://buildkite.com/docs/agent/v3/aws/elastic-ci-stack/ec2-linux-and-windows/setup) page for a step-by-step guide on how to set up the Elastic CI Stack in AWS for these operating systems.
 
-- IMDSv2 enforcement
-- Encrypted S3 secrets storage
-- KMS pipeline signing
-- VPC isolation
-- Custom AMI support
+A [list of recommended resources](#recommended-reading) provides links to other pages in the Buildkite Docs for more detailed information.
 
-### Integration
-
-- Docker with ECR support
-- CloudWatch logging and metrics
-- Multiple instance type support
-- Existing VPC compatibility
-
-## Quick Start
+Alternatively, jump straight in:
 
 ```hcl
 module "buildkite_stack" {
@@ -51,70 +42,138 @@ module "buildkite_stack" {
 }
 ```
 
+The current release is ![](https://img.shields.io/github/release/buildkite/elastic-ci-stack-for-aws.svg). See [Releases](https://github.com/buildkite/elastic-ci-stack-for-aws/releases) for older releases.
+
+> Although the stack creates its own VPC by default, Buildkite highly recommends following best practices by setting up a separate development AWS account and using role switching and consolidated billing — see the [Delegate Access Across AWS Accounts tutorial](http://docs.aws.amazon.com/IAM/latest/UserGuide/tutorial_cross-account-with-roles.html) for more information.
+
+## Security
+
+This repository hasn't been reviewed by security researchers. Therefore, exercise caution and careful thought with what credentials you make available to your builds.
+
+Anyone with commit access to your codebase (including third-party pull-requests if you've enabled them in Buildkite) will have access to your secrets bucket files.
+
+Also, keep in mind the EC2 HTTP metadata server is available from within builds, which means builds act with the same IAM permissions as the instance.
+
+## Experimental Resource Limits
+
+The Elastic CI Stack includes configurable systemd resource limits to prevent resource exhaustion. These limits can be configured using Terraform variables:
+
+| Variable                              | Description                                             | Default  |
+|---------------------------------------|---------------------------------------------------------|----------|
+| `experimental_enable_resource_limits` | Enable systemd resource limits for the Buildkite agent  | `false`  |
+| `resource_limits_memory_high`         | MemoryHigh limit (e.g., '90%' or '4G')                  | `"90%"`  |
+| `resource_limits_memory_max`          | MemoryMax limit (e.g., '90%' or '4G')                   | `"90%"`  |
+| `resource_limits_memory_swap_max`     | MemorySwapMax limit (e.g., '90%' or '4G')               | `"90%"`  |
+| `resource_limits_cpu_weight`          | CPU weight (1-10000)                                    | `100`    |
+| `resource_limits_cpu_quota`           | CPU quota (e.g., '90%')                                 | `"90%"`  |
+| `resource_limits_io_weight`           | I/O weight (1-10000)                                    | `80`     |
+
+### Example Configuration
+
 See the [examples/](./examples/) directory for more use cases.
 
-## Security Considerations
+### Notes
 
-This repository has not been reviewed by security researchers. Exercise caution when providing credentials to builds.
+- Resource limits are disabled by default
+- Values can be specified as percentages or absolute values (for memory-related parameters)
 
-Contributors with commit access (including external contributors if enabled) can access secrets bucket contents. Build processes run with the same IAM permissions as the EC2 instance through the metadata server.
+## Scheduled Scaling
 
-### Recommended security settings
+The Elastic CI Stack supports time-based scaling to automatically adjust the minimum number of instances based on your team's working hours. This feature helps optimize costs by scaling down during off-hours while allowing users the ability to proactively scale up capacity ahead of expected increasing capacity requirements.
 
-- Set `imdsv2_tokens = "required"` to enforce IMDSv2
-- Enable secrets bucket encryption with `secrets_bucket_encryption = true`
-- Enable pipeline signing using `pipeline_signing_kms_key_spec = "ECC_NIST_P256"`
-- Use permissions boundaries to limit IAM access
-- Configure restricted security groups and consider private subnets
+### Configuration Variables
 
-## Architecture
+| Variable                   | Description                                          | Default             |
+|----------------------------|---------------------------------------------------|------------------------|
+| `enable_scheduled_scaling` | Enable scheduled scaling actions                  | `false`                |
+| `schedule_timezone`        | Timezone for scheduled actions                    | `"UTC"`                |
+| `scale_up_schedule`        | Cron expression for scaling up                    | `"0 8 * * MON-FRI"`    |
+| `scale_up_min_size`        | MinSize when scaling up                           | `1`                    |
+| `scale_down_schedule`      | Cron expression for scaling down                  | `"0 18 * * MON-FRI"`   |
+| `scale_down_min_size`      | MinSize when scaling down                         | `0`                    |
 
-Build queue monitoring triggers Lambda functions that scale EC2 instances running Buildkite agents. Instances terminate automatically when idle to reduce costs.
+### Example configuration
 
-Launch Templates define instance configuration including user data and IAM roles. The module supports new VPC creation or existing VPC integration. Build artifacts and secrets store in S3, agent tokens store in SSM Parameter Store. CloudWatch handles logging and metrics collection.
+Example usage can be found in the [Scheduled Scaling](./examples/scheduled-scaling/) directory.
 
-## Support
+### Schedule Format
 
-For questions, contact [support@buildkite.com](mailto:support@buildkite.com). Include the following information:
-
-### Terraform state information
-
-```bash
-# Show your stack outputs
-terraform output
-
-# Show resource details
-terraform show
+Scheduled scaling uses [AWS Auto Scaling cron expressions](https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-scheduled-scaling.html#scheduled-scaling-cron) with the format:
+```
+minute hour day-of-month month day-of-week
 ```
 
-### CloudWatch logs
+Common examples:
+- `0 8 * * MON-FRI` - 8:00 AM on weekdays
+- `0 18 * * MON-FRI` - 6:00 PM on weekdays
+- `0 9 * * SAT` - 9:00 AM on Saturdays
+- `30 7 * * 1-5` - 7:30 AM Monday through Friday (using numbers)
 
-Collect logs from these log groups:
+### Timezone Support
 
-```text
-/aws/lambda/{stack-name}-scaler
+The `ScheduleTimezone` parameter supports [IANA timezone names](https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-scheduled-scaling.html#scheduled-scaling-timezone) such as:
+- `America/New_York` (Eastern Time)
+- `America/Los_Angeles` (Pacific Time)
+- `Europe/London` (Greenwich Mean Time)
+- `Asia/Tokyo` (Japan Standard Time)
+- `UTC` (Coordinated Universal Time)
+
+## Development
+
+When developing changes, please ensure you refer to our [Code of Conduct](CODE_OF_CONDUCT.md).
+
+We welcome pull requests for improvements that benefit the broader community.
+Changes specific to individual use cases should be maintained in forked repositories.
+
+If you need to build your own AMIs take a look at the [elastic-ci-stack-for-aws](https://github.com/buildkite/elastic-ci-stack-for-aws#Development) repository and the [Custom images](https://buildkite.com/docs/agent/v3/aws/elastic-ci-stack/ec2-linux-and-windows/setup#custom-images) section of the [Buildkite Docs](https://buildkite.com/docs).
+
+## Support Policy
+
+We provide support for security and bug fixes on the current major release only.
+
+If there are any changes in the main branch since the last tagged release, we
+aim to publish a new tagged release of this template at the end of each month.
+
+### Operating Systems
+
+Buildkite builds and deploys the following AMIs to all our supported regions:
+
+- Amazon Linux 2023 (64-bit x86)
+- Amazon Linux 2023 (64-bit Arm)
+- Windows Server 2022 (64-bit x86)
+
+## Recommended reading
+
+Following on from the [Getting started](#getting-started) pages above, to gain a better understanding of how Elastic CI Stack works and how to use it most effectively and securely, see the following resources:
+
+- [Buildkite Agents in AWS overview](https://buildkite.com/docs/agent/v3/aws)
+- [Configuration parameters](https://buildkite.com/docs/agent/v3/aws/elastic-ci-stack/ec2-linux-and-windows/configuration-parameters)
+- [Using AWS Secrets Manager](https://buildkite.com/docs/agent/v3/aws/elastic-ci-stack/ec2-linux-and-windows/secrets-manager)
+- [VPC design](https://buildkite.com/docs/agent/v3/aws/architecture/vpc)
+- [CloudFormation service role](https://buildkite.com/docs/agent/v3/aws/elastic-ci-stack/ec2-linux-and-windows/cloudformation-service-role)
+- [Terraform Get Started - AWS](https://developer.hashicorp.com/terraform/tutorials/aws-get-started)
+
+## Questions and support
+
+Feel free to drop an email to support@buildkite.com with questions. It'll also help us if you can provide the following details:
+
+```bash
+# List your tfvars
+cat YOUR_VARS_NAME.tfvars \
+```
+
+### Collect logs from CloudWatch
+
+Provide Buildkite with logs from CloudWatch Logs:
+
+```bash
 /buildkite/elastic-stack/{instance-id}
 /buildkite/system/{instance-id}
 ```
 
-Community support is available on the [Buildkite Community Forum](https://forum.buildkite.community) in the [Elastic CI Stack for AWS](https://forum.buildkite.community/c/elastic-ci-stack-for-aws/) section.
+## Licence
 
-## Documentation
-
-- [Buildkite Elastic CI Stack for AWS Overview](https://buildkite.com/docs/agent/v3/aws/elastic-ci-stack)
-- [Buildkite Agent Documentation](https://buildkite.com/docs/agent/v3)
-- [CloudFormation Version](https://github.com/buildkite/elastic-ci-stack-for-aws)
-
-## Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to contribute to this project.
-
-## License
-
-See [LICENSE](LICENSE) (MIT)
-
-> [!NOTE]
-> Pin provider versions in production to prevent unexpected changes. Add version constraints when defining Terraform providers.
+See [Licence.md](Licence.md) (MIT)
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
