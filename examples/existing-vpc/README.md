@@ -1,19 +1,42 @@
 # Existing VPC Example
 
-Use this if you already have a VPC set up and want to deploy agents into it. The example shows deploying into private subnets without public IPs, using your existing security groups.
+Demonstrates deploying Buildkite agents into an existing VPC infrastructure. This configuration deploys into private subnets without public IP addresses, using existing security groups.
 
-You'll need a VPC with at least 2 subnets in different availability zones. Security groups should allow outbound HTTPS to the Buildkite API and AWS services (S3, SSM, ECR, CloudWatch). If you're using private subnets, make sure you have a NAT Gateway or VPC endpoints configured.
+## Configuration
+
+This example provides:
+
+- Integration with existing VPC infrastructure
+- Private subnet deployment without public IP addresses
+- Custom security group configuration
+- NAT Gateway and VPC endpoint compatibility
+
+## Prerequisites
+
+- Existing VPC with at least 2 subnets in different availability zones
+- Security groups configured for outbound HTTPS access to:
+  - Buildkite API (`agent.buildkite.com:443`)
+  - AWS services (S3, SSM, ECR, CloudWatch on port 443)
+  - Docker registries (Docker Hub, ECR) for container builds
+- NAT Gateway or VPC endpoints configured for private subnet internet access
+- Buildkite agent registration token
 
 ## Usage
 
 ```bash
 terraform init
+
+terraform plan \
+  -var="buildkite_agent_token=YOUR_TOKEN" \
+  -var="vpc_id=vpc-xxxxx" \
+  -var='security_group_ids=["sg-xxxxx", "sg-yyyyy"]'
+
 terraform apply \
   -var="buildkite_agent_token=YOUR_TOKEN" \
   -var="vpc_id=vpc-xxxxx" \
   -var='security_group_ids=["sg-xxxxx", "sg-yyyyy"]'
 ```
 
-Agents need to reach `agent.buildkite.com:443`, plus AWS services like S3, SSM, and CloudWatch on 443. If you're pulling Docker images, they'll need access to Docker Hub or ECR too.
+## Network Requirements
 
-VPC endpoints can save you money on NAT Gateway data transfer if you're doing a lot of S3 or ECR traffic.
+Outbound HTTPS (port 443) access to external services is required. VPC endpoints are recommended for cost optimization with high S3/ECR traffic volumes.

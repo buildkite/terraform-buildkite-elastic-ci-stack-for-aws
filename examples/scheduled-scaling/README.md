@@ -1,20 +1,32 @@
 # Scheduled Scaling Example
 
-This setup uses time-based scaling for teams with predictable build patterns. Saves about 60% by spinning down capacity outside business hours, and pre-warms instances before people start work so there's no wait for the first jobs.
+Configures time-based Auto Scaling for CI workloads with predictable build patterns. This configuration optimizes costs by scaling down capacity during off-hours while pre-warming instances before peak usage periods.
 
-The schedule keeps 5-20 instances running Monday-Friday 8 AM to 6 PM (New York time). Outside those hours and on weekends, it scales to zero but can still spin up on-demand if jobs come in.
+## Schedule Details
 
-Idle period is set to 30 minutes during business hours so instances stick around for multiple jobs instead of terminating after each one.
+This example demonstrates scheduled scaling that reduces costs by approximately 60% through automated capacity management.
 
-Want different hours? Just adjust the cron expressions:
+### Default Schedule
+
+The stack maintains 5-20 instances during business hours (Monday-Friday, 8 AM - 6 PM New York time) and scales to zero outside these hours while preserving on-demand capability.
+
+### Idle Period
+
+The configuration sets a 30-minute idle period during business hours to improve job batching efficiency.
+
+## Alternative Schedules
+
+### European Business Hours
 
 ```hcl
-# European business hours (9 AM - 5 PM CET)
 schedule_timezone   = "Europe/Berlin"
 scale_up_schedule   = "0 9 * * MON-FRI"
 scale_down_schedule = "0 17 * * MON-FRI"
+```
 
-# 24/7 operation with reduced night capacity
+### 24/7 Operation with Reduced Night Capacity
+
+```hcl
 scale_up_schedule   = "0 8 * * *"
 scale_up_min_size   = 10
 scale_down_schedule = "0 22 * * *"
@@ -23,7 +35,14 @@ scale_down_min_size = 2
 
 ## Usage
 
+Initialize and apply the configuration:
+
 ```bash
 terraform init
+terraform plan -var="buildkite_agent_token=YOUR_TOKEN"
 terraform apply -var="buildkite_agent_token=YOUR_TOKEN"
 ```
+
+## Notes
+
+Schedule times use the configured timezone (default: America/New_York). On-demand scaling remains available during off-hours. Cron expressions follow standard syntax. Extended idle periods during business hours improve job batching efficiency.
