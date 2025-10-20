@@ -158,7 +158,7 @@ Feel free to drop an email to support@buildkite.com with questions. It'll also h
 
 ```bash
 # List your tfvars
-cat YOUR_VARS_NAME.tfvars \
+cat YOUR_VARS_NAME.tfvars
 ```
 
 ### Collect logs from CloudWatch
