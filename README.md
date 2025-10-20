@@ -1,26 +1,39 @@
+<h1><img alt="Elastic CI Stack for AWS" src="images/banner.png?raw=true"></h1>
+
+[![Build status](https://badge.buildkite.com/0bc5e03d8be71076d09f3e25396e7f53e97321953f9e9f7ada.svg)](https://buildkite.com/buildkite/terraform-buildkite-elastic-ci-stack-for-aws)
+
 # Buildkite Elastic CI Stack for AWS (Terraform)
 
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Terraform](https://img.shields.io/badge/terraform-%3E%3D1.0-623CE4.svg)](https://www.terraform.io)
-[![AWS Provider](https://img.shields.io/badge/aws_provider-%3E%3D5.0-orange.svg)](https://registry.terraform.io/providers/hashicorp/aws/latest)
+A Terraform module for deploying auto-scaling Buildkite agents on AWS EC2. This module provides the same architecture as the [CloudFormation Elastic CI Stack](https://github.com/buildkite/elastic-ci-stack-for-aws), implemented using Terraform.
 
-**Scalable, cost-optimized Buildkite agents on AWS EC2.**
+For CloudFormation-based deployments, see the [original stack](https://github.com/buildkite/elastic-ci-stack-for-aws).
 
-This Terraform module deploys a production-ready, auto-scaling Buildkite agent infrastructure on AWS. Originally converted from the [CloudFormation Elastic CI Stack](https://github.com/buildkite/elastic-ci-stack-for-aws), it provides the same battle-tested architecture with Terraform's flexibility.
+## Features
 
-## What's included
+### Auto-scaling
 
-This module automatically scales your Buildkite agents based on queue depth, and includes Spot instance support with scheduled scaling to keep costs down. Agents can self-terminate when idle.
+Agents scale automatically based on build queue depth. Spot instances reduce costs, and scheduled scaling handles predictable workload patterns.
 
-Security features include IMDSv2, encrypted S3 secrets, KMS pipeline signing, and VPC isolation. You can use multiple instance types, custom AMIs, or bring your own VPC setup.
+### Security
 
-Built-in Docker support with ECR integration, configurable networking modes, and user namespace remapping. CloudWatch handles metrics and logs, with lifecycle hooks for graceful shutdowns.
+- IMDSv2 enforcement
+- Encrypted S3 secrets storage
+- KMS pipeline signing
+- VPC isolation
+- Custom AMI support
+
+### Integration
+
+- Docker with ECR support
+- CloudWatch logging and metrics
+- Multiple instance type support
+- Existing VPC compatibility
 
 ## Quick Start
 
 ```hcl
 module "buildkite_stack" {
-  source = "github.com/buildkite/terraform-buildkite-elastic-ci-stack-for-aws"
+  source = "github.com/buildkite/terraform-buildkite-elastic-ci-stack-for-aws#0.1.0"
 
   stack_name            = "my-buildkite-stack"
   buildkite_queue       = "default"
@@ -40,42 +53,31 @@ module "buildkite_stack" {
 
 See the [examples/](./examples/) directory for more use cases.
 
-## Security
+## Security Considerations
 
-> **Warning**: This repository hasn't been reviewed by security researchers. Therefore, exercise caution and careful thought with what credentials you make available to your builds.
+This repository has not been reviewed by security researchers. Exercise caution when providing credentials to builds.
 
-Anyone with commit access to your codebase (including third-party pull-requests if you've enabled them in Buildkite) will have access to your secrets bucket files.
+Contributors with commit access (including external contributors if enabled) can access secrets bucket contents. Build processes run with the same IAM permissions as the EC2 instance through the metadata server.
 
-Also, keep in mind the EC2 HTTP metadata server is available from within builds, which means builds act with the same IAM permissions as the instance.
+### Recommended security settings
 
-Some things you should do:
 - Set `imdsv2_tokens = "required"` to enforce IMDSv2
-- Turn on secrets bucket encryption with `secrets_bucket_encryption = true`
+- Enable secrets bucket encryption with `secrets_bucket_encryption = true`
 - Enable pipeline signing using `pipeline_signing_kms_key_spec = "ECC_NIST_P256"`
 - Use permissions boundaries to limit IAM access
-- Lock down security groups and consider private subnets
+- Configure restricted security groups and consider private subnets
 
-## How it works
+## Architecture
 
-The Auto Scaling Group manages EC2 instances running Buildkite agents. A Lambda function polls the Buildkite API and adjusts the ASG size based on how many jobs are queued.
+Build queue monitoring triggers Lambda functions that scale EC2 instances running Buildkite agents. Instances terminate automatically when idle to reduce costs.
 
-Instance configuration comes from a Launch Template (user data, IAM roles, etc). You can create a new VPC or use an existing one. Artifacts and secrets live in S3, agent tokens go in SSM Parameter Store. CloudWatch handles all the metrics and logs, plus EventBridge triggers the scaler Lambda.
+Launch Templates define instance configuration including user data and IAM roles. The module supports new VPC creation or existing VPC integration. Build artifacts and secrets store in S3, agent tokens store in SSM Parameter Store. CloudWatch handles logging and metrics collection.
 
-## Troubleshooting
+## Support
 
-**Agents not connecting?** Make sure the token is correct (check SSM Parameter Store or your variables). Security groups need to allow outbound HTTPS to `agent.buildkite.com`. Look at CloudWatch Logs under `/buildkite/elastic-stack/{instance-id}` for errors, and verify the IAM role can access SSM parameters.
+For questions, contact [support@buildkite.com](mailto:support@buildkite.com). Include the following information:
 
-**Scaling not working?** Check the Lambda scaler logs at `/aws/lambda/{stack-name}-scaler`. Verify it has permissions to modify the ASG and that the EventBridge rule is enabled. Also make sure `buildkite_queue` matches what's in your pipeline.
-
-**Instances failing to launch?** Check the Auto Scaling Group activity in the AWS console. The AMI needs to be available in your region, and your VPC/subnets need free IP addresses. Double-check the IAM instance profile has the right permissions.
-
-**Getting Spot interruptions?** Try using multiple instance types to improve availability. Set `on_demand_base_capacity` if you need a guaranteed baseline. Watch the CloudWatch metrics for interruption rates, and consider switching to `capacity-optimized` allocation if you haven't already.
-
-## Questions and Support
-
-Feel free to drop an email to [support@buildkite.com](mailto:support@buildkite.com) with questions. It'll also help us if you can provide the following details:
-
-### Terraform State Information
+### Terraform state information
 
 ```bash
 # Show your stack outputs
@@ -85,23 +87,23 @@ terraform output
 terraform show
 ```
 
-### Collect Logs from CloudWatch
+### CloudWatch logs
 
-Provide Buildkite with logs from CloudWatch Logs:
+Collect logs from these log groups:
 
-```
+```text
 /aws/lambda/{stack-name}-scaler
 /buildkite/elastic-stack/{instance-id}
 /buildkite/system/{instance-id}
 ```
 
-You can also visit our [Buildkite Community Forum](https://forum.buildkite.community) and post a question in the [Elastic CI Stack for AWS](https://forum.buildkite.community/c/elastic-ci-stack-for-aws/) section!
+Community support is available on the [Buildkite Community Forum](https://forum.buildkite.community) in the [Elastic CI Stack for AWS](https://forum.buildkite.community/c/elastic-ci-stack-for-aws/) section.
 
 ## Documentation
 
 - [Buildkite Elastic CI Stack for AWS Overview](https://buildkite.com/docs/agent/v3/aws/elastic-ci-stack)
 - [Buildkite Agent Documentation](https://buildkite.com/docs/agent/v3)
-- [CloudFormation Version](https://github.com/buildkite/elastic-ci-stack-for-aws) (original implementation)
+- [CloudFormation Version](https://github.com/buildkite/elastic-ci-stack-for-aws)
 
 ## Contributing
 
@@ -110,6 +112,9 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to contribute to th
 ## License
 
 See [LICENSE](LICENSE) (MIT)
+
+> [!NOTE]
+> Pin provider versions in production to prevent unexpected changes. Add version constraints when defining Terraform providers.
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
