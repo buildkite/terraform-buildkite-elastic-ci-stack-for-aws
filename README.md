@@ -42,7 +42,7 @@ module "buildkite_stack" {
 }
 ```
 
-The current release is ![](https://img.shields.io/github/release/buildkite/elastic-ci-stack-for-aws.svg). See [Releases](https://github.com/buildkite/elastic-ci-stack-for-aws/releases) for older releases.
+The current release is ![](https://img.shields.io/github/release/buildkite/terraform-buildkite-elastic-ci-stack-for-aws.svg). See [Releases](https://github.com/buildkite/terraform-buildkite-elastic-ci-stack-for-aws/releases) for older releases.
 
 > Although the stack creates its own VPC by default, Buildkite highly recommends following best practices by setting up a separate development AWS account and using role switching and consolidated billing — see the [Delegate Access Across AWS Accounts tutorial](http://docs.aws.amazon.com/IAM/latest/UserGuide/tutorial_cross-account-with-roles.html) for more information.
 
