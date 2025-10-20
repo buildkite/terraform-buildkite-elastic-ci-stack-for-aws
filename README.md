@@ -150,7 +150,6 @@ Following on from the [Getting started](#getting-started) pages above, to gain a
 - [Configuration parameters](https://buildkite.com/docs/agent/v3/aws/elastic-ci-stack/ec2-linux-and-windows/configuration-parameters)
 - [Using AWS Secrets Manager](https://buildkite.com/docs/agent/v3/aws/elastic-ci-stack/ec2-linux-and-windows/secrets-manager)
 - [VPC design](https://buildkite.com/docs/agent/v3/aws/architecture/vpc)
-- [CloudFormation service role](https://buildkite.com/docs/agent/v3/aws/elastic-ci-stack/ec2-linux-and-windows/cloudformation-service-role)
 - [Terraform Get Started - AWS](https://developer.hashicorp.com/terraform/tutorials/aws-get-started)
 
 ## Questions and support
