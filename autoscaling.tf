@@ -101,6 +101,9 @@ resource "aws_launch_template" "agent_launch_template" {
     agent_enable_git_mirrors        = var.buildkite_agent_enable_git_mirrors ? "true" : "false"
     bootstrap_script_url            = var.bootstrap_script_url
     agent_signing_kms_key           = local.signing_key_arn
+    agent_signing_jwks_path         = var.pipeline_signing_jwks_parameter_store_path
+    agent_signing_jwks_key_id       = var.pipeline_signing_jwks_key_id
+    agent_verification_jwks_path    = var.pipeline_verification_jwks_parameter_store_path
     agent_signing_failure_behavior  = var.pipeline_signing_verification_failure_behavior
     agent_env_file_url              = var.agent_env_file_url
     authorized_users_url            = var.authorized_users_url
@@ -112,6 +115,7 @@ resource "aws_launch_template" "agent_launch_template" {
     aws_region                      = data.aws_region.current.id
     enable_secrets_plugin           = var.enable_secrets_plugin ? "true" : "false"
     enable_ecr_plugin               = var.enable_ecr_plugin ? "true" : "false"
+    enable_ecr_credential_helper    = var.enable_ecr_credential_helper ? "true" : "false"
     enable_docker_login_plugin      = var.enable_docker_login_plugin ? "true" : "false"
     enable_ec2_log_retention_policy = var.enable_ec2_log_retention_policy ? "true" : "false"
     ec2_log_retention_days          = var.ec2_log_retention_days
@@ -135,6 +139,9 @@ resource "aws_launch_template" "agent_launch_template" {
     agent_cancel_grace_period       = var.buildkite_agent_cancel_grace_period
     agent_signal_grace_period       = var.buildkite_agent_signal_grace_period
     agent_signing_kms_key           = local.signing_key_arn
+    agent_signing_jwks_path         = var.pipeline_signing_jwks_parameter_store_path
+    agent_signing_jwks_key_id       = var.pipeline_signing_jwks_key_id
+    agent_verification_jwks_path    = var.pipeline_verification_jwks_parameter_store_path
     agent_signing_failure_behavior  = var.pipeline_signing_verification_failure_behavior
     queue                           = var.buildkite_queue
     agent_enable_git_mirrors        = var.buildkite_agent_enable_git_mirrors ? "true" : "false"
@@ -151,6 +158,7 @@ resource "aws_launch_template" "agent_launch_template" {
     aws_region                      = data.aws_region.current.id
     enable_secrets_plugin           = var.enable_secrets_plugin ? "true" : "false"
     enable_ecr_plugin               = var.enable_ecr_plugin ? "true" : "false"
+    enable_ecr_credential_helper    = var.enable_ecr_credential_helper ? "true" : "false"
     enable_docker_login_plugin      = var.enable_docker_login_plugin ? "true" : "false"
     enable_docker_experimental      = var.enable_docker_experimental ? "true" : "false"
     enable_docker_userns_remap      = var.enable_docker_user_namespace_remap ? "true" : "false"
@@ -167,6 +175,8 @@ resource "aws_launch_template" "agent_launch_template" {
     docker_ipv4_address_pool_1      = var.docker_ipv4_address_pool_1
     docker_ipv4_address_pool_2      = var.docker_ipv4_address_pool_2
     docker_ipv6_address_pool        = var.docker_ipv6_address_pool
+    docker_fixed_cidr_v4            = var.docker_fixed_cidr_v4
+    docker_fixed_cidr_v6            = var.docker_fixed_cidr_v6
     mount_tmpfs_at_tmp              = var.mount_tmpfs_at_tmp ? "true" : "false"
   }))
 }

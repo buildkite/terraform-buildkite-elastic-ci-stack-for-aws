@@ -177,7 +177,7 @@ variable "buildkite_agent_scaler_version" {
 
   validation {
     condition     = can(regex("^(?:(?:[2-9]|[1-9]\\d+)\\.\\d+\\.\\d+|1\\.(?:[1-9]\\d+\\.\\d+|9\\.(?:[5-9]|[1-9]\\d+)))$", var.buildkite_agent_scaler_version))
-    error_message = "The agent scaler release must be 1.9.5 or newer."
+    error_message = "The agent scaler release must be 1.9.6 or newer."
   }
 }
 
@@ -688,6 +688,28 @@ variable "docker_ipv6_address_pool" {
   default     = "2001:db8:2::/104"
 }
 
+variable "docker_fixed_cidr_v4" {
+  description = "Optional IPv4 CIDR block for Docker's fixed-cidr option. Restricts the IP range Docker uses for container networking on the default bridge. Must be a subset of docker_ipv4_address_pool_1. Leave empty to disable. Only applies to Linux instances, not Windows."
+  type        = string
+  default     = ""
+
+  validation {
+    condition     = var.docker_fixed_cidr_v4 == "" || can(cidrhost(var.docker_fixed_cidr_v4, 0))
+    error_message = "docker_fixed_cidr_v4 must be empty or a valid IPv4 CIDR block (e.g., 172.17.1.0/24)."
+  }
+}
+
+variable "docker_fixed_cidr_v6" {
+  description = "IPv6 CIDR block for Docker's fixed-cidr-v6 option in dualstack mode. Restricts the IP range Docker uses for IPv6 container networking. Only applies to Linux instances in dualstack mode, not Windows."
+  type        = string
+  default     = "2001:db8:1::/64"
+
+  validation {
+    condition     = can(cidrhost(var.docker_fixed_cidr_v6, 0))
+    error_message = "docker_fixed_cidr_v6 must be a valid IPv6 CIDR block (e.g., 2001:db8:1::/64)."
+  }
+}
+
 variable "ecr_access_policy" {
   description = "Docker image registry permissions for agents. 'none' = no access, 'readonly' = pull images only, 'poweruser' = pull/push images, 'full' = complete ECR access. The '-pullthrough' variants (e.g., 'readonly-pullthrough') add permissions to enable automatic caching of public Docker images, reducing pull times and bandwidth costs."
   type        = string
@@ -713,6 +735,12 @@ variable "enable_ecr_plugin" {
   description = "Enables ECR plugin for all pipelines."
   type        = bool
   default     = true
+}
+
+variable "enable_ecr_credential_helper" {
+  description = "Enable Amazon ECR Credential Helper in ECR plugin for Docker authentication. Provides an alternative authentication method for ECR."
+  type        = bool
+  default     = false
 }
 
 variable "enable_docker_login_plugin" {
@@ -886,6 +914,34 @@ variable "pipeline_signing_verification_failure_behavior" {
   }
 }
 
+variable "pipeline_signing_jwks_parameter_store_path" {
+  description = "Existing SSM Parameter Store path to a JSON Web Key Set (JWKS) containing a key to sign jobs with. Alternative to pipeline_signing_kms_key_id for JWKS-based signing. Leave blank to use KMS signing instead."
+  type        = string
+  default     = ""
+
+  validation {
+    condition     = var.pipeline_signing_jwks_parameter_store_path == "" || can(regex("^/[a-zA-Z0-9_.\\-/]+$", var.pipeline_signing_jwks_parameter_store_path))
+    error_message = "pipeline_signing_jwks_parameter_store_path must start with '/' when provided."
+  }
+}
+
+variable "pipeline_signing_jwks_key_id" {
+  description = "The ID of the key in the JWKS to use for signing jobs. If not specified, and the JWKS contains only one key, that key will be used. Only relevant when pipeline_signing_jwks_parameter_store_path is set."
+  type        = string
+  default     = ""
+}
+
+variable "pipeline_verification_jwks_parameter_store_path" {
+  description = "Existing SSM Parameter Store path to a JSON Web Key Set (JWKS) containing keys with which to verify jobs. Used for pipeline signature verification."
+  type        = string
+  default     = ""
+
+  validation {
+    condition     = var.pipeline_verification_jwks_parameter_store_path == "" || can(regex("^/[a-zA-Z0-9_.\\-/]+$", var.pipeline_verification_jwks_parameter_store_path))
+    error_message = "pipeline_verification_jwks_parameter_store_path must start with '/' when provided."
+  }
+}
+
 # =============================================================================
 # OBSERVABILITY CONFIGURATION
 # =============================================================================
@@ -915,6 +971,17 @@ variable "lambda_log_retention_days" {
   validation {
     condition     = contains([1, 3, 5, 7, 14, 30, 60, 90, 120, 150, 180, 365, 400, 545, 731, 1827, 3653], var.lambda_log_retention_days)
     error_message = "lambda_log_retention_days must be one of: 1, 3, 5, 7, 14, 30, 60, 90, 120, 150, 180, 365, 400, 545, 731, 1827, 3653."
+  }
+}
+
+variable "lambda_architecture" {
+  description = "CPU architecture for Lambda functions (x86_64 or arm64). arm64 provides better price-performance but requires compatible dependencies."
+  type        = string
+  default     = "x86_64"
+
+  validation {
+    condition     = contains(["x86_64", "arm64"], var.lambda_architecture)
+    error_message = "lambda_architecture must be 'x86_64' or 'arm64'."
   }
 }
 

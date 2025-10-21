@@ -37,27 +37,29 @@ locals {
   use_ami_parameter = var.image_id_parameter != ""
 
   # Region-specific AMI IDs by architecture (linux-amd64, linux-arm64, windows)
-  buildkite_amis = {
-    us-east-1      = { linuxamd64 = "ami-0f18d34a51beb5aef", linuxarm64 = "ami-0b91bc41649d5ca55", windows = "ami-0621e20b1f2820c5d" }
-    us-east-2      = { linuxamd64 = "ami-0b944abcfc3c17f1d", linuxarm64 = "ami-0c680c91c55e3eeeb", windows = "ami-0c7e26cf95fa31800" }
-    us-west-1      = { linuxamd64 = "ami-0895ee398b9817c9c", linuxarm64 = "ami-0e664535a2f850f6b", windows = "ami-028475a192375f131" }
-    us-west-2      = { linuxamd64 = "ami-0b24c939ef13fee82", linuxarm64 = "ami-05625238edbb1d2b3", windows = "ami-03acfcdb22ed01963" }
-    af-south-1     = { linuxamd64 = "ami-0256a74e88bc553ba", linuxarm64 = "ami-05ec95f6d15a2fc33", windows = "ami-01bdbb329d22cafff" }
-    ap-east-1      = { linuxamd64 = "ami-07d9bf32d5100c3f8", linuxarm64 = "ami-0e2a78ba57ce7cc6e", windows = "ami-069d0e352866d75b3" }
-    ap-south-1     = { linuxamd64 = "ami-044623c52b6458339", linuxarm64 = "ami-0cf9b75e956cbf14a", windows = "ami-051c2fd4cab0587e2" }
-    ap-northeast-2 = { linuxamd64 = "ami-0d1a6d61d7dd84702", linuxarm64 = "ami-090bde9860f76a426", windows = "ami-00eb6068f81652ef2" }
-    ap-northeast-1 = { linuxamd64 = "ami-04d6256985896b98e", linuxarm64 = "ami-0bb059d99aca19c06", windows = "ami-0fbb021c6ceaed4a3" }
-    ap-southeast-2 = { linuxamd64 = "ami-0456cee00c93fdcc7", linuxarm64 = "ami-09fe645781067ef90", windows = "ami-090942c78f2bf796d" }
-    ap-southeast-1 = { linuxamd64 = "ami-04e77c385eefe0760", linuxarm64 = "ami-03df97088b597180c", windows = "ami-02e1fe20c2609a436" }
-    ca-central-1   = { linuxamd64 = "ami-01d13fe01fe8eead5", linuxarm64 = "ami-00100ded7d16e211f", windows = "ami-0c811490e84a92bf7" }
-    eu-central-1   = { linuxamd64 = "ami-08f3e7dd7a61d665e", linuxarm64 = "ami-08b86cd8f64b583ed", windows = "ami-0bac75954d63d1790" }
-    eu-west-1      = { linuxamd64 = "ami-00b091179695e1844", linuxarm64 = "ami-071ead7c96734d8cc", windows = "ami-0a7bd40719eea3525" }
-    eu-west-2      = { linuxamd64 = "ami-05cb8964c3cd95233", linuxarm64 = "ami-0da80d8390a3d1dd9", windows = "ami-09c24b04a3e098473" }
-    eu-south-1     = { linuxamd64 = "ami-0439dbb93058245e2", linuxarm64 = "ami-09a596f82d768fa2d", windows = "ami-04c1ae67d843f7a81" }
-    eu-west-3      = { linuxamd64 = "ami-0022e4b225a10747e", linuxarm64 = "ami-08a6af7a821474d98", windows = "ami-0e69a1e45b443c1c0" }
-    eu-north-1     = { linuxamd64 = "ami-0760989aed7656442", linuxarm64 = "ami-082af41ac0800a729", windows = "ami-0a60dc6f0e53a050c" }
-    me-south-1     = { linuxamd64 = "ami-094494c464906a4c2", linuxarm64 = "ami-0a652dd035da545fc", windows = "ami-0ab2e1fbbe23391b5" }
-    sa-east-1      = { linuxamd64 = "ami-0810d9d245a3f8bf6", linuxarm64 = "ami-07675f2879bc622c6", windows = "ami-000fd75fe2dc6375c" }
+  # AMI mappings for Buildkite Agent - these are the latest built AMIs from elastic-ci-stack-for-aws
+  # See https://github.com/buildkite/elastic-ci-stack-for-aws for source
+  buildkite_ami_mapping = {
+    us-east-1      = { linuxamd64 = "ami-02bc0594bafab3192", linuxarm64 = "ami-0708d316fe0e22063", windows = "ami-0c11dfe3d59f0e26d" }
+    us-east-2      = { linuxamd64 = "ami-09fdae5bcf1f89b92", linuxarm64 = "ami-0950c793ca4f19876", windows = "ami-0263bedf41e4d731b" }
+    us-west-1      = { linuxamd64 = "ami-0cced7db1a2691cf8", linuxarm64 = "ami-0477db7f01f08a427", windows = "ami-075b652872ccfa1ce" }
+    us-west-2      = { linuxamd64 = "ami-00f9792c70c56a13b", linuxarm64 = "ami-0173c9921ff7c6728", windows = "ami-0af2d75deadf05ae3" }
+    af-south-1     = { linuxamd64 = "ami-0ed28ecedd0a9f43b", linuxarm64 = "ami-0981981465d8d8379", windows = "ami-06da60e8327849e7c" }
+    ap-east-1      = { linuxamd64 = "ami-03d64bc88ac7e1f53", linuxarm64 = "ami-0ce6b0d6d82c8996b", windows = "ami-0540d38f78df3e6a6" }
+    ap-south-1     = { linuxamd64 = "ami-0cd3bb320c7a424ba", linuxarm64 = "ami-0b9e32cf9465d8024", windows = "ami-0d92bc81a829bb550" }
+    ap-northeast-2 = { linuxamd64 = "ami-011078b3a89b92277", linuxarm64 = "ami-02c55bb7167a76fec", windows = "ami-0041cc4456cbb0b72" }
+    ap-northeast-1 = { linuxamd64 = "ami-093298945a0ef5aea", linuxarm64 = "ami-0074f3958899a7897", windows = "ami-0ef004e92a834d3f8" }
+    ap-southeast-2 = { linuxamd64 = "ami-01d71daa69620bd26", linuxarm64 = "ami-063728a6a87a81ec0", windows = "ami-0aaffdf844702927e" }
+    ap-southeast-1 = { linuxamd64 = "ami-098e1971d46971e92", linuxarm64 = "ami-09add4754525c8413", windows = "ami-08f465a5ef49da26e" }
+    ca-central-1   = { linuxamd64 = "ami-0b9fa4b6c7e946cab", linuxarm64 = "ami-0af420e49c2f98a52", windows = "ami-0b1253d5f47986e88" }
+    eu-central-1   = { linuxamd64 = "ami-0fb23a0f2ff116662", linuxarm64 = "ami-0b70a99a18baba811", windows = "ami-0ebb9cf6dc17dbd70" }
+    eu-west-1      = { linuxamd64 = "ami-00c54414dfdc5160b", linuxarm64 = "ami-055f7791d9ebf3a66", windows = "ami-016c3bb5ef600dde3" }
+    eu-west-2      = { linuxamd64 = "ami-09badb9f0c2acda1f", linuxarm64 = "ami-0a9ae413b27436496", windows = "ami-02fde2992afcc92be" }
+    eu-south-1     = { linuxamd64 = "ami-08584df3f55523258", linuxarm64 = "ami-0493ceba25fd42ac6", windows = "ami-02e6e9b5113252b80" }
+    eu-west-3      = { linuxamd64 = "ami-0ba7d0ac152f8c21f", linuxarm64 = "ami-0f1392f0a1bc6941b", windows = "ami-0593be8acc465da0f" }
+    eu-north-1     = { linuxamd64 = "ami-04b21730a234bb32f", linuxarm64 = "ami-0ad6243b41b376dbc", windows = "ami-086f7f4cc126ee29f" }
+    me-south-1     = { linuxamd64 = "ami-0d7769006b3098827", linuxarm64 = "ami-08b58c028fe36adb9", windows = "ami-0ed3100607f645cf3" }
+    sa-east-1      = { linuxamd64 = "ami-02ad5907600361c49", linuxarm64 = "ami-09b09744576f76bca", windows = "ami-04b4a2eda06e5f7a9" }
   }
 
   # Detect ARM and burstable instances from instance type family
@@ -75,7 +77,7 @@ locals {
 
   is_windows       = var.instance_operating_system == "windows"
   ami_architecture = local.is_windows ? "windows" : (local.is_arm_instance ? "linuxarm64" : "linuxamd64")
-  selected_ami_id  = local.buildkite_amis[data.aws_region.current.id][local.ami_architecture]
+  selected_ami_id  = local.buildkite_ami_mapping[data.aws_region.current.id][local.ami_architecture]
 
   # Instance naming and timeout settings
   use_default_timeout      = var.instance_creation_timeout == ""

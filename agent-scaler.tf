@@ -10,7 +10,7 @@ resource "aws_lambda_function" "scaler" {
 
   handler       = "bootstrap"
   runtime       = "provided.al2"
-  architectures = ["x86_64"]
+  architectures = [var.lambda_architecture]
   timeout       = 120
   memory_size   = 128
 
