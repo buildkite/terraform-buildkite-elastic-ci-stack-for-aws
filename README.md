@@ -5,7 +5,7 @@
 # Buildkite Elastic CI Stack for AWS Terraform Module
 
 > [!WARNING]
-> This release has been tested, but is still in beta. If any issues are encountered, please [raise an issue](https://github.com/buildkite/terraform-buildkite-elastic-ci-stack-for-aws/issues/new/choose) or feel free to draft a Pull Request.
+> This release has been tested, but is still in Preview. If any issues are encountered, please [raise an issue](https://github.com/buildkite/terraform-buildkite-elastic-ci-stack-for-aws/issues/new/choose) or feel free to draft a Pull Request.
 
 > [!NOTE]
 > Prefer Cloudformation? See [elastic-ci-stack-for-aws](https://github.com/buildkite/elastic-ci-stack-for-aws)
