@@ -4,7 +4,7 @@
 
 # Buildkite Elastic CI Stack for AWS Terraform Module
 
-> [!WARNING]  
+> [!WARNING]
 > This release has been tested, but is still in beta. If any issues are encountered, please [raise an issue](https://github.com/buildkite/terraform-buildkite-elastic-ci-stack-for-aws/issues/new/choose) or feel free to draft a Pull Request.
 
 > [!NOTE]
@@ -391,7 +391,7 @@ No modules.
 | <a name="input_secrets_bucket_region"></a> [secrets\_bucket\_region](#input\_secrets\_bucket\_region) | Optional - Region for the secrets\_bucket. If blank the bucket's region is dynamically discovered. | `string` | `""` | no |
 | <a name="input_security_group_ids"></a> [security\_group\_ids](#input\_security\_group\_ids) | Optional - List of security group ids to assign to instances. | `list(string)` | `[]` | no |
 | <a name="input_spot_allocation_strategy"></a> [spot\_allocation\_strategy](#input\_spot\_allocation\_strategy) | Strategy for selecting Spot instance types to minimize interruptions and costs. 'capacity-optimized' (recommended) chooses types with the most available capacity. 'price-capacity-optimized' balances low prices with availability. 'lowest-price' prioritizes cost savings. 'capacity-optimized-prioritized' follows instance\_types order while optimizing for capacity. | `string` | `"capacity-optimized"` | no |
-| <a name="input_stack_name"></a> [stack\_name](#input\_stack\_name) | Unique name for this Buildkite stack. Used as a prefix for all resource names to enable multiple stack deployments. | `string` | `"buildkite-stack"` | no |
+| <a name="input_stack_name"></a> [stack\_name](#input\_stack\_name) | Unique name for this Buildkite stack. Used as a prefix for all resource names to enable multiple stack deployments.<br/><br/>WARNING: Changing this value after initial deployment will cause most resources to be destroyed and recreated,<br/>resulting in downtime and potential data loss. If the stack needs to be renamed, consider deploying a new stack and migrating workloads. | `string` | `"buildkite-stack"` | no |
 | <a name="input_subnets"></a> [subnets](#input\_subnets) | Optional - List of two existing VPC subnet ids where EC2 instances will run. Required if setting vpc\_id. | `list(string)` | `[]` | no |
 | <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | Optional - Id of an existing VPC to launch instances into. Leave blank to have a new VPC created. | `string` | `""` | no |
 

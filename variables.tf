@@ -3,7 +3,12 @@
 # =============================================================================
 
 variable "stack_name" {
-  description = "Unique name for this Buildkite stack. Used as a prefix for all resource names to enable multiple stack deployments."
+  description = <<-EOT
+    Unique name for this Buildkite stack. Used as a prefix for all resource names to enable multiple stack deployments.
+
+    WARNING: Changing this value after initial deployment will cause most resources to be destroyed and recreated,
+    resulting in downtime and potential data loss. If the stack needs to be renamed, consider deploying a new stack and migrating workloads.
+  EOT
   type        = string
   default     = "buildkite-stack"
 

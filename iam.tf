@@ -19,7 +19,10 @@ resource "aws_iam_role" "iam_role" {
         Action = "sts:AssumeRole"
         Effect = "Allow"
         Principal = {
-          Service = "ec2.amazonaws.com"
+          Service = [
+            "autoscaling.amazonaws.com",
+            "ec2.amazonaws.com"
+          ]
         }
       }
     ]
@@ -88,7 +91,33 @@ resource "aws_iam_role_policy" "buildkite_agent_policy" {
           Sid    = "AutoScalingAccess"
           Effect = "Allow"
           Action = [
-            "autoscaling:SetInstanceHealth"
+            "autoscaling:DescribeAutoScalingInstances",
+            "autoscaling:SetInstanceHealth",
+            "autoscaling:TerminateInstanceInAutoScalingGroup"
+          ]
+          Resource = "*"
+        },
+        {
+          Sid    = "CloudWatchMetrics"
+          Effect = "Allow"
+          Action = [
+            "cloudwatch:PutMetricData"
+          ]
+          Resource = "*"
+        },
+        {
+          Sid    = "StackResourceAccess"
+          Effect = "Allow"
+          Action = [
+            "cloudformation:DescribeStackResource"
+          ]
+          Resource = "*"
+        },
+        {
+          Sid    = "Ec2TagsAccess"
+          Effect = "Allow"
+          Action = [
+            "ec2:DescribeTags"
           ]
           Resource = "*"
         }
@@ -98,13 +127,32 @@ resource "aws_iam_role_policy" "buildkite_agent_policy" {
           Sid    = "S3SecretsAccess"
           Effect = "Allow"
           Action = [
-            "s3:GetObject",
-            "s3:GetObjectVersion",
-            "s3:ListBucket"
+            "s3:Get*",
+            "s3:List*"
           ]
           Resource = [
             local.create_secrets_bucket ? aws_s3_bucket.managed_secrets_bucket[0].arn : "arn:aws:s3:::${var.secrets_bucket}",
             "${local.create_secrets_bucket ? aws_s3_bucket.managed_secrets_bucket[0].arn : "arn:aws:s3:::${var.secrets_bucket}"}/*"
+          ]
+        }
+      ] : [],
+      local.use_artifacts_bucket ? [
+        {
+          Sid    = "S3ArtifactsAccess"
+          Effect = "Allow"
+          Action = [
+            "s3:GetObject",
+            "s3:GetObjectAcl",
+            "s3:GetObjectVersion",
+            "s3:GetObjectVersionAcl",
+            "s3:ListBucket",
+            "s3:PutObject",
+            "s3:PutObjectAcl",
+            "s3:PutObjectVersionAcl"
+          ]
+          Resource = [
+            "arn:aws:s3:::${var.artifacts_bucket}",
+            "arn:aws:s3:::${var.artifacts_bucket}/*"
           ]
         }
       ] : [],
@@ -129,7 +177,7 @@ resource "aws_iam_role_policy" "buildkite_agent_policy" {
 
 # IAM Role for AZ Rebalancing Suspender Lambda
 resource "aws_iam_role" "asg_process_suspender" {
-  name_prefix = "${local.stack_name_full}-az-suspend-"
+  name = "${local.stack_name_full}-AsgProcessSuspenderRole"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
