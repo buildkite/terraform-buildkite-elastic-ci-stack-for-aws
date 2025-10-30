@@ -170,8 +170,52 @@ resource "aws_iam_role_policy" "buildkite_agent_policy" {
           ]
           Resource = "*"
         }
-      ]
+      ],
+      local.has_signing_key ? [
+        {
+          Sid    = "PipelineSigningKMSKeyAccess"
+          Effect = "Allow"
+          Action = concat(
+            ["kms:Verify", "kms:GetPublicKey"],
+            local.signing_key_full_access ? ["kms:Sign"] : []
+          )
+          Resource = local.signing_key_arn
+        }
+      ] : [],
+      local.use_custom_token_kms ? [
+        {
+          Sid      = "DecryptAgentToken"
+          Effect   = "Allow"
+          Action   = "kms:Decrypt"
+          Resource = "arn:aws:kms:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:key/${var.buildkite_agent_token_parameter_store_kms_key}"
+        }
+      ] : []
     )
+  })
+}
+
+resource "aws_iam_role_policy" "ecr_pullthrough_policy" {
+  count = local.enable_ecr_pullthrough ? 1 : 0
+  name  = "ECRPullThrough"
+  role  = aws_iam_role.iam_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ecr:CreateRepository",
+          "ecr:BatchImportUpstreamImage",
+          "ecr:GetImageCopyStatus",
+          "ecr:InitiateLayerUpload",
+          "ecr:UploadLayerPart",
+          "ecr:CompleteLayerUpload",
+          "ecr:PutImage"
+        ]
+        Resource = "*"
+      }
+    ]
   })
 }
 
