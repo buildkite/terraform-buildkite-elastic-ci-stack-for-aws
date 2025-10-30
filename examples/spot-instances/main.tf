@@ -8,7 +8,7 @@ terraform {
 }
 
 module "buildkite_stack" {
-  source = "github.com/buildkite/terraform-buildkite-elastic-ci-stack-for-aws?ref=v0.1.1"
+  source = "github.com/buildkite/terraform-buildkite-elastic-ci-stack-for-aws?ref=v0.1.0"
 
   stack_name            = "buildkite-spot"
   buildkite_queue       = "spot"
