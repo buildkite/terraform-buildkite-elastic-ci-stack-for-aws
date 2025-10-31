@@ -38,6 +38,7 @@ Content-Type: text/x-shellscript; charset="us-ascii"
 #!/bin/bash -v
 BUILDKITE_STACK_NAME="${stack_name}" \
 BUILDKITE_STACK_VERSION="${stack_version}" \
+BUILDKITE_STACK_DEPLOYED_BY="${stack_deployed_by}" \
 BUILDKITE_SCALE_IN_IDLE_PERIOD="${scale_in_idle_period}" \
 BUILDKITE_SECRETS_BUCKET="${secrets_bucket}" \
 BUILDKITE_SECRETS_BUCKET_REGION="${secrets_bucket_region}" \
