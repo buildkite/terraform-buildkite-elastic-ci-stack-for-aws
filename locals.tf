@@ -60,6 +60,7 @@ locals {
     eu-north-1     = { linuxamd64 = "ami-04b21730a234bb32f", linuxarm64 = "ami-0ad6243b41b376dbc", windows = "ami-086f7f4cc126ee29f" }
     me-south-1     = { linuxamd64 = "ami-0d7769006b3098827", linuxarm64 = "ami-08b58c028fe36adb9", windows = "ami-0ed3100607f645cf3" }
     sa-east-1      = { linuxamd64 = "ami-02ad5907600361c49", linuxarm64 = "ami-09b09744576f76bca", windows = "ami-04b4a2eda06e5f7a9" }
+    cloudformation_stack_version = "v6.43.0"
   }
 
   # Detect ARM and burstable instances from instance type family

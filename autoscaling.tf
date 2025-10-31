@@ -81,8 +81,9 @@ resource "aws_launch_template" "agent_launch_template" {
     enable_docker_userns_remap      = var.enable_docker_user_namespace_remap ? "true" : "false"
     enable_docker_experimental      = var.enable_docker_experimental ? "true" : "false"
     docker_networking_protocol      = var.docker_networking_protocol
-    stack_name                      = "buildkite-aws-stack"
-    stack_version                   = "terraform"
+    stack_name                      = local.stack_name_full
+    stack_version                   = local.buildkite_ami_mapping.cloudformation_stack_version
+    stack_deployed_by               = "Terraform"
     scale_in_idle_period            = var.scale_in_idle_period
     secrets_bucket                  = local.create_secrets_bucket ? aws_s3_bucket.managed_secrets_bucket[0].id : var.secrets_bucket
     secrets_bucket_region           = local.create_secrets_bucket ? data.aws_region.current.id : var.secrets_bucket_region
@@ -120,8 +121,9 @@ resource "aws_launch_template" "agent_launch_template" {
     enable_ec2_log_retention_policy = var.enable_ec2_log_retention_policy ? "true" : "false"
     ec2_log_retention_days          = var.ec2_log_retention_days
     }) : templatefile("${path.module}/scripts/user-data-linux.sh", {
-    stack_name                      = "buildkite-aws-stack"
-    stack_version                   = "terraform"
+    stack_name                      = local.stack_name_full
+    stack_version                   = local.buildkite_ami_mapping.cloudformation_stack_version
+    stack_deployed_by               = "Terraform"
     scale_in_idle_period            = var.scale_in_idle_period
     secrets_bucket                  = local.create_secrets_bucket ? aws_s3_bucket.managed_secrets_bucket[0].id : var.secrets_bucket
     secrets_bucket_region           = local.create_secrets_bucket ? data.aws_region.current.id : var.secrets_bucket_region
