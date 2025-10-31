@@ -4,7 +4,7 @@
 #tfsec:ignore:aws-s3-encryption-customer-key Using AES256 (SSE-S3) instead of CMK for simplicity; users can override if needed
 resource "aws_s3_bucket" "managed_secrets_bucket" {
   count  = local.create_secrets_bucket ? 1 : 0
-  bucket = "${local.stack_name_full}-secrets"
+  bucket = lower("${local.stack_name_full}-secrets")
   tags   = local.common_tags
 }
 
@@ -41,7 +41,7 @@ resource "aws_s3_bucket_public_access_block" "managed_secrets_bucket_pab" {
 #tfsec:ignore:aws-s3-enable-bucket-logging Logging bucket itself doesn't need logging (would create recursion)
 resource "aws_s3_bucket" "managed_secrets_logging_bucket" {
   count  = local.create_secrets_bucket ? 1 : 0
-  bucket = "${local.stack_name_full}-secrets-logs"
+  bucket = lower("${local.stack_name_full}-secrets-logs")
   tags   = local.common_tags
 }
 

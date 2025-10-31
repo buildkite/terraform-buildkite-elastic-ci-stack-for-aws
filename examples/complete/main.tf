@@ -13,7 +13,7 @@ provider "aws" {
 }
 
 module "buildkite_agents" {
-  source = "../.."
+  source = "github.com/buildkite/terraform-buildkite-elastic-ci-stack-for-aws?ref=v0.1.0"
 
   # Stack configuration
   stack_name = "production-buildkite-stack"
