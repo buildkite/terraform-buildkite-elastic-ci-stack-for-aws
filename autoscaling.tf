@@ -83,7 +83,7 @@ resource "aws_launch_template" "agent_launch_template" {
     docker_networking_protocol      = var.docker_networking_protocol
     stack_name                      = local.stack_name_full
     stack_version                   = local.buildkite_ami_mapping.cloudformation_stack_version
-    stack_deployed_by               = "Terraform"
+    stack_deployed_by               = "terraform"
     scale_in_idle_period            = var.scale_in_idle_period
     secrets_bucket                  = local.create_secrets_bucket ? aws_s3_bucket.managed_secrets_bucket[0].id : var.secrets_bucket
     secrets_bucket_region           = local.create_secrets_bucket ? data.aws_region.current.id : var.secrets_bucket_region
@@ -123,7 +123,7 @@ resource "aws_launch_template" "agent_launch_template" {
     }) : templatefile("${path.module}/scripts/user-data-linux.sh", {
     stack_name                      = local.stack_name_full
     stack_version                   = local.buildkite_ami_mapping.cloudformation_stack_version
-    stack_deployed_by               = "Terraform"
+    stack_deployed_by               = "terraform"
     scale_in_idle_period            = var.scale_in_idle_period
     secrets_bucket                  = local.create_secrets_bucket ? aws_s3_bucket.managed_secrets_bucket[0].id : var.secrets_bucket
     secrets_bucket_region           = local.create_secrets_bucket ? data.aws_region.current.id : var.secrets_bucket_region
