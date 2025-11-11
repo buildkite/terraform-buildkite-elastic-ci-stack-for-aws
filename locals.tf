@@ -63,6 +63,10 @@ locals {
     cloudformation_stack_version = "v6.46.0"
   }
 
+  # Region-specific Lambda deployment bucket
+  # us-east-1 uses "buildkite-lambdas", all other regions append the region suffix
+  agent_scaler_s3_bucket = data.aws_region.current.id == "us-east-1" ? "buildkite-lambdas" : "buildkite-lambdas-${data.aws_region.current.id}"
+
   # Detect ARM and burstable instances from instance type family
   instance_type_family = split(".", split(",", var.instance_types)[0])[0]
 
