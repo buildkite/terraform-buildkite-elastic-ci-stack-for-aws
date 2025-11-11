@@ -5,7 +5,7 @@ resource "aws_lambda_function" "scaler" {
   function_name = "${local.stack_name_full}-scaler"
   description   = "Scales ${aws_autoscaling_group.agent_auto_scale_group.name} based on Buildkite metrics"
 
-  s3_bucket = "buildkite-lambdas"
+  s3_bucket = local.buildkite_lambda_bucket_mapping[data.aws_region.current.id]
   s3_key    = "buildkite-agent-scaler/v${var.buildkite_agent_scaler_version}/handler.zip"
 
   handler       = "bootstrap"
