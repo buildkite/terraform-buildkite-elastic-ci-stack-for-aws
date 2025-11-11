@@ -63,29 +63,9 @@ locals {
     cloudformation_stack_version = "v6.46.0"
   }
 
-  # Lambda functions are deployed from region-specific S3 buckets to avoid cross-region access errors
-  buildkite_lambda_bucket_mapping = {
-    us-east-1      = "buildkite-lambdas"
-    us-east-2      = "buildkite-lambdas-us-east-2"
-    us-west-1      = "buildkite-lambdas-us-west-1"
-    us-west-2      = "buildkite-lambdas-us-west-2"
-    af-south-1     = "buildkite-lambdas-af-south-1"
-    ap-east-1      = "buildkite-lambdas-ap-east-1"
-    ap-south-1     = "buildkite-lambdas-ap-south-1"
-    ap-northeast-2 = "buildkite-lambdas-ap-northeast-2"
-    ap-northeast-1 = "buildkite-lambdas-ap-northeast-1"
-    ap-southeast-2 = "buildkite-lambdas-ap-southeast-2"
-    ap-southeast-1 = "buildkite-lambdas-ap-southeast-1"
-    ca-central-1   = "buildkite-lambdas-ca-central-1"
-    eu-central-1   = "buildkite-lambdas-eu-central-1"
-    eu-west-1      = "buildkite-lambdas-eu-west-1"
-    eu-west-2      = "buildkite-lambdas-eu-west-2"
-    eu-south-1     = "buildkite-lambdas-eu-south-1"
-    eu-west-3      = "buildkite-lambdas-eu-west-3"
-    eu-north-1     = "buildkite-lambdas-eu-north-1"
-    me-south-1     = "buildkite-lambdas-me-south-1"
-    sa-east-1      = "buildkite-lambdas-sa-east-1"
-  }
+  # Region-specific Lambda deployment bucket
+  # us-east-1 uses "buildkite-lambdas", all other regions append the region suffix
+  agent_scaler_s3_bucket = data.aws_region.current.id == "us-east-1" ? "buildkite-lambdas" : "buildkite-lambdas-${data.aws_region.current.id}"
 
   # Detect ARM and burstable instances from instance type family
   instance_type_family = split(".", split(",", var.instance_types)[0])[0]
