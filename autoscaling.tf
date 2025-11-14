@@ -111,6 +111,8 @@ resource "aws_launch_template" "agent_launch_template" {
     ecr_access_policy               = var.ecr_access_policy
     terminate_instance_after_job    = var.buildkite_terminate_instance_after_job ? "true" : "false"
     agent_disconnect_after_uptime   = var.buildkite_agent_disconnect_after_uptime
+    terminate_instance_on_disk_full = var.buildkite_terminate_instance_on_disk_full ? "true" : "false"
+    purge_builds_on_disk_full       = var.buildkite_purge_builds_on_disk_full ? "true" : "false"
     additional_sudo_permissions     = var.buildkite_additional_sudo_permissions
     buildkite_windows_administrator = var.buildkite_windows_administrator ? "true" : "false"
     aws_region                      = data.aws_region.current.id
