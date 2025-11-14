@@ -178,11 +178,11 @@ variable "buildkite_agent_scaler_serverless_arn" {
 variable "buildkite_agent_scaler_version" {
   description = "Version of the buildkite-agent-scaler to use."
   type        = string
-  default     = "1.9.6"
+  default     = "1.9.8"
 
   validation {
-    condition     = can(regex("^(?:(?:[2-9]|[1-9]\\d+)\\.\\d+\\.\\d+|1\\.(?:[1-9]\\d+\\.\\d+|9\\.(?:[5-9]|[1-9]\\d+)))$", var.buildkite_agent_scaler_version))
-    error_message = "The agent scaler release must be 1.9.6 or newer."
+    condition     = can(regex("^(?:(?:[2-9]|[1-9]\\d+)\\.\\d+\\.\\d+|1\\.(?:[1-9]\\d+\\.\\d+|9\\.(?:[8-9]|[1-9]\\d+)))$", var.buildkite_agent_scaler_version))
+    error_message = "The agent scaler release must be 1.9.8 or newer."
   }
 }
 
@@ -734,6 +734,12 @@ variable "enable_secrets_plugin" {
   description = "Enables S3 Secrets plugin for all pipelines."
   type        = bool
   default     = true
+}
+
+variable "secrets_plugin_skip_ssh_key_not_found_warning" {
+  description = "Optional - Skip warning when SSH key is not found in the secrets bucket."
+  type        = bool
+  default     = false
 }
 
 variable "enable_ecr_plugin" {
