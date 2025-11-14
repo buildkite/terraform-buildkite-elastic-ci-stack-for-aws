@@ -736,6 +736,12 @@ variable "enable_secrets_plugin" {
   default     = true
 }
 
+variable "secrets_plugin_skip_ssh_key_not_found_warning" {
+  description = "Optional - Skip warning when SSH key is not found in the secrets bucket."
+  type        = bool
+  default     = false
+}
+
 variable "enable_ecr_plugin" {
   description = "Enables ECR plugin for all pipelines."
   type        = bool

@@ -115,6 +115,7 @@ resource "aws_launch_template" "agent_launch_template" {
     buildkite_windows_administrator = var.buildkite_windows_administrator ? "true" : "false"
     aws_region                      = data.aws_region.current.id
     enable_secrets_plugin           = var.enable_secrets_plugin ? "true" : "false"
+    secrets_plugin_skip_ssh_key_not_found_warning = var.secrets_plugin_skip_ssh_key_not_found_warning ? "true" : "false"
     enable_ecr_plugin               = var.enable_ecr_plugin ? "true" : "false"
     enable_ecr_credential_helper    = var.enable_ecr_credential_helper ? "true" : "false"
     enable_docker_login_plugin      = var.enable_docker_login_plugin ? "true" : "false"
@@ -159,6 +160,7 @@ resource "aws_launch_template" "agent_launch_template" {
     additional_sudo_permissions     = var.buildkite_additional_sudo_permissions
     aws_region                      = data.aws_region.current.id
     enable_secrets_plugin           = var.enable_secrets_plugin ? "true" : "false"
+    secrets_plugin_skip_ssh_key_not_found_warning = var.secrets_plugin_skip_ssh_key_not_found_warning ? "true" : "false"
     enable_ecr_plugin               = var.enable_ecr_plugin ? "true" : "false"
     enable_ecr_credential_helper    = var.enable_ecr_credential_helper ? "true" : "false"
     enable_docker_login_plugin      = var.enable_docker_login_plugin ? "true" : "false"
