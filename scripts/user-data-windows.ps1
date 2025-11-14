@@ -2,6 +2,8 @@
 $Env:DOCKER_USERNS_REMAP="${enable_docker_userns_remap}"
 $Env:DOCKER_EXPERIMENTAL="${enable_docker_experimental}"
 $Env:DOCKER_NETWORKING_PROTOCOL="${docker_networking_protocol}"
+$Env:DOCKER_PRUNE_UNTIL="${docker_prune_until}"
+$Env:DOCKER_PRUNE_ON="${docker_prune_on}"
 powershell -file C:\buildkite-agent\bin\bk-configure-docker.ps1 >> C:\buildkite-agent\elastic-stack.log
 
 $Env:BUILDKITE_STACK_NAME="${stack_name}"

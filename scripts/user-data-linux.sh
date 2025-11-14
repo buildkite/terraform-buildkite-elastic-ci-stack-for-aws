@@ -22,6 +22,8 @@ DOCKER_IPV4_ADDRESS_POOL_2=${docker_ipv4_address_pool_2} \
 DOCKER_IPV6_ADDRESS_POOL=${docker_ipv6_address_pool} \
 DOCKER_FIXED_CIDR_V4="${docker_fixed_cidr_v4}" \
 DOCKER_FIXED_CIDR_V6="${docker_fixed_cidr_v6}" \
+DOCKER_PRUNE_UNTIL="${docker_prune_until}" \
+DOCKER_PRUNE_ON="${docker_prune_on}" \
 BUILDKITE_ENABLE_INSTANCE_STORAGE="${enable_instance_storage}" \
   /usr/local/bin/bk-configure-docker.sh
 --==BOUNDARY==
@@ -79,6 +81,8 @@ ECR_CREDENTIAL_HELPER_ENABLED="${enable_ecr_credential_helper}" \
 DOCKER_LOGIN_PLUGIN_ENABLED="${enable_docker_login_plugin}" \
 DOCKER_EXPERIMENTAL="${enable_docker_experimental}" \
 DOCKER_USERNS_REMAP=${enable_docker_userns_remap} \
+DOCKER_PRUNE_UNTIL="${docker_prune_until}" \
+DOCKER_PRUNE_ON="${docker_prune_on}" \
 AWS_REGION="${aws_region}" \
 ENABLE_RESOURCE_LIMITS="${enable_resource_limits}" \
 RESOURCE_LIMITS_MEMORY_HIGH="${resource_limits_memory_high}" \
