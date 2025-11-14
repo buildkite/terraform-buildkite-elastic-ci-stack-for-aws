@@ -715,6 +715,40 @@ variable "docker_fixed_cidr_v6" {
   }
 }
 
+variable "docker_prune_until" {
+  description = <<-EOT
+    Retention period for Docker images and build cache during garbage collection.
+    Docker will delete resources older than this threshold, keeping resources created within this timeframe.
+    Accepts duration strings like '30m' (30 minutes), '4h' (4 hours), '1h30m' (1.5 hours), '7d' (7 days).
+    Default 4h means resources older than 4 hours will be pruned.
+  EOT
+  type        = string
+  default     = "4h"
+
+  validation {
+    condition     = can(regex("^(\\d+[smhd])+$", var.docker_prune_until))
+    error_message = "docker_prune_until must be a duration string like '30m', '4h', '1h30m', or '7d'. Valid units: s (seconds), m (minutes), h (hours), d (days)."
+  }
+}
+
+variable "docker_prune_on" {
+  description = <<-EOT
+    Controls when Docker garbage collection runs to free disk space.
+    'pre-job' - Cleanup before each job starts, plus emergency cleanup on low disk.
+    'post-job' - Cleanup after each job finishes, plus emergency cleanup on low disk.
+    'emergency' - Only runs cleanup when disk space is critically low (Linux only).
+    'disabled' - Disables Docker build pruning. (Image pruning is still performed on disk full).
+    Emergency cleanup runs for all modes except 'disabled'.
+  EOT
+  type        = string
+  default     = "disabled"
+
+  validation {
+    condition     = contains(["pre-job", "post-job", "emergency", "disabled"], var.docker_prune_on)
+    error_message = "docker_prune_on must be 'pre-job', 'post-job', 'emergency', or 'disabled'."
+  }
+}
+
 variable "ecr_access_policy" {
   description = "Docker image registry permissions for agents. 'none' = no access, 'readonly' = pull images only, 'poweruser' = pull/push images, 'full' = complete ECR access. The '-pullthrough' variants (e.g., 'readonly-pullthrough') add permissions to enable automatic caching of public Docker images, reducing pull times and bandwidth costs."
   type        = string
