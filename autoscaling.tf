@@ -120,6 +120,8 @@ resource "aws_launch_template" "agent_launch_template" {
     enable_docker_login_plugin      = var.enable_docker_login_plugin ? "true" : "false"
     enable_ec2_log_retention_policy = var.enable_ec2_log_retention_policy ? "true" : "false"
     ec2_log_retention_days          = var.ec2_log_retention_days
+    docker_prune_until              = var.docker_prune_until
+    docker_prune_on                 = var.docker_prune_on
     }) : templatefile("${path.module}/scripts/user-data-linux.sh", {
     stack_name                      = local.stack_name_full
     stack_version                   = local.buildkite_ami_mapping.cloudformation_stack_version
@@ -179,6 +181,8 @@ resource "aws_launch_template" "agent_launch_template" {
     docker_ipv6_address_pool        = var.docker_ipv6_address_pool
     docker_fixed_cidr_v4            = var.docker_fixed_cidr_v4
     docker_fixed_cidr_v6            = var.docker_fixed_cidr_v6
+    docker_prune_until              = var.docker_prune_until
+    docker_prune_on                 = var.docker_prune_on
     mount_tmpfs_at_tmp              = var.mount_tmpfs_at_tmp ? "true" : "false"
   }))
 }
