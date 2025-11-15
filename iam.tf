@@ -5,10 +5,12 @@
 resource "aws_iam_instance_profile" "iam_instance_profile" {
   name = "${local.stack_name_full}-InstanceProfile"
   path = "/"
-  role = aws_iam_role.iam_role.name
+  role = local.use_custom_iam_role ? local.custom_role_name : aws_iam_role.iam_role[0].name
 }
 
 resource "aws_iam_role" "iam_role" {
+  count = local.use_custom_iam_role ? 0 : 1
+
   name                 = local.use_custom_role_name ? var.instance_role_name : "${local.stack_name_full}-Role"
   permissions_boundary = local.use_permissions_boundary ? var.instance_role_permissions_boundary_arn : null
 
@@ -33,22 +35,24 @@ resource "aws_iam_role" "iam_role" {
 
 # Attach ECR managed policy if configured
 resource "aws_iam_role_policy_attachment" "instance_ecr_policy" {
-  count      = local.enable_ecr ? 1 : 0
-  role       = aws_iam_role.iam_role.name
+  count      = local.use_custom_iam_role ? 0 : (local.enable_ecr ? 1 : 0)
+  role       = aws_iam_role.iam_role[0].name
   policy_arn = local.ecr_policy_arns[var.ecr_access_policy]
 }
 
 # Attach custom managed policies if configured
 resource "aws_iam_role_policy_attachment" "instance_managed_policies" {
-  for_each   = local.use_managed_policies ? toset(var.managed_policy_arns) : []
-  role       = aws_iam_role.iam_role.name
+  for_each   = local.use_custom_iam_role ? toset([]) : (local.use_managed_policies ? toset(var.managed_policy_arns) : toset([]))
+  role       = aws_iam_role.iam_role[0].name
   policy_arn = each.value
 }
 
 # Inline policy for Buildkite agent permissions
 resource "aws_iam_role_policy" "buildkite_agent_policy" {
+  count = local.use_custom_iam_role ? 0 : 1
+
   name = "BuildkiteAgentPolicy"
-  role = aws_iam_role.iam_role.id
+  role = aws_iam_role.iam_role[0].id
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -195,9 +199,9 @@ resource "aws_iam_role_policy" "buildkite_agent_policy" {
 }
 
 resource "aws_iam_role_policy" "ecr_pullthrough_policy" {
-  count = local.enable_ecr_pullthrough ? 1 : 0
+  count = local.use_custom_iam_role ? 0 : (local.enable_ecr_pullthrough ? 1 : 0)
   name  = "ECRPullThrough"
-  role  = aws_iam_role.iam_role.id
+  role  = aws_iam_role.iam_role[0].id
 
   policy = jsonencode({
     Version = "2012-10-17"

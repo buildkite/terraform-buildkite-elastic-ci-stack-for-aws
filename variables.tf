@@ -619,20 +619,38 @@ variable "authorized_users_url" {
   default     = ""
 }
 
+variable "instance_role_arn" {
+  description = <<-EOT
+    Optional - ARN of an existing IAM role to attach to instances instead of creating a new role.
+    When specified, the module will not create any IAM roles or policies, and will use this role instead.
+    The role must have all necessary permissions for Buildkite agents to function correctly.
+    This is useful when you want to share a single IAM role across multiple queues/stacks.
+    See https://buildkite.com/docs/agent/v3/aws/elastic-ci-stack/ec2-linux-and-windows/managing-elastic-ci-stack#using-custom-iam-roles
+    for required permissions and configuration examples.
+  EOT
+  type        = string
+  default     = ""
+
+  validation {
+    condition     = var.instance_role_arn == "" || can(regex("^arn:aws:iam::[0-9]+:role/.+$", var.instance_role_arn))
+    error_message = "instance_role_arn must be a valid IAM role ARN (e.g., arn:aws:iam::123456789012:role/MyRole) or empty."
+  }
+}
+
 variable "instance_role_name" {
-  description = "Optional - A name for the IAM Role attached to the Instance Profile."
+  description = "Optional - A name for the IAM Role attached to the Instance Profile when creating a new role. Ignored when instance_role_arn is provided."
   type        = string
   default     = ""
 }
 
 variable "instance_role_permissions_boundary_arn" {
-  description = "Optional - The ARN of the policy used to set the permissions boundary for the role."
+  description = "Optional - The ARN of the policy used to set the permissions boundary for the role when creating a new role. Ignored when instance_role_arn is provided."
   type        = string
   default     = ""
 }
 
 variable "instance_role_tags" {
-  description = "Optional - Comma-separated key=value pairs for instance IAM role tags (up to 5 tags). Example: 'Environment=production,Team=platform,Purpose=ci'. Note: Keys and values cannot contain '=' characters."
+  description = "Optional - Comma-separated key=value pairs for instance IAM role tags (up to 5 tags). Example: 'Environment=production,Team=platform,Purpose=ci'. Note: Keys and values cannot contain '=' characters. Only applied when creating a new role, ignored when instance_role_arn is provided."
   type        = string
   default     = ""
 

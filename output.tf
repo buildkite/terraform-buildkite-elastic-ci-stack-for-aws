@@ -35,12 +35,12 @@ output "auto_scaling_group_arn" {
 # IAM Outputs
 output "instance_role_arn" {
   description = "ARN of the IAM role attached to agent instances"
-  value       = aws_iam_role.iam_role.arn
+  value       = local.use_custom_iam_role ? var.instance_role_arn : aws_iam_role.iam_role[0].arn
 }
 
 output "instance_role_name" {
   description = "Name of the IAM role attached to agent instances"
-  value       = aws_iam_role.iam_role.name
+  value       = local.use_custom_iam_role ? local.custom_role_name : aws_iam_role.iam_role[0].name
 }
 
 # Lambda Outputs
