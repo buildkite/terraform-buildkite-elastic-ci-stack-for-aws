@@ -625,6 +625,8 @@ variable "instance_role_arn" {
     When specified, the module will not create any IAM roles or policies, and will use this role instead.
     The role must have all necessary permissions for Buildkite agents to function correctly.
     This is useful when you want to share a single IAM role across multiple queues/stacks.
+    See https://buildkite.com/docs/agent/v3/aws/elastic-ci-stack/ec2-linux-and-windows/managing-elastic-ci-stack#using-custom-iam-roles
+    for required permissions and configuration examples.
   EOT
   type        = string
   default     = ""
