@@ -74,6 +74,7 @@ BUILDKITE_PURGE_BUILDS_ON_DISK_FULL="${purge_builds_on_disk_full}" \
 BUILDKITE_ADDITIONAL_SUDO_PERMISSIONS="${additional_sudo_permissions}" \
 AWS_DEFAULT_REGION="${aws_region}" \
 SECRETS_PLUGIN_ENABLED="${enable_secrets_plugin}" \
+BUILDKITE_SECRETS_PLUGIN_SKIP_SSH_KEY_NOT_FOUND_WARNING="${secrets_plugin_skip_ssh_key_not_found_warning}" \
 ECR_PLUGIN_ENABLED="${enable_ecr_plugin}" \
 ECR_CREDENTIAL_HELPER_ENABLED="${enable_ecr_credential_helper}" \
 DOCKER_LOGIN_PLUGIN_ENABLED="${enable_docker_login_plugin}" \

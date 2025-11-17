@@ -31,7 +31,7 @@ module "buildkite_agents" {
   agents_per_instance                        = 2
 
   # Auto-scaling configuration with Lambda scaler
-  buildkite_agent_scaler_version = "1.9.6"
+  buildkite_agent_scaler_version = "1.9.8"
   scaler_enable_elastic_ci_mode  = true
   min_size                       = 2
   max_size                       = 20
