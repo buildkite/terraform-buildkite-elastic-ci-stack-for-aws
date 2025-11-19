@@ -225,6 +225,8 @@ resource "aws_iam_role_policy" "ecr_pullthrough_policy" {
 
 # IAM Role for AZ Rebalancing Suspender Lambda
 resource "aws_iam_role" "asg_process_suspender" {
+  count = local.use_custom_asg_process_suspender_role ? 0 : 1
+
   name = "${local.stack_name_full}-AsgProcessSuspenderRole"
 
   assume_role_policy = jsonencode({
@@ -242,14 +244,16 @@ resource "aws_iam_role" "asg_process_suspender" {
 }
 
 resource "aws_iam_role_policy_attachment" "asg_process_suspender_basic" {
-  role       = aws_iam_role.asg_process_suspender.name
+  count      = local.use_custom_asg_process_suspender_role ? 0 : 1
+  role       = aws_iam_role.asg_process_suspender[0].name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
 #tfsec:ignore:aws-iam-no-policy-wildcards autoscaling:SuspendProcesses requires wildcard as ASG ARN is not known at policy creation time
 resource "aws_iam_role_policy" "asg_process_suspender" {
-  name = "suspend-asg-processes"
-  role = aws_iam_role.asg_process_suspender.id
+  count = local.use_custom_asg_process_suspender_role ? 0 : 1
+  name  = "suspend-asg-processes"
+  role  = aws_iam_role.asg_process_suspender[0].id
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -263,7 +267,7 @@ resource "aws_iam_role_policy" "asg_process_suspender" {
 
 # IAM Role for Graceful Shutdown Lambda
 resource "aws_iam_role" "stop_buildkite_agents" {
-  count = local.enable_graceful_shutdown ? 1 : 0
+  count = local.use_custom_stop_buildkite_agents_role ? 0 : (local.enable_graceful_shutdown ? 1 : 0)
 
   name_prefix          = "${local.stack_name_full}-stop-bk-"
   permissions_boundary = local.use_permissions_boundary ? var.instance_role_permissions_boundary_arn : null
@@ -283,14 +287,14 @@ resource "aws_iam_role" "stop_buildkite_agents" {
 }
 
 resource "aws_iam_role_policy_attachment" "stop_buildkite_agents_basic" {
-  count = local.enable_graceful_shutdown ? 1 : 0
+  count = local.use_custom_stop_buildkite_agents_role ? 0 : (local.enable_graceful_shutdown ? 1 : 0)
 
   role       = aws_iam_role.stop_buildkite_agents[0].name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
 resource "aws_iam_role_policy" "stop_buildkite_agents_describe_asg" {
-  count = local.enable_graceful_shutdown ? 1 : 0
+  count = local.use_custom_stop_buildkite_agents_role ? 0 : (local.enable_graceful_shutdown ? 1 : 0)
 
   name = "describe-asgs"
   role = aws_iam_role.stop_buildkite_agents[0].id
@@ -306,7 +310,7 @@ resource "aws_iam_role_policy" "stop_buildkite_agents_describe_asg" {
 }
 
 resource "aws_iam_role_policy" "stop_buildkite_agents_modify_asg" {
-  count = local.enable_graceful_shutdown ? 1 : 0
+  count = local.use_custom_stop_buildkite_agents_role ? 0 : (local.enable_graceful_shutdown ? 1 : 0)
 
   name = "modify-asgs"
   role = aws_iam_role.stop_buildkite_agents[0].id
@@ -322,7 +326,7 @@ resource "aws_iam_role_policy" "stop_buildkite_agents_modify_asg" {
 }
 
 resource "aws_iam_role_policy" "stop_buildkite_agents_ssm_document" {
-  count = local.enable_graceful_shutdown ? 1 : 0
+  count = local.use_custom_stop_buildkite_agents_role ? 0 : (local.enable_graceful_shutdown ? 1 : 0)
 
   name = "run-stop-buildkite-document"
   role = aws_iam_role.stop_buildkite_agents[0].id
@@ -338,7 +342,7 @@ resource "aws_iam_role_policy" "stop_buildkite_agents_ssm_document" {
 }
 
 resource "aws_iam_role_policy" "stop_buildkite_agents_ssm_instances" {
-  count = local.enable_graceful_shutdown ? 1 : 0
+  count = local.use_custom_stop_buildkite_agents_role ? 0 : (local.enable_graceful_shutdown ? 1 : 0)
 
   name = "stop-buildkite-instances"
   role = aws_iam_role.stop_buildkite_agents[0].id

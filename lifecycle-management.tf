@@ -3,7 +3,7 @@
 resource "aws_lambda_function" "az_rebalancing_suspender" {
   function_name = "${local.stack_name_full}-az-rebalancing-suspender"
   description   = "Disables AZ Rebalancing on the agent ASG."
-  role          = aws_iam_role.asg_process_suspender.arn
+  role          = local.use_custom_asg_process_suspender_role ? var.asg_process_suspender_role_arn : aws_iam_role.asg_process_suspender[0].arn
   handler       = "index.handler"
   runtime       = "python3.13"
   architectures = [var.lambda_architecture]
@@ -84,7 +84,7 @@ resource "aws_lambda_function" "stop_buildkite_agents" {
 
   function_name = "${local.stack_name_full}-stop-buildkite-agents"
   description   = "Gracefully stops all Buildkite agents in a given Auto Scaling group."
-  role          = aws_iam_role.stop_buildkite_agents[0].arn
+  role          = local.use_custom_stop_buildkite_agents_role ? var.stop_buildkite_agents_role_arn : aws_iam_role.stop_buildkite_agents[0].arn
   handler       = "index.handler"
   runtime       = "python3.12"
   architectures = [var.lambda_architecture]
