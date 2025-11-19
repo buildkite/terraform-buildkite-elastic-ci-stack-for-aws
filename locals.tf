@@ -141,8 +141,14 @@ locals {
   # Stack naming and tagging
   stack_name_full = "${var.stack_name}-${random_id.stack_suffix.hex}"
 
-  common_tags = {
-    ManagedBy = "Terraform"
-    Stack     = local.stack_name_full
-  }
+  common_tags = merge(
+    var.tags,
+    local.enable_cost_tags ? {
+      (var.cost_allocation_tag_name) = var.cost_allocation_tag_value
+    } : {},
+    {
+      ManagedBy = "Terraform"
+      Stack     = local.stack_name_full
+    }
+  )
 }

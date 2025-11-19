@@ -7,6 +7,8 @@ data "aws_ssm_parameter" "ami" {
 resource "aws_launch_template" "agent_launch_template" {
   name = "${local.stack_name_full}-launch-template"
 
+  tags = local.common_tags
+
   network_interfaces {
     device_index                = 0
     associate_public_ip_address = var.associate_public_ip_address
@@ -52,28 +54,24 @@ resource "aws_launch_template" "agent_launch_template" {
   tag_specifications {
     resource_type = "instance"
     tags = merge(
+      local.common_tags,
       {
         Role                  = "buildkite-agent"
         Name                  = local.use_custom_name ? var.instance_name : local.stack_name_full
         BuildkiteAgentRelease = var.buildkite_agent_release
         BuildkiteQueue        = var.buildkite_queue
-      },
-      local.enable_cost_tags ? {
-        (var.cost_allocation_tag_name) = var.cost_allocation_tag_value
-      } : {}
+      }
     )
   }
 
   tag_specifications {
     resource_type = "volume"
     tags = merge(
+      local.common_tags,
       {
         Name           = local.use_custom_name ? var.instance_name : local.stack_name_full
         BuildkiteQueue = var.buildkite_queue
-      },
-      local.enable_cost_tags ? {
-        (var.cost_allocation_tag_name) = var.cost_allocation_tag_value
-      } : {}
+      }
     )
   }
 
