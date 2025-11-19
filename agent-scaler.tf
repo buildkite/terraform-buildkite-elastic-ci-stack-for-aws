@@ -58,9 +58,7 @@ resource "aws_lambda_function" "scaler" {
     aws_iam_role_policy_attachment.scaler_lambda_policy[0]
   ]
 
-  tags = local.enable_cost_tags ? {
-    (var.cost_allocation_tag_name) = var.cost_allocation_tag_value
-  } : {}
+  tags = local.common_tags
 }
 
 #tfsec:ignore:aws-cloudwatch-log-group-customer-key Using default encryption for CloudWatch Logs; CMK can be added by users if required
@@ -70,9 +68,7 @@ resource "aws_cloudwatch_log_group" "scaler_lambda_logs" {
   name              = "/aws/lambda/${local.stack_name_full}-scaler"
   retention_in_days = var.lambda_log_retention_days
 
-  tags = local.enable_cost_tags ? {
-    (var.cost_allocation_tag_name) = var.cost_allocation_tag_value
-  } : {}
+  tags = local.common_tags
 }
 
 resource "aws_cloudwatch_event_rule" "scaler_schedule" {
@@ -80,6 +76,8 @@ resource "aws_cloudwatch_event_rule" "scaler_schedule" {
   name                = "${local.stack_name_full}-scaler-schedule"
   description         = "Triggers Buildkite agent scaler Lambda every ${var.scaler_event_schedule_period}"
   schedule_expression = "rate(${var.scaler_event_schedule_period})"
+
+  tags = local.common_tags
 }
 
 resource "aws_cloudwatch_event_target" "scaler_lambda" {

@@ -1036,6 +1036,26 @@ variable "cost_allocation_tag_value" {
   default     = "buildkite-elastic-ci-stack-for-aws"
 }
 
+variable "tags" {
+  description = <<-EOT
+    Map of custom tags to apply to all taggable resources. These tags are merged with the cost allocation tag (if enabled) and standard tags.
+
+    Example:
+    tags = {
+      Environment = "production"
+      Team        = "platform"
+      Owner       = "ops-team"
+    }
+
+    All resources will receive these tags plus:
+    - ManagedBy = "Terraform" (standard)
+    - Stack = "<stack-name>-<random-suffix>" (standard)
+    - CreatedBy = "<cost-allocation-value>" (if enable_cost_allocation_tags is set to true)
+  EOT
+  type        = map(string)
+  default     = {}
+}
+
 # =============================================================================
 # CROSS-VARIABLE VALIDATIONS
 # =============================================================================
