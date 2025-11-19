@@ -28,6 +28,10 @@ locals {
 
   custom_role_name = local.use_custom_iam_role ? element(split("/", var.instance_role_arn), length(split("/", var.instance_role_arn)) - 1) : ""
 
+  use_custom_scaler_lambda_role         = var.scaler_lambda_role_arn != ""
+  use_custom_asg_process_suspender_role = var.asg_process_suspender_role_arn != ""
+  use_custom_stop_buildkite_agents_role = var.stop_buildkite_agents_role_arn != ""
+
   # Parse comma-separated role tags into list
   role_tag_list  = compact(split(",", var.instance_role_tags))
   role_tag_count = length(local.role_tag_list)

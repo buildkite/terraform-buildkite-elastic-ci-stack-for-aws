@@ -14,7 +14,7 @@ resource "aws_lambda_function" "scaler" {
   timeout       = 120
   memory_size   = 128
 
-  role = aws_iam_role.scaler_lambda_role[0].arn
+  role = local.use_custom_scaler_lambda_role ? var.scaler_lambda_role_arn : aws_iam_role.scaler_lambda_role[0].arn
 
   environment {
     variables = {
@@ -99,7 +99,7 @@ resource "aws_lambda_permission" "allow_eventbridge" {
 }
 
 resource "aws_iam_role" "scaler_lambda_role" {
-  count = local.has_variable_size ? 1 : 0
+  count = local.use_custom_scaler_lambda_role ? 0 : (local.has_variable_size ? 1 : 0)
 
   name                 = "${local.stack_name_full}-scaler-lambda-role"
   permissions_boundary = local.use_permissions_boundary ? var.instance_role_permissions_boundary_arn : null
@@ -122,7 +122,7 @@ resource "aws_iam_role" "scaler_lambda_role" {
 
 #tfsec:ignore:aws-iam-no-policy-wildcards Lambda requires CloudWatch Logs CreateLogGroup permission with wildcard for dynamic log group creation
 resource "aws_iam_role_policy" "scaler_lambda_policy" {
-  count = local.has_variable_size ? 1 : 0
+  count = local.use_custom_scaler_lambda_role ? 0 : (local.has_variable_size ? 1 : 0)
 
   name = "${local.stack_name_full}-scaler-lambda-policy"
   role = aws_iam_role.scaler_lambda_role[0].id
@@ -213,7 +213,7 @@ resource "aws_iam_role_policy" "scaler_lambda_policy" {
 }
 
 resource "aws_iam_role_policy_attachment" "scaler_lambda_policy" {
-  count = local.has_variable_size ? 1 : 0
+  count = local.use_custom_scaler_lambda_role ? 0 : (local.has_variable_size ? 1 : 0)
 
   role       = aws_iam_role.scaler_lambda_role[0].name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"

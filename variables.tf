@@ -660,6 +660,60 @@ variable "instance_role_tags" {
   }
 }
 
+variable "scaler_lambda_role_arn" {
+  description = <<-EOT
+    Optional - ARN of an existing IAM role to attach to the scaler Lambda function instead of creating a new role.
+    When specified, the module will not create any IAM roles or policies for the scaler Lambda, and will use this role instead.
+    The role must have all necessary permissions for the scaler Lambda to function correctly.
+    This is useful when you want to share a single IAM role across multiple queues/stacks.
+    See https://buildkite.com/docs/agent/v3/aws/elastic-ci-stack/ec2-linux-and-windows/managing-elastic-ci-stack#using-custom-iam-roles
+    for required permissions and configuration examples.
+  EOT
+  type        = string
+  default     = ""
+
+  validation {
+    condition     = var.scaler_lambda_role_arn == "" || can(regex("^arn:aws:iam::[0-9]+:role/.+$", var.scaler_lambda_role_arn))
+    error_message = "scaler_lambda_role_arn must be a valid IAM role ARN (e.g., arn:aws:iam::123456789012:role/MyRole) or empty."
+  }
+}
+
+variable "asg_process_suspender_role_arn" {
+  description = <<-EOT
+    Optional - ARN of an existing IAM role to attach to the ASG process suspender Lambda function instead of creating a new role.
+    When specified, the module will not create any IAM roles or policies for the ASG process suspender Lambda, and will use this role instead.
+    The role must have all necessary permissions for the ASG process suspender Lambda to function correctly.
+    This is useful when you want to share a single IAM role across multiple queues/stacks.
+    See https://buildkite.com/docs/agent/v3/aws/elastic-ci-stack/ec2-linux-and-windows/managing-elastic-ci-stack#using-custom-iam-roles
+    for required permissions and configuration examples.
+  EOT
+  type        = string
+  default     = ""
+
+  validation {
+    condition     = var.asg_process_suspender_role_arn == "" || can(regex("^arn:aws:iam::[0-9]+:role/.+$", var.asg_process_suspender_role_arn))
+    error_message = "asg_process_suspender_role_arn must be a valid IAM role ARN (e.g., arn:aws:iam::123456789012:role/MyRole) or empty."
+  }
+}
+
+variable "stop_buildkite_agents_role_arn" {
+  description = <<-EOT
+    Optional - ARN of an existing IAM role to attach to the stop buildkite agents Lambda function instead of creating a new role.
+    When specified, the module will not create any IAM roles or policies for the stop buildkite agents Lambda, and will use this role instead.
+    The role must have all necessary permissions for the stop buildkite agents Lambda to function correctly.
+    This is useful when you want to share a single IAM role across multiple queues/stacks.
+    See https://buildkite.com/docs/agent/v3/aws/elastic-ci-stack/ec2-linux-and-windows/managing-elastic-ci-stack#using-custom-iam-roles
+    for required permissions and configuration examples.
+  EOT
+  type        = string
+  default     = ""
+
+  validation {
+    condition     = var.stop_buildkite_agents_role_arn == "" || can(regex("^arn:aws:iam::[0-9]+:role/.+$", var.stop_buildkite_agents_role_arn))
+    error_message = "stop_buildkite_agents_role_arn must be a valid IAM role ARN (e.g., arn:aws:iam::123456789012:role/MyRole) or empty."
+  }
+}
+
 variable "managed_policy_arns" {
   description = "Optional - List of managed IAM policy ARNs to attach to the instance role."
   type        = list(string)
