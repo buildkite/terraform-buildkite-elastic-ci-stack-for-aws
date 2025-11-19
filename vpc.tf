@@ -11,9 +11,9 @@ resource "aws_vpc" "vpc" {
 resource "aws_internet_gateway" "gateway" {
   count  = local.create_vpc ? 1 : 0
   vpc_id = aws_vpc.vpc[0].id
-  tags = {
+  tags = merge(local.common_tags, {
     Name = local.stack_name_full
-  }
+  })
 }
 
 
