@@ -73,7 +73,7 @@ resource "aws_lambda_invocation" "suspend_az_rebalance" {
 
   lifecycle {
     replace_triggered_by = [
-      aws_autoscaling_group.agent_auto_scale_group
+      aws_autoscaling_group.agent_auto_scale_group.name
     ]
   }
 }
@@ -197,7 +197,7 @@ resource "aws_lambda_invocation" "stop_buildkite_agents_on_replacement" {
   # This will trigger when the ASG is replaced
   lifecycle {
     replace_triggered_by = [
-      aws_autoscaling_group.agent_auto_scale_group
+      aws_autoscaling_group.agent_auto_scale_group.name
     ]
   }
 }
