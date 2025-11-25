@@ -28,6 +28,7 @@ resource "aws_lambda_function" "scaler" {
       BUILDKITE_AGENT_ENDPOINT = var.agent_endpoint
 
       # Scaling configuration
+      BUILDKITE_USER_AGENT_METADATA = "elastic-ci-stack-for-aws/${local.buildkite_ami_mapping.cloudformation_stack_version}/terraform"
       DISABLE_SCALE_IN          = var.disable_scale_in ? "true" : "false"
       SCALE_IN_COOLDOWN_PERIOD  = "${var.scale_in_cooldown_period}s"
       SCALE_OUT_COOLDOWN_PERIOD = "${var.scale_out_cooldown_period}s"

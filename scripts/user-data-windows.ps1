@@ -7,6 +7,7 @@ powershell -file C:\buildkite-agent\bin\bk-configure-docker.ps1 >> C:\buildkite-
 $Env:BUILDKITE_STACK_NAME="${stack_name}"
 $Env:BUILDKITE_STACK_VERSION="${stack_version}"
 $Env:BUILDKITE_STACK_DEPLOYED_BY="${stack_deployed_by}"
+$Env:BUILDKITE_USER_AGENT_METADATA="elastic-ci-stack-for-aws/${stack_version}/${stack_deployed_by}"
 $Env:BUILDKITE_SCALE_IN_IDLE_PERIOD="${scale_in_idle_period}"
 $Env:BUILDKITE_SECRETS_BUCKET="${secrets_bucket}"
 $Env:BUILDKITE_SECRETS_BUCKET_REGION="${secrets_bucket_region}"
