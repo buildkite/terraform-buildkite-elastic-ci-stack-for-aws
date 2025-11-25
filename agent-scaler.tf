@@ -29,12 +29,12 @@ resource "aws_lambda_function" "scaler" {
 
       # Scaling configuration
       BUILDKITE_USER_AGENT_METADATA = "elastic-ci-stack-for-aws/${local.buildkite_ami_mapping.cloudformation_stack_version}/terraform"
-      DISABLE_SCALE_IN          = var.disable_scale_in ? "true" : "false"
-      SCALE_IN_COOLDOWN_PERIOD  = "${var.scale_in_cooldown_period}s"
-      SCALE_OUT_COOLDOWN_PERIOD = "${var.scale_out_cooldown_period}s"
-      SCALE_OUT_FACTOR          = tostring(var.scale_out_factor)
-      INSTANCE_BUFFER           = tostring(var.instance_buffer)
-      INCLUDE_WAITING           = var.scale_out_for_waiting_jobs ? "true" : "false"
+      DISABLE_SCALE_IN              = var.disable_scale_in ? "true" : "false"
+      SCALE_IN_COOLDOWN_PERIOD      = "${var.scale_in_cooldown_period}s"
+      SCALE_OUT_COOLDOWN_PERIOD     = "${var.scale_out_cooldown_period}s"
+      SCALE_OUT_FACTOR              = tostring(var.scale_out_factor)
+      INSTANCE_BUFFER               = tostring(var.instance_buffer)
+      INCLUDE_WAITING               = var.scale_out_for_waiting_jobs ? "true" : "false"
 
       # Lambda behavior
       # Convert EventBridge schedule period to Go duration format for LAMBDA_INTERVAL
