@@ -242,6 +242,18 @@ resource "aws_autoscaling_group" "agent_auto_scale_group" {
     }
   }
 
+  tag {
+    key                 = "BuildkiteQueue"
+    value               = var.buildkite_queue
+    propagate_at_launch = false
+  }
+
+  tag {
+    key                 = "AgentsPerInstance"
+    value               = var.agents_per_instance
+    propagate_at_launch = false
+  }
+
   lifecycle {
     ignore_changes = [suspended_processes]
   }
