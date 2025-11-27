@@ -736,6 +736,29 @@ variable "enable_docker_experimental" {
   default     = false
 }
 
+variable "docker_prune_until" {
+  description = "Retention period for Docker images and build cache during garbage collection. Docker will delete resources older than this threshold, keeping resources created within this timeframe. Accepts duration strings like '30m' (30 minutes), '4h' (4 hours), '1h30m' (1.5 hours), '7d' (7 days). Default 4h means resources older than 4 hours will be pruned."
+  type        = string
+  default     = "4h"
+
+  validation {
+    condition     = can(regex("^(\\d+[smhd])+$", var.docker_prune_until))
+    error_message = "Must be a duration string like '30m', '4h', '1h30m', or '7d'. Valid units: s (seconds), m (minutes), h (hours), d (days)."
+  }
+}
+
+variable "enable_pre_exit_disk_cleanup" {
+  description = "Controls whether disk cleanup also runs in the pre-exit hook after jobs complete. Disk cleanup always runs in the environment hook when disk space is low. When enabled, cleanup also runs in pre-exit to reclaim resources generated during job execution."
+  type        = bool
+  default     = false
+}
+
+variable "docker_builder_prune_enabled" {
+  description = "Controls whether Docker builder cache is pruned during garbage collection. When enabled, Docker builder cache will run after Docker image pruning."
+  type        = bool
+  default     = false
+}
+
 variable "docker_networking_protocol" {
   description = "Which IP version to enable for docker containers and building docker images. Only applies to Linux instances, not Windows."
   type        = string
