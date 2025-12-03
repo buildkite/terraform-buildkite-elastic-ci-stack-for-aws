@@ -16,6 +16,9 @@ Content-Type: text/x-shellscript; charset="us-ascii"
 #!/bin/bash -v
 DOCKER_USERNS_REMAP=${enable_docker_userns_remap} \
 DOCKER_EXPERIMENTAL=${enable_docker_experimental} \
+DOCKER_PRUNE_UNTIL=${docker_prune_until} \
+ENABLE_PRE_EXIT_DISK_CLEANUP=${enable_pre_exit_disk_cleanup} \
+DOCKER_BUILDER_PRUNE_ENABLED=${docker_builder_prune_enabled} \
 DOCKER_NETWORKING_PROTOCOL=${docker_networking_protocol} \
 DOCKER_IPV4_ADDRESS_POOL_1=${docker_ipv4_address_pool_1} \
 DOCKER_IPV4_ADDRESS_POOL_2=${docker_ipv4_address_pool_2} \

@@ -166,6 +166,9 @@ resource "aws_launch_template" "agent_launch_template" {
     enable_docker_login_plugin                    = var.enable_docker_login_plugin ? "true" : "false"
     enable_docker_experimental                    = var.enable_docker_experimental ? "true" : "false"
     enable_docker_userns_remap                    = var.enable_docker_user_namespace_remap ? "true" : "false"
+    docker_prune_until                            = var.docker_prune_until
+    enable_pre_exit_disk_cleanup                  = var.enable_pre_exit_disk_cleanup ? "true" : "false"
+    docker_builder_prune_enabled                  = var.docker_builder_prune_enabled ? "true" : "false"
     enable_resource_limits                        = var.experimental_enable_resource_limits ? "true" : "false"
     resource_limits_memory_high                   = var.resource_limits_memory_high
     resource_limits_memory_max                    = var.resource_limits_memory_max
