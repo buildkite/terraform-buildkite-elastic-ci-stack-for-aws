@@ -268,6 +268,7 @@ No modules.
 | [random_id.stack_suffix](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/id) | resource |
 | [terraform_data.validate_max_min_size](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [terraform_data.validate_token](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
+| [terraform_data.validate_vpc_subnets](https://registry.terraform.io/providers/hashicorp/terraform/latest/docs/resources/data) | resource |
 | [archive_file.az_rebalancing_suspender](https://registry.terraform.io/providers/hashicorp/archive/latest/docs/data-sources/file) | data source |
 | [archive_file.stop_buildkite_agents](https://registry.terraform.io/providers/hashicorp/archive/latest/docs/data-sources/file) | data source |
 | [aws_availability_zones.available](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/availability_zones) | data source |
