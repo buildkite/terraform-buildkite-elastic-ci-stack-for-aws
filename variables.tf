@@ -575,8 +575,8 @@ variable "subnets" {
   default     = []
 
   validation {
-    condition     = var.vpc_id == "" || length(var.subnets) >= 2
-    error_message = "If vpc_id is specified, at least 2 subnets must be provided."
+    condition     = length(var.subnets) == 0 || length(var.subnets) >= 2
+    error_message = "If subnets are specified, at least 2 subnets must be provided."
   }
 }
 
@@ -1151,6 +1151,15 @@ resource "terraform_data" "validate_max_min_size" {
     precondition {
       condition     = var.max_size >= var.min_size
       error_message = "max_size must be greater than or equal to min_size."
+    }
+  }
+}
+
+resource "terraform_data" "validate_vpc_subnets" {
+  lifecycle {
+    precondition {
+      condition     = var.vpc_id == "" || length(var.subnets) >= 2
+      error_message = "If vpc_id is specified, at least 2 subnets must be provided."
     }
   }
 }
