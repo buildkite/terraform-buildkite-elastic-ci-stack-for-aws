@@ -8,7 +8,7 @@ terraform {
 }
 
 module "buildkite_stack" {
-  source = "buildkite/elastic-ci-stack-for-aws/buildkite"
+  source  = "buildkite/elastic-ci-stack-for-aws/buildkite"
   version = "0.5.0"
 
   stack_name            = "buildkite-scheduled"
