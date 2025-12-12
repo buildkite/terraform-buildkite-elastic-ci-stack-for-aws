@@ -27,7 +27,7 @@ Alternatively, jump straight in:
 
 ```hcl
 module "buildkite_stack" {
-  source = "github.com/buildkite/terraform-buildkite-elastic-ci-stack-for-aws?ref=v0.4.0"
+  source = "github.com/buildkite/terraform-buildkite-elastic-ci-stack-for-aws?ref=v0.5.0"
 
   stack_name            = "my-buildkite-stack"
   buildkite_queue       = "default"
