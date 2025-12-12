@@ -175,17 +175,6 @@ variable "buildkite_agent_scaler_serverless_arn" {
   default     = "arn:aws:serverlessrepo:us-east-1:172840064832:applications/buildkite-agent-scaler"
 }
 
-variable "buildkite_agent_scaler_version" {
-  description = "Version of the buildkite-agent-scaler to use."
-  type        = string
-  default     = "1.9.8"
-
-  validation {
-    condition     = can(regex("^(?:(?:[2-9]|[1-9]\\d+)\\.\\d+\\.\\d+|1\\.(?:[1-9]\\d+\\.\\d+|9\\.(?:[8-9]|[1-9]\\d+)))$", var.buildkite_agent_scaler_version))
-    error_message = "The agent scaler release must be 1.9.8 or newer."
-  }
-}
-
 variable "scaler_enable_elastic_ci_mode" {
   description = "Experimental - Enable the Elastic CI Mode with enhanced features like graceful termination and dangling instance detection. Available since buildkite_agent_scaler_version 1.9.3"
   type        = bool
