@@ -2,7 +2,7 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": ["config:base"],
   "timezone": "UTC",
-  "enabledManagers": ["terraform"],
+  "enabledManagers": ["terraform", "custom.regex"],
   "packageRules": [
     {
       "matchManagers": ["terraform"],
@@ -15,7 +15,7 @@
       "rangeStrategy": "bump"
     }
   ],
-  "regexManagers": [
+  "customManagers": [
     {
       "customType": "regex",
       "fileMatch": [
@@ -26,7 +26,7 @@
       ],
       "datasourceTemplate": "github-releases",
       "depNameTemplate": "buildkite/buildkite-agent-scaler",
-      "extractVersion": "^v?(?<version>.*)$",
+      "extractVersionTemplate": "^v?(?<version>.*)$",
       "versioningTemplate": "semver"
     },
     {
@@ -39,6 +39,19 @@
       ],
       "datasourceTemplate": "terraform-module",
       "depNameTemplate": "buildkite/elastic-ci-stack-for-aws/buildkite",
+      "versioningTemplate": "semver"
+    },
+    {
+      "customType": "regex",
+      "fileMatch": [
+        "^locals\\.tf$"
+      ],
+      "matchStrings": [
+        "cloudformation_stack_version\\s*=\\s*\"(?<currentValue>v?\\d+\\.\\d+\\.\\d+)\""
+      ],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "buildkite/elastic-ci-stack-for-aws",
+      "extractVersionTemplate": "^v?(?<version>.*)$",
       "versioningTemplate": "semver"
     }
   ]
