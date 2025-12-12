@@ -1,5 +1,5 @@
 steps:
-  - command: "if [ -z ${GITHUB_TOKEN} ]; then echo 'no GH token'; exit 1; fi"
+  - command: "if [ -z $${GITHUB_TOKEN} ]; then echo 'no GH token'; exit 1; fi"
     label: ":github: Check GitHub Token"
 
 #  - group: ":terraform: Root Module"
