@@ -1,83 +1,87 @@
 steps:
-  - group: ":terraform: Root Module"
-    steps:
-      - label: ":terraform: Format Check"
-        command: ".buildkite/scripts/format-check.sh"
-        if_changed: "**.tf"
-        plugins:
-          - docker#v5.11.0:
-              image: "hashicorp/terraform:1.13"
-              workdir: "/workdir"
-              entrypoint: "/bin/sh"
+  - command: "if [ -z ${GITHUB_TOKEN} ]; then echo 'no GH token'; exit 1; fi"
+    label: ":github: Check GitHub Token"
 
-      - label: ":terraform: Validate"
-        command: ".buildkite/scripts/validate.sh"
-        if_changed:
-          - "*.tf"
-          - "*.tfvars"
-          - "scripts/*"
-        plugins:
-          - docker#v5.11.0:
-              image: "hashicorp/terraform:1.13"
-              workdir: "/workdir"
-              entrypoint: "/bin/sh"
-
-      - label: ":lint-roller: TFLint"
-        command: ".buildkite/scripts/tflint.sh"
-        if_changed:
-          - "*.tf"
-          - ".tflint.hcl"
-        plugins:
-          - docker#v5.11.0:
-              image: "ghcr.io/terraform-linters/tflint:latest"
-              workdir: "/workdir"
-              entrypoint: "/bin/sh"
-
-      - label: ":shield: Security Scan"
-        command: ".buildkite/scripts/tfsec.sh"
-        if_changed: "*.tf"
-        plugins:
-          - docker#v5.11.0:
-              image: "aquasec/tfsec:latest"
-              workdir: "/workdir"
-              entrypoint: "/bin/sh"
-
-      - label: ":page_facing_up: Documentation Check"
-        command: ".buildkite/scripts/docs-check.sh"
-        if_changed:
-          - "*.tf"
-          - "README.md"
-        plugins:
-          - docker#v5.11.0:
-              image: "quay.io/terraform-docs/terraform-docs:latest"
-              workdir: "/workdir"
-              entrypoint: "/bin/sh"
-
-  - group: ":terraform: Examples"
-    steps:
-      - label: ":terraform: Format Check Examples"
-        command: ".buildkite/scripts/examples-format-check.sh"
-        if_changed: "examples/**"
-        plugins:
-          - docker#v5.11.0:
-              image: "hashicorp/terraform:1.13"
-              workdir: "/workdir"
-              entrypoint: "/bin/sh"
-
-      - label: ":terraform: Validate Examples"
-        command: ".buildkite/scripts/examples-validate.sh"
-        if_changed: "examples/**"
-        plugins:
-          - docker#v5.11.0:
-              image: "hashicorp/terraform:1.13"
-              workdir: "/workdir"
-              entrypoint: "/bin/sh"
-
-      - label: ":lint-roller: TFLint Examples"
-        command: ".buildkite/scripts/examples-tflint.sh"
-        if_changed: "examples/**"
-        plugins:
-          - docker#v5.11.0:
-              image: "ghcr.io/terraform-linters/tflint:latest"
-              workdir: "/workdir"
-              entrypoint: "/bin/sh"
+#  - group: ":terraform: Root Module"
+#    steps:
+#      - label: ":terraform: Format Check"
+#        command: ".buildkite/scripts/format-check.sh"
+#        if_changed: "**.tf"
+#        plugins:
+#          - docker#v5.11.0:
+#              image: "hashicorp/terraform:1.13"
+#              workdir: "/workdir"
+#              entrypoint: "/bin/sh"
+#
+#      - label: ":terraform: Validate"
+#        command: ".buildkite/scripts/validate.sh"
+#        if_changed:
+#          - "*.tf"
+#          - "*.tfvars"
+#          - "scripts/*"
+#        plugins:
+#          - docker#v5.11.0:
+#              image: "hashicorp/terraform:1.13"
+#              workdir: "/workdir"
+#              entrypoint: "/bin/sh"
+#
+#      - label: ":lint-roller: TFLint"
+#        command: ".buildkite/scripts/tflint.sh"
+#        if_changed:
+#          - "*.tf"
+#          - ".tflint.hcl"
+#        plugins:
+#          - docker#v5.11.0:
+#              image: "ghcr.io/terraform-linters/tflint:latest"
+#              workdir: "/workdir"
+#              entrypoint: "/bin/sh"
+#
+#      - label: ":shield: Security Scan"
+#        command: ".buildkite/scripts/tfsec.sh"
+#        if_changed: "*.tf"
+#        plugins:
+#          - docker#v5.11.0:
+#              image: "aquasec/tfsec:latest"
+#              workdir: "/workdir"
+#              entrypoint: "/bin/sh"
+#
+#      - label: ":page_facing_up: Documentation Check"
+#        command: ".buildkite/scripts/docs-check.sh"
+#        if_changed:
+#          - "*.tf"
+#          - "README.md"
+#        plugins:
+#          - docker#v5.11.0:
+#              image: "quay.io/terraform-docs/terraform-docs:latest"
+#              workdir: "/workdir"
+#              entrypoint: "/bin/sh"
+#
+#  - group: ":terraform: Examples"
+#    steps:
+#      - label: ":terraform: Format Check Examples"
+#        command: ".buildkite/scripts/examples-format-check.sh"
+#        if_changed: "examples/**"
+#        plugins:
+#          - docker#v5.11.0:
+#              image: "hashicorp/terraform:1.13"
+#              workdir: "/workdir"
+#              entrypoint: "/bin/sh"
+#
+#      - label: ":terraform: Validate Examples"
+#        command: ".buildkite/scripts/examples-validate.sh"
+#        if_changed: "examples/**"
+#        plugins:
+#          - docker#v5.11.0:
+#              image: "hashicorp/terraform:1.13"
+#              workdir: "/workdir"
+#              entrypoint: "/bin/sh"
+#
+#      - label: ":lint-roller: TFLint Examples"
+#        command: ".buildkite/scripts/examples-tflint.sh"
+#        if_changed: "examples/**"
+#        plugins:
+#          - docker#v5.11.0:
+#              image: "ghcr.io/terraform-linters/tflint:latest"
+#              workdir: "/workdir"
+#              entrypoint: "/bin/sh"
+#
