@@ -1,6 +1,9 @@
 steps:
-  - command: "if [ -z $${GITHUB_TOKEN} ]; then echo 'no GH token'; exit 1; fi"
+  - command: 'curl -H "Authorization: Bearer $${GITHUB_TOKEN}" https://api.github.com/user'
     label: ":github: Check GitHub Token"
+    secrets:
+      - GITHUB_TOKEN
+
 
 #  - group: ":terraform: Root Module"
 #    steps:
