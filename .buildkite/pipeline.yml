@@ -87,3 +87,5 @@ steps:
 
       - label: "Testing script"
         command: ".buildkite/scripts/check_ami_version_match.sh"
+        if_changed:
+          - "locals.tf"

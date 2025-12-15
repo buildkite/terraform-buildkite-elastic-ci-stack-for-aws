@@ -48,6 +48,9 @@ show_git_changes() {
   git diff "$LOCALS_FILE"
 
   if ! git diff --quiet "$LOCALS_FILE"; then
+    echo "Running terraform fmt on $LOCALS_FILE..." >&2
+    terraform fmt "$LOCALS_FILE"
+
     git config user.name "buildkite-bot"
     git config user.email "bot@buildkite.com"
 
