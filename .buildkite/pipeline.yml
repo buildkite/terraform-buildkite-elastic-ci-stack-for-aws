@@ -86,11 +86,13 @@ steps:
         continue_on_failure: true
 
       - label: "Testing script"
-        command: ".buildkite/scripts/check_ami_version_match.sh"
+        command: |
+          apk add --no-cache bash curl git
+          .buildkite/scripts/check_ami_version_match.sh
         if_changed:
           - "locals.tf"
         plugins:
           - docker#v5.11.0:
               image: "hashicorp/terraform:1.13"
               workdir: "/workdir"
-              entrypoint: "/bin/bash"
+              entrypoint: "/bin/sh"
