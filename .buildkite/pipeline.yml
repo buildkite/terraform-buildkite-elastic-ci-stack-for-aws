@@ -89,3 +89,8 @@ steps:
         command: ".buildkite/scripts/check_ami_version_match.sh"
         if_changed:
           - "locals.tf"
+        plugins:
+          - docker#v5.11.0:
+              image: "hashicorp/terraform:1.13"
+              workdir: "/workdir"
+              entrypoint: "/bin/bash"
