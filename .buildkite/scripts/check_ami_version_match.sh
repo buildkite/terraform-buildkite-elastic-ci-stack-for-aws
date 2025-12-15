@@ -39,6 +39,15 @@ get_cloudformation_version() {
   echo "$version"
 }
 
+show_git_changes() {
+  echo "Git status:" >&2
+  git status
+
+  echo "" >&2
+  echo "Changes to $LOCALS_FILE:" >&2
+  git diff "$LOCALS_FILE"
+}
+
 update_ami_mappings() {
   local version="$1"
   echo "Versions match ($version). Updating AMI mappings..." >&2
@@ -86,6 +95,8 @@ update_ami_mappings() {
   mv "$LOCALS_FILE.tmp" "$LOCALS_FILE"
   rm -f "$temp_mapping"
   echo "AMI mappings updated successfully" >&2
+
+  show_git_changes
 }
 
 check_versions() {
@@ -122,6 +133,3 @@ while true; do
   sleep "$RETRY_INTERVAL_IN_SECONDS"
   RETRY_COUNT=$((RETRY_COUNT + 1))
 done
-
-git status
-git diff "$LOCALS_FILE"
