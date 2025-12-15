@@ -46,13 +46,30 @@ show_git_changes() {
   echo "" >&2
   echo "Changes to $LOCALS_FILE:" >&2
   git diff "$LOCALS_FILE"
-  git add "$LOCALS_FILE"
-  git commit -m "Update AMI mappings to CloudFormation version $(get_tf_version)" || {
-    echo "No changes to commit" >&2
-  }
-  git push || {
-    echo "No changes to push" >&2
-  }
+
+  if ! git diff --quiet "$LOCALS_FILE"; then
+    git config user.name "buildkite-bot"
+    git config user.email "bot@buildkite.com"
+
+    local branch="${BUILDKITE_BRANCH:-main}"
+
+    if ! git symbolic-ref -q HEAD > /dev/null; then
+      echo "In detached HEAD state, checking out branch: $branch" >&2
+      git checkout -B "$branch"
+    fi
+
+    git add "$LOCALS_FILE"
+    git commit -m "Update AMI mappings to CloudFormation version $(get_tf_version)"
+
+    # Setting groundwork for when we have a token
+    if [[ -n "${GITHUB_TOKEN:-}" ]]; then
+      git push "https://${GITHUB_TOKEN}@github.com/buildkite/terraform-buildkite-elastic-ci-stack-for-aws.git" "HEAD:${branch}"
+    else
+      echo "Warning: GITHUB_TOKEN not set, skipping push" >&2
+    fi
+  else
+    echo "No changes detected in $LOCALS_FILE" >&2
+  fi
 }
 
 update_ami_mappings() {
