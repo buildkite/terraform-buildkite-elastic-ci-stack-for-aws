@@ -46,6 +46,13 @@ show_git_changes() {
   echo "" >&2
   echo "Changes to $LOCALS_FILE:" >&2
   git diff "$LOCALS_FILE"
+  git add "$LOCALS_FILE"
+  git commit -m "Update AMI mappings to CloudFormation version $(get_tf_version)" || {
+    echo "No changes to commit" >&2
+  }
+  git push || {
+    echo "No changes to push" >&2
+  }
 }
 
 update_ami_mappings() {
