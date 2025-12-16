@@ -66,11 +66,11 @@ get_cloudformation_version() {
 
 show_git_changes() {
   echo "Git status:" >&2
-  git status
+  git status >&2
 
   echo "" >&2
   echo "Changes to $LOCALS_FILE:" >&2
-  git diff "$LOCALS_FILE"
+  git diff "$LOCALS_FILE" >&2
 }
 
 run_terraform_fmt() {
@@ -124,24 +124,27 @@ update_ami_mappings() {
   echo "Versions match ($version). Checking if AMI mappings need update..." >&2
 
   # Fetch the CloudFormation template and extract AMI section
-  local ami_lines
-  ami_lines=$(curl -fsSL "$CLOUDFORMATION_TEMPLATE_URL" | awk '/AWSRegion2AMI:/,/^[^ ]/' | grep -E '^\s+[a-z0-9-]+\s*:')
+  local yaml_content
+  yaml_content=$(curl -fsSL "$CLOUDFORMATION_TEMPLATE_URL")
 
   local temp_mapping
   temp_mapping=$(mktemp)
 
   echo "  buildkite_ami_mapping = {" > "$temp_mapping"
 
-  while IFS= read -r line; do
-    if [[ "$line" =~ ([a-z0-9-]+)[[:space:]]*:[[:space:]]*\{[[:space:]]*linuxamd64:[[:space:]]*(ami-[a-f0-9]+),[[:space:]]*linuxarm64:[[:space:]]*(ami-[a-f0-9]+),[[:space:]]*windows:[[:space:]]*(ami-[a-f0-9]+) ]]; then
-      region="${BASH_REMATCH[1]}"
-      amd64="${BASH_REMATCH[2]}"
-      arm64="${BASH_REMATCH[3]}"
-      windows="${BASH_REMATCH[4]}"
-      printf "    %-28s = { linuxamd64 = \"%-21s\", linuxarm64 = \"%-21s\", windows = \"%-21s\" }\n" \
-        "$region" "$amd64" "$arm64" "$windows" >> "$temp_mapping"
-    fi
-  done <<< "$ami_lines"
+  # Parse multi-line YAML format using awk
+  echo "$yaml_content" | awk '
+    /AWSRegion2AMI:/ { in_section=1; next }
+    in_section && /^[^ ]/ { exit }
+    in_section && /^    [a-z0-9-]+:/ {
+      region = $1
+      gsub(/:/, "", region)
+      getline; linuxamd64 = $2
+      getline; linuxarm64 = $2
+      getline; windows = $2
+      printf "    %-28s = { linuxamd64 = \"%-21s\", linuxarm64 = \"%-21s\", windows = \"%-21s\" }\n", region, linuxamd64, linuxarm64, windows
+    }
+  ' >> "$temp_mapping"
 
   echo "    cloudformation_stack_version = \"$version\"" >> "$temp_mapping"
   echo "  }" >> "$temp_mapping"

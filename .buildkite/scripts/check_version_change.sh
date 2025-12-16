@@ -1,6 +1,11 @@
 #!/usr/bin/bash
 set -euo pipefail
 
+if [ ${BUILDKITE_PULL_REQUEST} == "false" ]; then
+  echo "Not a pull request, skipping version change check." >&2
+  exit 0
+fi
+
 if git diff origin/main...HEAD -- locals.tf | grep -q 'cloudformation_stack_version'; then
   echo "cloudformation_stack_version changed, uploading AMI update pipeline step..." >&2
 
