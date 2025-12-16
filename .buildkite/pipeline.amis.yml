@@ -1,6 +1,6 @@
 steps:
   - label: Update AMIs
-    command: 'if [ -z "$${GITHUB_TOKEN}" ]; then echo "GITHUB_TOKEN is not set"; else echo "token is set"; fi'
+    command: 'if [ -z "$${GH_TOKEN}" ]; then echo "GH_TOKEN is not set"; else echo "token is set"; fi'
     plugins:
       - aws-assume-role-with-web-identity#v1.4.0:
           role-arn: arn:aws:iam::445615400570:role/pipeline-terraform-buildkite-elastic-ci-stack-for-aws-release
@@ -10,6 +10,6 @@ steps:
             - pipeline_slug
       - aws-ssm#v1.0.0:
           parameters:
-            GITHUB_TOKEN: /pipelines/buildkite/terraform-buildkite-elastic-ci-stack-for-aws-release/github-token
+            GH_TOKEN: /pipelines/buildkite/terraform-buildkite-elastic-ci-stack-for-aws-release/github-token
     agents:
       queue: "oss-deploy"
