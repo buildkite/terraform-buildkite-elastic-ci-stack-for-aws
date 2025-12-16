@@ -52,8 +52,8 @@ show_git_changes() {
     echo "Running terraform fmt on $LOCALS_FILE..." >&2
     terraform fmt "$LOCALS_FILE"
 
-    git config user.name "buildkite-bot"
-    git config user.email "bot@buildkite.com"
+    git config user.name "buildkite-systems"
+    git config user.email "buildkite-systems@buildkite.com"
 
     local branch="${BUILDKITE_BRANCH:-main}"
 
@@ -67,6 +67,7 @@ show_git_changes() {
 
     if [[ -n "${GITHUB_TOKEN:-}" ]]; then
       git push "https://${GITHUB_TOKEN}@github.com/buildkite/terraform-buildkite-elastic-ci-stack-for-aws.git" "HEAD:${branch}"
+      echo "Pushed changes to branch $branch" >&2
       curl -X POST -H "Authorization: token ${GITHUB_TOKEN}" -H "Content-Type: application/json" \
         -d "{\"body\":\"Updated AMI mappings to CloudFormation version $(get_tf_version)\"}" \
         "${PR_URL}/comments"
@@ -74,6 +75,8 @@ show_git_changes() {
       curl -X POST -H "Authorization: token ${GITHUB_TOKEN}" -H "Content-Type: application/json" \
         -d "{\"body\":\"Validation that there were no changes to variables required by AMIs within $(get_tf_version)\"}" \
         "${PR_URL}/comments"
+
+      echo "Posted comments to PR" >&2
     else
       echo "Warning: GITHUB_TOKEN not set, skipping push" >&2
     fi
@@ -113,17 +116,21 @@ update_ami_mappings() {
 
   # Replace in locals.tf
   awk '
-    BEGIN { in_mapping=0 }
-    /buildkite_ami_mapping = {/ {
-      in_mapping=1
+    /buildkite_ami_mapping = \{/ {
       while ((getline line < "'"$temp_mapping"'") > 0) {
         print line
       }
       close("'"$temp_mapping"'")
+      in_mapping=1
       next
     }
-    in_mapping && /^  }/ { in_mapping=0; next }
-    !in_mapping { print }
+    in_mapping {
+      if (/^  \}$/) {
+        in_mapping=0
+      }
+      next
+    }
+    { print }
   ' "$LOCALS_FILE" > "$LOCALS_FILE.tmp"
 
   mv "$LOCALS_FILE.tmp" "$LOCALS_FILE"
