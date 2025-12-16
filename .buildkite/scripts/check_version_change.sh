@@ -36,7 +36,7 @@ steps:
           image: hashicorp/terraform:1.13
           workdir: "/workdir"
           entrypoint: "/bin/sh"
-          command: ["-c", "apk add --no-cache bash curl git openssh && bash .buildkite/scripts/check_ami_version_match.sh"]
+          command: ["-c", "apk add --no-cache bash curl git openssh yq && bash .buildkite/scripts/check_ami_version_match.sh"]
           environment:
             - DEPLOY_KEY
             - BUILDKITE_BRANCH

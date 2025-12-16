@@ -80,10 +80,11 @@ run_terraform_fmt() {
 
 ensure_on_branch() {
   local branch="${BUILDKITE_BRANCH:-main}"
+  branch=$(printf "%s" "$branch" | tr -d '[:space:]')
 
   if ! git symbolic-ref -q HEAD > /dev/null; then
     echo "In detached HEAD state, checking out branch: $branch" >&2
-    git checkout -B "$branch"
+    git checkout -B "$branch" >&2
   fi
 
   echo "$branch"
@@ -123,7 +124,6 @@ update_ami_mappings() {
   local version="$1"
   echo "Versions match ($version). Checking if AMI mappings need update..." >&2
 
-  # Fetch the CloudFormation template and extract AMI section
   local yaml_content
   yaml_content=$(curl -fsSL "$CLOUDFORMATION_TEMPLATE_URL")
 
