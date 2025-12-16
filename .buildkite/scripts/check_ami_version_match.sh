@@ -132,19 +132,8 @@ update_ami_mappings() {
 
   echo "  buildkite_ami_mapping = {" > "$temp_mapping"
 
-  # Parse multi-line YAML format using awk
-  echo "$yaml_content" | awk '
-    /AWSRegion2AMI:/ { in_section=1; next }
-    in_section && /^[^ ]/ { exit }
-    in_section && /^    [a-z0-9-]+:/ {
-      region = $1
-      gsub(/:/, "", region)
-      getline; linuxamd64 = $2
-      getline; linuxarm64 = $2
-      getline; windows = $2
-      printf "    %-28s = { linuxamd64 = \"%-21s\", linuxarm64 = \"%-21s\", windows = \"%-21s\" }\n", region, linuxamd64, linuxarm64, windows
-    }
-  ' >> "$temp_mapping"
+  echo "$yaml_content" | yq -r '.Mappings.AWSRegion2AMI | to_entries[] | "\(.key)|\(.value.linuxamd64)|\(.value.linuxarm64)|\(.value.windows)"' | \
+    awk -F'|' '{printf "    %-28s = { linuxamd64 = \"%-21s\", linuxarm64 = \"%-21s\", windows = \"%-21s\" }\n", $1, $2, $3, $4}' >> "$temp_mapping"
 
   echo "    cloudformation_stack_version = \"$version\"" >> "$temp_mapping"
   echo "  }" >> "$temp_mapping"
