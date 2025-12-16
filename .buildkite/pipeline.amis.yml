@@ -9,10 +9,10 @@ steps:
             - organization_slug
             - organization_id
             - pipeline_slug
-      - aws-ssm#v1.0.0:
+      - aws-ssm#v1.1.0:
           parameters:
-            GH_TOKEN: /pipelines/buildkite/terraform-buildkite-elastic-ci-stack-for-aws-release/GITHUB_TOKEN
-      - docker#v5.11.0:
+            GITHUB_TOKEN: /pipelines/buildkite/terraform-buildkite-elastic-ci-stack-for-aws-release/GITHUB_TOKEN
+      - docker#v5.13.0:
           image: hashicorp/terraform:1.13
           workdir: "/workdir"
           entrypoint: "/bin/sh"
