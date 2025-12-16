@@ -15,43 +15,35 @@ RETRY_INTERVAL_IN_SECONDS=600
 MAX_RETRIES=6 # 1 hour seems rational because the CI for Packer takes a while
 RETRY_COUNT=0
 
-check_token_scopes() {
-  if [[ -z "${GITHUB_TOKEN:-}" ]]; then
-    echo "Warning: GITHUB_TOKEN not set" >&2
-    return 1
+setup_ssh() {
+  if [[ -z "${DEPLOY_KEY:-}" ]]; then
+    echo "Error: DEPLOY_KEY not set" >&2
+    exit 1
   fi
 
-  echo "Checking GitHub token scopes..." >&2
-  local response
-  response=$(curl -sS -I -H "Authorization: token ${GITHUB_TOKEN}" https://api.github.com/repos/buildkite/terraform-buildkite-elastic-ci-stack-for-aws)
+  echo "Setting up SSH for git operations..." >&2
 
-  local scopes
-  scopes=$(echo "$response" | grep -i "x-oauth-scopes:" | cut -d: -f2- | xargs)
+  mkdir -p ~/.ssh
+  chmod 700 ~/.ssh
 
-  echo "Token scopes: ${scopes:-none}" >&2
+  # Write deploy key to file
+  echo "$DEPLOY_KEY" > ~/.ssh/deploy_key
+  chmod 600 ~/.ssh/deploy_key
 
-  local user_info
-  user_info=$(curl -sS -H "Authorization: token ${GITHUB_TOKEN}" https://api.github.com/user)
-  local username
-  username=$(echo "$user_info" | grep -o '"login": *"[^"]*"' | cut -d'"' -f4)
+  cat > ~/.ssh/config <<EOF
+Host github.com
+  HostName github.com
+  IdentityFile ~/.ssh/deploy_key
+  IdentitiesOnly yes
+  StrictHostKeyChecking no
+  UserKnownHostsFile /dev/null
+EOF
+  chmod 600 ~/.ssh/config
 
-  echo "Token belongs to user: ${username:-unknown}" >&2
-
-  if [[ "$scopes" == *"repo"* ]] || [[ "$scopes" == *"public_repo"* ]]; then
-    echo "✓ Token has write access" >&2
-    return 0
-  else
-    echo "✗ Token lacks write access (needs 'repo' or 'public_repo' scope)" >&2
-    return 1
-  fi
+  echo "✓ SSH configured" >&2
 }
 
-# Construct PR API URL from Buildkite env vars
-if [[ -n "${BUILDKITE_PULL_REQUEST:-}" && "${BUILDKITE_PULL_REQUEST}" != "false" ]]; then
-  PR_API_URL="https://api.github.com/repos/${BUILDKITE_PULL_REQUEST_REPO}/issues/${BUILDKITE_PULL_REQUEST}/comments"
-else
-  PR_API_URL=""
-fi
+setup_ssh
 
 get_tf_version() {
   local version
