@@ -10,6 +10,6 @@ steps:
             - pipeline_slug
       - aws-ssm#v1.0.0:
           parameters:
-            GH_TOKEN: /pipelines/terraform-buildkite-elastic-ci-stack-for-aws-release/github-token
+            GH_TOKEN: /pipelines/buildkite/terraform-buildkite-elastic-ci-stack-for-aws-release/GITHUB_TOKEN
     agents:
       queue: "oss-deploy"
