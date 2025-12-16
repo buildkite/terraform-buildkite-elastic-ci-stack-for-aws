@@ -46,6 +46,7 @@ check_token_scopes() {
   fi
 }
 
+# Construct PR API URL from Buildkite env vars
 if [[ -n "${BUILDKITE_PULL_REQUEST:-}" && "${BUILDKITE_PULL_REQUEST}" != "false" ]]; then
   PR_API_URL="https://api.github.com/repos/${BUILDKITE_PULL_REQUEST_REPO}/issues/${BUILDKITE_PULL_REQUEST}/comments"
 else
@@ -101,27 +102,8 @@ show_git_changes() {
     git add "$LOCALS_FILE"
     git commit -m "Update AMI mappings to CloudFormation version $(get_cloudformation_version)"
 
-    if [[ -n "${GITHUB_TOKEN:-}" ]]; then
-      check_token_scopes || echo "Warning: Token check failed, continuing anyway..." >&2
-
-      git push "https://x-access-token:${GITHUB_TOKEN}@github.com/buildkite/terraform-buildkite-elastic-ci-stack-for-aws.git" "HEAD:${branch}"
-      echo "Pushed changes to branch $branch" >&2
-
-      # Post comments to PR if this is a PR build
-      if [[ -n "${PR_API_URL}" ]]; then
-        curl -X POST -H "Authorization: token ${GITHUB_TOKEN}" -H "Content-Type: application/json" \
-          -d "{\"body\":\"Updated AMI mappings to CloudFormation version $(get_cloudformation_version)\"}" \
-          "${PR_API_URL}"
-
-        curl -X POST -H "Authorization: token ${GITHUB_TOKEN}" -H "Content-Type: application/json" \
-          -d "{\"body\":\"Validation that there were no changes to variables required by AMIs within $(get_cloudformation_version)\"}" \
-          "${PR_API_URL}"
-
-        echo "Posted comments to PR" >&2
-      fi
-    else
-      echo "Warning: GITHUB_TOKEN not set, skipping push" >&2
-    fi
+    git push "git@github.com:buildkite/terraform-buildkite-elastic-ci-stack-for-aws.git" "HEAD:${branch}"
+    echo "Pushed changes to branch $branch" >&2
   else
     echo "No changes detected in $LOCALS_FILE" >&2
   fi
