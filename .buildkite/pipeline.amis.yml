@@ -17,6 +17,9 @@ steps:
           workdir: "/workdir"
           entrypoint: "/bin/sh"
           command: ["-c", "apk add --no-cache bash curl git && bash .buildkite/scripts/check_ami_version_match.sh"]
-          propagate_environment: true
+          environment:
+            - GITHUB_TOKEN
+            - BUILDKITE_BRANCH
+            - BUILDKITE_PULL_REQUEST
     agents:
       queue: "oss-deploy"

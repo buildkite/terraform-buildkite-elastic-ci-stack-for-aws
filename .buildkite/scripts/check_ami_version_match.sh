@@ -87,7 +87,7 @@ show_git_changes() {
 
 update_ami_mappings() {
   local version="$1"
-  echo "Versions match ($version). Updating AMI mappings..." >&2
+  echo "Versions match ($version). Checking if AMI mappings need update..." >&2
 
   # Fetch the CloudFormation template and extract AMI section
   local ami_lines
@@ -113,6 +113,20 @@ update_ami_mappings() {
 
   echo "    cloudformation_stack_version = \"$version\"" >> "$temp_mapping"
   echo "  }" >> "$temp_mapping"
+
+  local current_mapping
+  current_mapping=$(awk '/buildkite_ami_mapping = \{/,/^  \}$/' "$LOCALS_FILE")
+
+  local new_mapping
+  new_mapping=$(cat "$temp_mapping")
+
+  if [[ "$current_mapping" == "$new_mapping" ]]; then
+    echo "AMI mappings are already up to date. No changes needed." >&2
+    rm -f "$temp_mapping"
+    exit 0
+  fi
+
+  echo "AMI mappings differ, updating..." >&2
 
   # Replace in locals.tf
   awk '
