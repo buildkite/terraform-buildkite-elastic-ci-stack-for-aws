@@ -1,6 +1,7 @@
 steps:
-  - label: Update AMIs
-    command: 'curl -H "Authorization: token $${GH_TOKEN}" https://api.github.com/user'
+  - label: ":robot: Update AMI Mappings"
+    if_changed:
+      - "locals.tf"
     plugins:
       - aws-assume-role-with-web-identity#v1.4.0:
           role-arn: arn:aws:iam::445615400570:role/pipeline-terraform-buildkite-elastic-ci-stack-for-aws-release
@@ -11,5 +12,11 @@ steps:
       - aws-ssm#v1.0.0:
           parameters:
             GH_TOKEN: /pipelines/buildkite/terraform-buildkite-elastic-ci-stack-for-aws-release/GITHUB_TOKEN
+      - docker#v5.11.0:
+          image: hashicorp/terraform:1.13
+          workdir: "/workdir"
+          entrypoint: "/bin/sh"
+          command: ["-c", "apk add --no-cache bash curl git && bash .buildkite/scripts/check_ami_version_match.sh"]
+          propagate_environment: true
     agents:
       queue: "oss-deploy"

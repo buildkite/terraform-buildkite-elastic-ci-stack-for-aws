@@ -14,6 +14,7 @@ CLOUDFORMATION_TEMPLATE_URL="https://s3.amazonaws.com/buildkite-aws-stack/latest
 RETRY_INTERVAL_IN_SECONDS=600
 MAX_RETRIES=6 # 1 hour seems rational because the CI for Packer takes a while
 RETRY_COUNT=0
+PR_URL="${BUILDKITE_PULL_REQUEST_URL:-}"
 
 get_tf_version() {
   local version
@@ -64,9 +65,15 @@ show_git_changes() {
     git add "$LOCALS_FILE"
     git commit -m "Update AMI mappings to CloudFormation version $(get_tf_version)"
 
-    # Setting groundwork for when we have a token
     if [[ -n "${GITHUB_TOKEN:-}" ]]; then
       git push "https://${GITHUB_TOKEN}@github.com/buildkite/terraform-buildkite-elastic-ci-stack-for-aws.git" "HEAD:${branch}"
+      curl -X POST -H "Authorization: token ${GITHUB_TOKEN}" -H "Content-Type: application/json" \
+        -d "{\"body\":\"Updated AMI mappings to CloudFormation version $(get_tf_version)\"}" \
+        "${PR_URL}/comments"
+
+      curl -X POST -H "Authorization: token ${GITHUB_TOKEN}" -H "Content-Type: application/json" \
+        -d "{\"body\":\"Validation that there were no changes to variables required by AMIs within $(get_tf_version)\"}" \
+        "${PR_URL}/comments"
     else
       echo "Warning: GITHUB_TOKEN not set, skipping push" >&2
     fi
