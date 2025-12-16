@@ -16,6 +16,8 @@ steps:
           environment:
             - DEPLOY_KEY
             - BUILDKITE_BRANCH
+    secrets:
+        DEPLOY_KEY: ES_FOR_TF_PUB_KEY
     agents:
       queue: "oss-deploy"
 EOF
