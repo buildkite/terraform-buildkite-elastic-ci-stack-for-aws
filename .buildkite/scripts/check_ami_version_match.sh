@@ -14,7 +14,43 @@ CLOUDFORMATION_TEMPLATE_URL="https://s3.amazonaws.com/buildkite-aws-stack/latest
 RETRY_INTERVAL_IN_SECONDS=600
 MAX_RETRIES=6 # 1 hour seems rational because the CI for Packer takes a while
 RETRY_COUNT=0
-PR_URL="${BUILDKITE_PULL_REQUEST_URL:-}"
+
+check_token_scopes() {
+  if [[ -z "${GITHUB_TOKEN:-}" ]]; then
+    echo "Warning: GITHUB_TOKEN not set" >&2
+    return 1
+  fi
+
+  echo "Checking GitHub token scopes..." >&2
+  local response
+  response=$(curl -sS -I -H "Authorization: token ${GITHUB_TOKEN}" https://api.github.com/repos/buildkite/terraform-buildkite-elastic-ci-stack-for-aws)
+
+  local scopes
+  scopes=$(echo "$response" | grep -i "x-oauth-scopes:" | cut -d: -f2- | xargs)
+
+  echo "Token scopes: ${scopes:-none}" >&2
+
+  local user_info
+  user_info=$(curl -sS -H "Authorization: token ${GITHUB_TOKEN}" https://api.github.com/user)
+  local username
+  username=$(echo "$user_info" | grep -o '"login": *"[^"]*"' | cut -d'"' -f4)
+
+  echo "Token belongs to user: ${username:-unknown}" >&2
+
+  if [[ "$scopes" == *"repo"* ]] || [[ "$scopes" == *"public_repo"* ]]; then
+    echo "✓ Token has write access" >&2
+    return 0
+  else
+    echo "✗ Token lacks write access (needs 'repo' or 'public_repo' scope)" >&2
+    return 1
+  fi
+}
+
+if [[ -n "${BUILDKITE_PULL_REQUEST:-}" && "${BUILDKITE_PULL_REQUEST}" != "false" ]]; then
+  PR_API_URL="https://api.github.com/repos/${BUILDKITE_PULL_REQUEST_REPO}/issues/${BUILDKITE_PULL_REQUEST}/comments"
+else
+  PR_API_URL=""
+fi
 
 get_tf_version() {
   local version
@@ -66,18 +102,23 @@ show_git_changes() {
     git commit -m "Update AMI mappings to CloudFormation version $(get_cloudformation_version)"
 
     if [[ -n "${GITHUB_TOKEN:-}" ]]; then
+      check_token_scopes || echo "Warning: Token check failed, continuing anyway..." >&2
+
       git push "https://x-access-token:${GITHUB_TOKEN}@github.com/buildkite/terraform-buildkite-elastic-ci-stack-for-aws.git" "HEAD:${branch}"
       echo "Pushed changes to branch $branch" >&2
-      curl -X POST -H "Authorization: token ${GITHUB_TOKEN}" -H "Content-Type: application/json" \
-        -d "{\"body\":\"Updated AMI mappings to CloudFormation version $(get_tf_version)\"}" \
-        "${PR_URL}/comments"
 
-      curl -X POST -H "Authorization: token ${GITHUB_TOKEN}" -H "Content-Type: application/json" \
-        -d "{\"body\":\"Validation that there were no changes to variables required by AMIs within $(get_tf_version)\"}" \
-        "${PR_URL}/comments"
       # Post comments to PR if this is a PR build
+      if [[ -n "${PR_API_URL}" ]]; then
+        curl -X POST -H "Authorization: token ${GITHUB_TOKEN}" -H "Content-Type: application/json" \
+          -d "{\"body\":\"Updated AMI mappings to CloudFormation version $(get_cloudformation_version)\"}" \
+          "${PR_API_URL}"
 
-      echo "Posted comments to PR" >&2
+        curl -X POST -H "Authorization: token ${GITHUB_TOKEN}" -H "Content-Type: application/json" \
+          -d "{\"body\":\"Validation that there were no changes to variables required by AMIs within $(get_cloudformation_version)\"}" \
+          "${PR_API_URL}"
+
+        echo "Posted comments to PR" >&2
+      fi
     else
       echo "Warning: GITHUB_TOKEN not set, skipping push" >&2
     fi
