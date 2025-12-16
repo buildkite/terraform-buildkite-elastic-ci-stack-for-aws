@@ -75,6 +75,7 @@ show_git_changes() {
       curl -X POST -H "Authorization: token ${GITHUB_TOKEN}" -H "Content-Type: application/json" \
         -d "{\"body\":\"Validation that there were no changes to variables required by AMIs within $(get_tf_version)\"}" \
         "${PR_URL}/comments"
+      # Post comments to PR if this is a PR build
 
       echo "Posted comments to PR" >&2
     else

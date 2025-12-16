@@ -1,5 +1,5 @@
 steps:
-  - label: ":robot: Update AMI Mappings"
+  - label: ":bot: Update AMI Mappings"
     if_changed:
       - "locals.tf"
     plugins:
@@ -21,5 +21,6 @@ steps:
             - GITHUB_TOKEN
             - BUILDKITE_BRANCH
             - BUILDKITE_PULL_REQUEST
+            - BUILDKITE_PULL_REQUEST_REPO
     agents:
       queue: "oss-deploy"
