@@ -22,11 +22,8 @@ setup_ssh() {
   fi
 
   echo "Setting up SSH for git operations..." >&2
-
   mkdir -p ~/.ssh
   chmod 700 ~/.ssh
-
-  # Write deploy key to file
   echo "$DEPLOY_KEY" > ~/.ssh/deploy_key
   chmod 600 ~/.ssh/deploy_key
 
@@ -39,8 +36,6 @@ Host github.com
   UserKnownHostsFile /dev/null
 EOF
   chmod 600 ~/.ssh/config
-
-  echo "✓ SSH configured" >&2
 }
 
 setup_ssh
@@ -109,13 +104,11 @@ update_ami_mappings() {
   local ami_lines
   ami_lines=$(curl -fsSL "$CLOUDFORMATION_TEMPLATE_URL" | awk '/AWSRegion2AMI:/,/^[^ ]/' | grep -E '^\s+[a-z0-9-]+\s*:')
 
-  # Create temp file with new mapping
   local temp_mapping
   temp_mapping=$(mktemp)
 
   echo "  buildkite_ami_mapping = {" > "$temp_mapping"
 
-  # Parse each line and convert to Terraform format
   while IFS= read -r line; do
     if [[ "$line" =~ ([a-z0-9-]+)[[:space:]]*:[[:space:]]*\{[[:space:]]*linuxamd64:[[:space:]]*(ami-[a-f0-9]+),[[:space:]]*linuxarm64:[[:space:]]*(ami-[a-f0-9]+),[[:space:]]*windows:[[:space:]]*(ami-[a-f0-9]+) ]]; then
       region="${BASH_REMATCH[1]}"
@@ -144,7 +137,6 @@ update_ami_mappings() {
 
   echo "AMI mappings differ, updating..." >&2
 
-  # Replace in locals.tf
   awk '
     /buildkite_ami_mapping = \{/ {
       while ((getline line < "'"$temp_mapping"'") > 0) {
@@ -194,7 +186,6 @@ while true; do
     break
   fi
 
-  # If we get here, TF version is ahead of CF version
   if [ "$RETRY_COUNT" -ge "$MAX_RETRIES" ]; then
     echo "Exceeded maximum retries ($MAX_RETRIES). Exiting, give it some time and retry this job." >&2
     exit 1
