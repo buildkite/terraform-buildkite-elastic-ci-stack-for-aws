@@ -53,7 +53,7 @@ show_git_changes() {
     terraform fmt "$LOCALS_FILE"
 
     git config user.name "buildkite-systems"
-    git config user.email "buildkite-systems@buildkite.com"
+    git config user.email "dev@buildkite.com"
 
     local branch="${BUILDKITE_BRANCH:-main}"
 
@@ -63,10 +63,10 @@ show_git_changes() {
     fi
 
     git add "$LOCALS_FILE"
-    git commit -m "Update AMI mappings to CloudFormation version $(get_tf_version)"
+    git commit -m "Update AMI mappings to CloudFormation version $(get_cloudformation_version)"
 
     if [[ -n "${GITHUB_TOKEN:-}" ]]; then
-      git push "https://${GITHUB_TOKEN}@github.com/buildkite/terraform-buildkite-elastic-ci-stack-for-aws.git" "HEAD:${branch}"
+      git push "https://x-access-token:${GITHUB_TOKEN}@github.com/buildkite/terraform-buildkite-elastic-ci-stack-for-aws.git" "HEAD:${branch}"
       echo "Pushed changes to branch $branch" >&2
       curl -X POST -H "Authorization: token ${GITHUB_TOKEN}" -H "Content-Type: application/json" \
         -d "{\"body\":\"Updated AMI mappings to CloudFormation version $(get_tf_version)\"}" \
