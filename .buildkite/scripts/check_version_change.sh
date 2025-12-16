@@ -6,11 +6,8 @@ if git diff origin/main...HEAD -- locals.tf | grep -q 'cloudformation_stack_vers
 
   cat <<EOF | buildkite-agent pipeline upload
 steps:
-  - label: ":robot: Update AMI Mappings"
+  - label: "Update AMI Mappings"
     plugins:
-      - aws-ssm#v1.1.0:
-          parameters:
-            DEPLOY_KEY: /pipelines/buildkite/terraform-buildkite-elastic-ci-stack-for-aws-release/DEPLOY_KEY
       - docker#v5.13.0:
           image: hashicorp/terraform:1.13
           workdir: "/workdir"
@@ -19,8 +16,6 @@ steps:
           environment:
             - DEPLOY_KEY
             - BUILDKITE_BRANCH
-            - BUILDKITE_PULL_REQUEST
-            - BUILDKITE_PULL_REQUEST_REPO
     agents:
       queue: "oss-deploy"
 EOF

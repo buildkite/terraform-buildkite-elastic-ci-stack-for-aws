@@ -71,26 +71,49 @@ show_git_changes() {
   echo "" >&2
   echo "Changes to $LOCALS_FILE:" >&2
   git diff "$LOCALS_FILE"
+}
+
+run_terraform_fmt() {
+  echo "Running terraform fmt on $LOCALS_FILE..." >&2
+  terraform fmt "$LOCALS_FILE"
+}
+
+ensure_on_branch() {
+  local branch="${BUILDKITE_BRANCH:-main}"
+
+  if ! git symbolic-ref -q HEAD > /dev/null; then
+    echo "In detached HEAD state, checking out branch: $branch" >&2
+    git checkout -B "$branch"
+  fi
+
+  echo "$branch"
+}
+
+commit_and_push() {
+  local branch="$1"
+
+  git config user.name "buildkite-systems"
+  git config user.email "dev@buildkite.com"
+
+  git add "$LOCALS_FILE"
+  git commit -m "Update AMI mappings to CloudFormation version $(get_cloudformation_version)"
+
+  if ! git push "git@github.com:buildkite/terraform-buildkite-elastic-ci-stack-for-aws.git" "HEAD:${branch}"; then
+    echo "Error: git push failed. Check deploy key permissions and SSH configuration." >&2
+    exit 1
+  fi
+
+  echo "Pushed changes to branch $branch" >&2
+}
+
+process_git_changes() {
+  show_git_changes
 
   if ! git diff --quiet "$LOCALS_FILE"; then
-    echo "Running terraform fmt on $LOCALS_FILE..." >&2
-    terraform fmt "$LOCALS_FILE"
-
-    git config user.name "buildkite-systems"
-    git config user.email "dev@buildkite.com"
-
-    local branch="${BUILDKITE_BRANCH:-main}"
-
-    if ! git symbolic-ref -q HEAD > /dev/null; then
-      echo "In detached HEAD state, checking out branch: $branch" >&2
-      git checkout -B "$branch"
-    fi
-
-    git add "$LOCALS_FILE"
-    git commit -m "Update AMI mappings to CloudFormation version $(get_cloudformation_version)"
-
-    git push "git@github.com:buildkite/terraform-buildkite-elastic-ci-stack-for-aws.git" "HEAD:${branch}"
-    echo "Pushed changes to branch $branch" >&2
+    run_terraform_fmt
+    local branch
+    branch=$(ensure_on_branch)
+    commit_and_push "$branch"
   else
     echo "No changes detected in $LOCALS_FILE" >&2
   fi
@@ -115,8 +138,8 @@ update_ami_mappings() {
       amd64="${BASH_REMATCH[2]}"
       arm64="${BASH_REMATCH[3]}"
       windows="${BASH_REMATCH[4]}"
-      printf "    %-28s = { linuxamd64 = \"%-21s, linuxarm64 = \"%-21s, windows = \"%-21s }\n" \
-        "$region" "$amd64\"" "$arm64\"" "$windows\"" >> "$temp_mapping"
+      printf "    %-28s = { linuxamd64 = \"%-21s\", linuxarm64 = \"%-21s\", windows = \"%-21s\" }\n" \
+        "$region" "$amd64" "$arm64" "$windows" >> "$temp_mapping"
     fi
   done <<< "$ami_lines"
 
@@ -159,7 +182,7 @@ update_ami_mappings() {
   rm -f "$temp_mapping"
   echo "AMI mappings updated successfully" >&2
 
-  show_git_changes
+  process_git_changes
 }
 
 check_versions() {
