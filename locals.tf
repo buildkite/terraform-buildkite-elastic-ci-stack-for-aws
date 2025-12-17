@@ -47,7 +47,7 @@ locals {
   # AMI mappings for Buildkite Agent - these are the latest built AMIs from elastic-ci-stack-for-aws
   # See https://github.com/buildkite/elastic-ci-stack-for-aws for source
   buildkite_ami_mapping = {
-    us-east-1                    = { linuxamd64 = "ami-test1111111111111", linuxarm64 = "ami-test2222222222222", windows = "ami-test3333333333333" }
+    us-east-1                    = { linuxamd64 = "ami-084bce982dccc1dad", linuxarm64 = "ami-0b81376b8ca37615f", windows = "ami-0d5dacb9586ab073c" }
     us-east-2                    = { linuxamd64 = "ami-0f2ea4d2f7beb128b", linuxarm64 = "ami-0236921512501bf69", windows = "ami-0b578e027e7bc7eb5" }
     us-west-1                    = { linuxamd64 = "ami-0dbd31515a6376304", linuxarm64 = "ami-0675e0da15c4af7b9", windows = "ami-0a47b4030b0d21f3d" }
     us-west-2                    = { linuxamd64 = "ami-0f1614b109b2251b4", linuxarm64 = "ami-0ad88b7a0b9500b61", windows = "ami-0051ccc9047a7742f" }
