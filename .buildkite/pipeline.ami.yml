@@ -14,8 +14,6 @@ steps:
           login: true
           account-ids: "445615400570"
           region: us-east-1
-    agents:
-      queue: "hosted"
     if_changed:
       - ".buildkite/scripts/Dockerfile"
 
