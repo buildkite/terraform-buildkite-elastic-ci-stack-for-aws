@@ -15,23 +15,19 @@ steps:
     plugins:
       - aws-assume-role-with-web-identity#v1.4.0:
           role-arn: arn:aws:iam::445615400570:role/pipeline-terraform-buildkite-elastic-ci-stack-for-aws-release
-          region: us-east-1
           session-tags:
             - organization_slug
             - organization_id
             - pipeline_slug
             - build_branch
-      - ecr#v2.10.0:
-          login: true
-          account-ids: "445615400570"
-          region: us-east-1
       - aws-ssm#v1.1.0:
           parameters:
             GITHUB_TOKEN: /pipelines/buildkite/terraform-buildkite-elastic-ci-stack-for-aws-release/GITHUB_TOKEN
       - docker#v5.13.0:
-          image: 445615400570.dkr.ecr.us-east-1.amazonaws.com/terraform-buildkite-elastic-ci-stack-for-aws-ami-updater:latest
+          image: hashicorp/terraform:1.13
           workdir: "/workdir"
-          command: [".buildkite/scripts/check_ami_version_match.sh"]
+          entrypoint: "/bin/sh"
+          command: ["-c", "apk add --no-cache bash curl git yq jq && bash .buildkite/scripts/update_amis.sh"]
           environment:
             - GITHUB_TOKEN
             - BUILDKITE_BRANCH
@@ -41,34 +37,4 @@ steps:
 EOF
 else
   echo "cloudformation_stack_version unchanged, skipping AMI update" >&2
-  cat <<EOF | buildkite-agent pipeline upload
-steps:
-  - label: "Update AMI Mappings"
-    plugins:
-      - aws-assume-role-with-web-identity#v1.4.0:
-          role-arn: arn:aws:iam::445615400570:role/pipeline-terraform-buildkite-elastic-ci-stack-for-aws-release
-          region: us-east-1
-          session-tags:
-            - organization_slug
-            - organization_id
-            - pipeline_slug
-            - build_branch
-      - ecr#v2.10.0:
-          login: true
-          account-ids: "445615400570"
-          region: us-east-1
-      - aws-ssm#v1.1.0:
-          parameters:
-            GITHUB_TOKEN: /pipelines/buildkite/terraform-buildkite-elastic-ci-stack-for-aws-release/GITHUB_TOKEN
-      - docker#v5.13.0:
-          image: 445615400570.dkr.ecr.us-east-1.amazonaws.com/terraform-buildkite-elastic-ci-stack-for-aws-ami-updater:latest
-          workdir: "/workdir"
-          command: [".buildkite/scripts/check_ami_version_match.sh"]
-          environment:
-            - GITHUB_TOKEN
-            - BUILDKITE_BRANCH
-            - BUILDKITE_PULL_REQUEST
-    agents:
-      queue: "oss-deploy"
-EOF
 fi

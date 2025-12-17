@@ -6,8 +6,9 @@ set -euo pipefail
 # 2. Fetch the latest CloudFormation template from S3
 # 3. Extract the version from the CloudFormation template
 # 4. Compare the two versions
-# 5. If they match, we're going to update the AMI's in locals.tf
+# 5. If they match, we're going to update the AMI's in locals.tf, push to git, and comment on the PR
 # 6. If they don't match, wait and retry until they do (or fail if TF version is less than CF version or we hit a timeout of 1 hour)
+
 
 LOCALS_FILE="${1:-locals.tf}"
 CLOUDFORMATION_TEMPLATE_URL="https://s3.amazonaws.com/buildkite-aws-stack/latest/aws-stack.yml"
