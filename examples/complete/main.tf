@@ -32,14 +32,14 @@ module "buildkite_agents" {
   agents_per_instance                        = 2
 
   # Auto-scaling configuration with Lambda scaler
-  scaler_enable_elastic_ci_mode  = true
-  min_size                       = 2
-  max_size                       = 20
-  instance_buffer                = 2
-  scale_in_idle_period           = 300
-  scale_out_factor               = 1.5
-  scale_out_cooldown_period      = 180
-  scale_in_cooldown_period       = 600
+  scaler_enable_elastic_ci_mode = true
+  min_size                      = 2
+  max_size                      = 20
+  instance_buffer               = 2
+  scale_in_idle_period          = 300
+  scale_out_factor              = 1.5
+  scale_out_cooldown_period     = 180
+  scale_in_cooldown_period      = 600
 
   # Instance configuration - mixed On-Demand and Spot
   instance_types           = "t3.large,t3.xlarge,t3a.large,t3a.xlarge"
