@@ -29,10 +29,9 @@ steps:
           parameters:
             GITHUB_TOKEN: /pipelines/buildkite/terraform-buildkite-elastic-ci-stack-for-aws-release/GITHUB_TOKEN
       - docker#v5.13.0:
-          image: hashicorp/terraform:1.13
+          image: 445615400570.dkr.ecr.us-east-1.amazonaws.com/terraform-buildkite-elastic-ci-stack-for-aws-ami-updater:latest
           workdir: "/workdir"
-          entrypoint: "/bin/sh"
-          command: ["-c", "apk add --no-cache bash curl git openssh yq jq && bash .buildkite/scripts/check_ami_version_match.sh"]
+          command: [".buildkite/scripts/check_ami_version_match.sh"]
           environment:
             - GITHUB_TOKEN
             - BUILDKITE_BRANCH
@@ -62,10 +61,9 @@ steps:
           parameters:
             GITHUB_TOKEN: /pipelines/buildkite/terraform-buildkite-elastic-ci-stack-for-aws-release/GITHUB_TOKEN
       - docker#v5.13.0:
-          image: hashicorp/terraform:1.13
+          image: 445615400570.dkr.ecr.us-east-1.amazonaws.com/terraform-buildkite-elastic-ci-stack-for-aws-ami-updater:latest
           workdir: "/workdir"
-          entrypoint: "/bin/sh"
-          command: ["-c", "apk add --no-cache bash curl git openssh yq jq && bash .buildkite/scripts/check_ami_version_match.sh"]
+          command: [".buildkite/scripts/check_ami_version_match.sh"]
           environment:
             - GITHUB_TOKEN
             - BUILDKITE_BRANCH

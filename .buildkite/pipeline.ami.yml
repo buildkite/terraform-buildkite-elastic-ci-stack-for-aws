@@ -1,4 +1,24 @@
 steps:
+  - label: ":docker: Build Dockerfile AMIs"
+    command: .buildkite/scripts/build_ami_dockerfiles.sh
+    plugins:
+      - aws-assume-role-with-web-identity#v1.4.0:
+          role-arn: arn:aws:iam::445615400570:role/pipeline-terraform-buildkite-elastic-ci-stack-for-aws-release
+          region: us-east-1
+          session-tags:
+            - organization_slug
+            - organization_id
+            - pipeline_slug
+            - build_branch
+      - ecr#v2.10.0:
+          login: true
+          account-ids: "445615400570"
+          region: us-east-1
+    agents:
+      queue: "hosted"
+    if_changed:
+      - ".buildkite/scripts/Dockerfile"
+
   - label: "Check for Cloudformation Stack Version Change"
     command: .buildkite/scripts/check_version_change.sh
     agents:
