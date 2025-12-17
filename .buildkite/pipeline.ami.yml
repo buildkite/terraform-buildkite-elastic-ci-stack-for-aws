@@ -1,7 +1,5 @@
 steps:
   - label: "Check for Cloudformation Stack Version Change"
     command: .buildkite/scripts/check_version_change.sh
-    if_changed:
-      - "locals.tf"
     agents:
       queue: "hosted"
