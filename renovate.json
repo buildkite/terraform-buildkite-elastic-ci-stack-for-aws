@@ -53,6 +53,72 @@
       "depNameTemplate": "buildkite/elastic-ci-stack-for-aws",
       "extractVersionTemplate": "^v?(?<version>.*)$",
       "versioningTemplate": "semver"
+    },
+    {
+      "customType": "regex",
+      "fileMatch": [
+        "^\\.buildkite/pipeline\\.yml$",
+        "^\\.buildkite/scripts/check_version_change\\.sh$"
+      ],
+      "matchStrings": [
+        "hashicorp/terraform:(?<currentValue>\\d+\\.\\d+)"
+      ],
+      "datasourceTemplate": "docker",
+      "depNameTemplate": "hashicorp/terraform",
+      "versioningTemplate": "docker"
+    },
+    {
+      "customType": "regex",
+      "fileMatch": [
+        "^\\.buildkite/pipeline\\.yml$",
+        "^\\.buildkite/scripts/check_version_change\\.sh$"
+      ],
+      "matchStrings": [
+        "docker#v(?<currentValue>\\d+\\.\\d+\\.\\d+)"
+      ],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "buildkite-plugins/docker-buildkite-plugin",
+      "extractVersionTemplate": "^v?(?<version>.*)$",
+      "versioningTemplate": "semver"
+    },
+    {
+      "customType": "regex",
+      "fileMatch": [
+        "^\\.buildkite/scripts/check_version_change\\.sh$"
+      ],
+      "matchStrings": [
+        "aws-assume-role-with-web-identity#v(?<currentValue>\\d+\\.\\d+\\.\\d+)"
+      ],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "buildkite-plugins/aws-assume-role-with-web-identity-buildkite-plugin",
+      "extractVersionTemplate": "^v?(?<version>.*)$",
+      "versioningTemplate": "semver"
+    },
+    {
+      "customType": "regex",
+      "fileMatch": [
+        "^\\.buildkite/scripts/check_version_change\\.sh$"
+      ],
+      "matchStrings": [
+        "aws-ssm#v(?<currentValue>\\d+\\.\\d+\\.\\d+)"
+      ],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "buildkite-plugins/aws-ssm-buildkite-plugin",
+      "extractVersionTemplate": "^v?(?<version>.*)$",
+      "versioningTemplate": "semver"
+    },
+    {
+      "customType": "regex",
+      "fileMatch": [
+        "^\\.tflint\\.hcl$"
+      ],
+      "matchStrings": [
+        "version\\s*=\\s*\"(?<currentValue>\\d+\\.\\d+\\.\\d+)\""
+      ],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "terraform-linters/tflint-ruleset-aws",
+      "extractVersionTemplate": "^v?(?<version>.*)$",
+      "versioningTemplate": "semver"
     }
   ]
 }
