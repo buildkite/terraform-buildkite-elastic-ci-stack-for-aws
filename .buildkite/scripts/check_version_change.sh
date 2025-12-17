@@ -6,6 +6,11 @@ if [ ${BUILDKITE_PULL_REQUEST} == "false" ]; then
   exit 0
 fi
 
+git fetch --depth=1 origin main >&2
+
+# TODO: Create a Docker image with git installed to avoid this step entirely, but for now let's just use this image and iterate
+# Taking a look at the history of the terraform image, this has always been Alpine based, so shouldn't run into any issues with this, but a Dockerfile would be better, but blocked on this currently.
+# I've added some guardrails to ensure if the BASE changes, this will fail loudly in the meantime.
 if git diff origin/main...HEAD -- locals.tf | grep -q 'cloudformation_stack_version'; then
   echo "cloudformation_stack_version changed, uploading AMI update pipeline step..." >&2
 
@@ -27,7 +32,7 @@ steps:
           image: hashicorp/terraform:1.13
           workdir: "/workdir"
           entrypoint: "/bin/sh"
-          command: ["-c", "apk add --no-cache bash curl git yq jq && bash .buildkite/scripts/update_amis.sh"]
+          command: ["-c", "if command -v apk >/dev/null 2>&1; then apk add --no-cache bash curl git yq jq; else echo 'apk not found: hashicorp/terraform image no longer Alpine; aborting AMI update step' >&2; exit 1; fi; bash .buildkite/scripts/update_amis.sh"]
           environment:
             - GITHUB_TOKEN
             - BUILDKITE_BRANCH
