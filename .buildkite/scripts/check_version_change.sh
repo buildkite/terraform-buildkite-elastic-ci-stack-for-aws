@@ -15,11 +15,16 @@ steps:
     plugins:
       - aws-assume-role-with-web-identity#v1.4.0:
           role-arn: arn:aws:iam::445615400570:role/pipeline-terraform-buildkite-elastic-ci-stack-for-aws-release
+          region: us-east-1
           session-tags:
             - organization_slug
             - organization_id
             - pipeline_slug
             - build_branch
+      - ecr#v2.10.0:
+          login: true
+          account-ids: "445615400570"
+          region: us-east-1
       - aws-ssm#v1.1.0:
           parameters:
             GITHUB_TOKEN: /pipelines/buildkite/terraform-buildkite-elastic-ci-stack-for-aws-release/GITHUB_TOKEN
@@ -43,11 +48,16 @@ steps:
     plugins:
       - aws-assume-role-with-web-identity#v1.4.0:
           role-arn: arn:aws:iam::445615400570:role/pipeline-terraform-buildkite-elastic-ci-stack-for-aws-release
+          region: us-east-1
           session-tags:
             - organization_slug
             - organization_id
             - pipeline_slug
             - build_branch
+      - ecr#v2.10.0:
+          login: true
+          account-ids: "445615400570"
+          region: us-east-1
       - aws-ssm#v1.1.0:
           parameters:
             GITHUB_TOKEN: /pipelines/buildkite/terraform-buildkite-elastic-ci-stack-for-aws-release/GITHUB_TOKEN
