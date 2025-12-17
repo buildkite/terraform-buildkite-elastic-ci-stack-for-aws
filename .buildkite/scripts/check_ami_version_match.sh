@@ -14,10 +14,19 @@ CLOUDFORMATION_TEMPLATE_URL="https://s3.amazonaws.com/buildkite-aws-stack/latest
 RETRY_INTERVAL_IN_SECONDS=600
 MAX_RETRIES=6 # 1 hour seems rational because the CI for Packer takes a while
 RETRY_COUNT=0
+REMOTE_URL="https://github.com/buildkite/terraform-buildkite-elastic-ci-stack-for-aws.git"
 
-setup_ssh() {
+REMOTE_URL="git@github.com:buildkite/terraform-buildkite-elastic-ci-stack-for-aws.git"
+
+setup_auth() {
+  if [[ -n "${GITHUB_TOKEN:-}" ]]; then
+    REMOTE_URL="https://x-access-token:${GITHUB_TOKEN}@github.com/buildkite/terraform-buildkite-elastic-ci-stack-for-aws.git"
+    echo "Using HTTPS with token for git push" >&2
+    return
+  fi
+
   if [[ -z "${DEPLOY_KEY:-}" ]]; then
-    echo "Error: DEPLOY_KEY not set" >&2
+    echo "Error: neither GITHUB_TOKEN nor DEPLOY_KEY is set" >&2
     exit 1
   fi
 
@@ -38,7 +47,7 @@ EOF
   chmod 600 ~/.ssh/config
 }
 
-setup_ssh
+setup_auth
 
 get_tf_version() {
   local version
@@ -80,6 +89,7 @@ run_terraform_fmt() {
 
 ensure_on_branch() {
   local branch="${BUILDKITE_BRANCH:-main}"
+  # Strip whitespace/newlines to avoid contaminating refspec
   branch=$(printf "%s" "$branch" | tr -d '[:space:]')
 
   if ! git symbolic-ref -q HEAD > /dev/null; then
@@ -99,12 +109,36 @@ commit_and_push() {
   git add "$LOCALS_FILE"
   git commit -m "Update AMI mappings to CloudFormation version $(get_cloudformation_version)"
 
-  if ! git push "git@github.com:buildkite/terraform-buildkite-elastic-ci-stack-for-aws.git" "HEAD:${branch}"; then
-    echo "Error: git push failed. Check deploy key permissions and SSH configuration." >&2
+  if ! git push "$REMOTE_URL" "HEAD:${branch}"; then
+    echo "Error: git push failed. Check token permissions and network/SSH configuration." >&2
     exit 1
   fi
 
   echo "Pushed changes to branch $branch" >&2
+}
+
+post_pr_comment() {
+  local message="$1"
+
+  if [[ "${BUILDKITE_PULL_REQUEST:-false}" == "false" ]]; then
+    echo "No pull request context; skipping PR comment." >&2
+    return
+  fi
+
+  if [[ -z "${GITHUB_TOKEN:-}" ]]; then
+    echo "GITHUB_TOKEN not set; cannot post PR comment." >&2
+    return
+  fi
+
+  local pr_number="$BUILDKITE_PULL_REQUEST"
+  local api_url="https://api.github.com/repos/buildkite/terraform-buildkite-elastic-ci-stack-for-aws/pull/${pr_number}/comments"
+
+  echo "Posting PR comment to #${pr_number}" >&2
+  curl -sS -X POST \
+    -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+    -H "Accept: application/vnd.github+json" \
+    -d "$(jq -nc --arg body "$message" '{body: $body}')" \
+    "$api_url" >/dev/null
 }
 
 process_git_changes() {
@@ -115,6 +149,7 @@ process_git_changes() {
     local branch
     branch=$(ensure_on_branch)
     commit_and_push "$branch"
+    post_pr_comment "Updated AMI mappings to CloudFormation version $(get_cloudformation_version). Check changes for the Elastic CI Stack to ensure that there's no other required changes before merging, such as new required input configuration/variables used by cloud init."
   else
     echo "No changes detected in $LOCALS_FILE" >&2
   fi
@@ -132,6 +167,7 @@ update_ami_mappings() {
 
   echo "  buildkite_ami_mapping = {" > "$temp_mapping"
 
+  # Use yq to parse YAML reliably, then format with awk for padding
   echo "$yaml_content" | yq -r '.Mappings.AWSRegion2AMI | to_entries[] | "\(.key)|\(.value.linuxamd64)|\(.value.linuxarm64)|\(.value.windows)"' | \
     awk -F'|' '{printf "    %-28s = { linuxamd64 = \"%-21s\", linuxarm64 = \"%-21s\", windows = \"%-21s\" }\n", $1, $2, $3, $4}' >> "$temp_mapping"
 
@@ -189,24 +225,15 @@ check_versions() {
     exit 1
   else
     # TF Version is greater than the CloudFormation version, so we'll keep checking until the CloudFormation Template is published
-    return 1
-  fi
-}
+    setup_auth() {
+      if [[ -z "${GITHUB_TOKEN:-}" ]]; then
+        echo "Error: GITHUB_TOKEN not set; required for git push and PR comments" >&2
+        exit 1
+      fi
 
-while true; do
-  TF_VERSION=$(get_tf_version)
-  CLOUDFORMATION_VERSION=$(get_cloudformation_version)
+      REMOTE_URL="https://x-access-token:${GITHUB_TOKEN}@github.com/buildkite/terraform-buildkite-elastic-ci-stack-for-aws.git"
+      echo "Using HTTPS with token for git operations" >&2
+    }
 
-  if check_versions "$TF_VERSION" "$CLOUDFORMATION_VERSION"; then
-    break
-  fi
-
+    setup_auth
   if [ "$RETRY_COUNT" -ge "$MAX_RETRIES" ]; then
-    echo "Exceeded maximum retries ($MAX_RETRIES). Exiting, give it some time and retry this job." >&2
-    exit 1
-  fi
-
-  echo "Waiting for new CloudFormation Template to be published, TF_VERSION is $TF_VERSION while CloudFormation version is $CLOUDFORMATION_VERSION. Retrying in 10 minutes..." >&2
-  sleep "$RETRY_INTERVAL_IN_SECONDS"
-  RETRY_COUNT=$((RETRY_COUNT + 1))
-done

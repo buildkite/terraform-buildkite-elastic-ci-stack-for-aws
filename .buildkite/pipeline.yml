@@ -1,9 +1,4 @@
 steps:
-  - label: "Check for Cloudformation Stack Version Change"
-    command: .buildkite/scripts/check_version_change.sh
-    agents:
-      queue: "oss-deploy"
-
   - group: ":terraform: Root Module"
     steps:
       - label: ":terraform: Format Check"

@@ -13,18 +13,27 @@ if git diff origin/main...HEAD -- locals.tf | grep -q 'cloudformation_stack_vers
 steps:
   - label: "Update AMI Mappings"
     plugins:
+      - aws-assume-role-with-web-identity#v1.4.0:
+          role-arn: arn:aws:iam::445615400570:role/pipeline-buildkite-terraform-buildkite-elastic-ci-stack-for-aws-release
+          session-tags:
+            - organization_slug
+            - organization_id
+            - pipeline_slug
+            - build_branch
+      - aws-ssm#v1.1.0:
+          parameters:
+            GITHUB_TOKEN: /pipelines/buildkite/terraform-buildkite-elastic-ci-stack-for-aws-release/GITHUB_TOKEN
       - docker#v5.13.0:
           image: hashicorp/terraform:1.13
           workdir: "/workdir"
           entrypoint: "/bin/sh"
-          command: ["-c", "apk add --no-cache bash curl git openssh yq && bash .buildkite/scripts/check_ami_version_match.sh"]
+          command: ["-c", "apk add --no-cache bash curl git openssh yq jq && bash .buildkite/scripts/check_ami_version_match.sh"]
           environment:
-            - DEPLOY_KEY
+            - GITHUB_TOKEN
             - BUILDKITE_BRANCH
-    secrets:
-        DEPLOY_KEY: ES_FOR_TF_PUB_KEY
+            - BUILDKITE_PULL_REQUEST
     agents:
-      queue: "oss-deploy"
+      queue: "hosted"
 EOF
 else
   echo "cloudformation_stack_version unchanged, skipping AMI update" >&2
@@ -32,17 +41,26 @@ else
 steps:
   - label: "Update AMI Mappings"
     plugins:
+      - aws-assume-role-with-web-identity#v1.4.0:
+          role-arn: arn:aws:iam::445615400570:role/pipeline-buildkite-terraform-buildkite-elastic-ci-stack-for-aws-release
+          session-tags:
+            - organization_slug
+            - organization_id
+            - pipeline_slug
+            - build_branch
+      - aws-ssm#v1.1.0:
+          parameters:
+            GITHUB_TOKEN: /pipelines/buildkite/terraform-buildkite-elastic-ci-stack-for-aws-release/GITHUB_TOKEN
       - docker#v5.13.0:
           image: hashicorp/terraform:1.13
           workdir: "/workdir"
           entrypoint: "/bin/sh"
-          command: ["-c", "apk add --no-cache bash curl git openssh yq && bash .buildkite/scripts/check_ami_version_match.sh"]
+          command: ["-c", "apk add --no-cache bash curl git openssh yq jq && bash .buildkite/scripts/check_ami_version_match.sh"]
           environment:
-            - DEPLOY_KEY
+            - GITHUB_TOKEN
             - BUILDKITE_BRANCH
-    secrets:
-        DEPLOY_KEY: ES_FOR_TF_PUB_KEY
+            - BUILDKITE_PULL_REQUEST
     agents:
-      queue: "oss-deploy"
+      queue: "hosted"
 EOF
 fi
