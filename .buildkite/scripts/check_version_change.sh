@@ -33,7 +33,7 @@ steps:
             - BUILDKITE_BRANCH
             - BUILDKITE_PULL_REQUEST
     agents:
-      queue: "hosted"
+      queue: "oss-deploy"
 EOF
 else
   echo "cloudformation_stack_version unchanged, skipping AMI update" >&2
@@ -61,6 +61,6 @@ steps:
             - BUILDKITE_BRANCH
             - BUILDKITE_PULL_REQUEST
     agents:
-      queue: "hosted"
+      queue: "oss-deploy"
 EOF
 fi
