@@ -81,3 +81,6 @@ steps:
               image: "ghcr.io/terraform-linters/tflint:latest"
               workdir: "/workdir"
               entrypoint: "/bin/sh"
+
+      - wait: ~
+        continue_on_failure: true
