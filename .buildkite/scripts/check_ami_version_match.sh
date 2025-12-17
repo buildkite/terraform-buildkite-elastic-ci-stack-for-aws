@@ -16,35 +16,14 @@ MAX_RETRIES=6 # 1 hour seems rational because the CI for Packer takes a while
 RETRY_COUNT=0
 REMOTE_URL="https://github.com/buildkite/terraform-buildkite-elastic-ci-stack-for-aws.git"
 
-REMOTE_URL="git@github.com:buildkite/terraform-buildkite-elastic-ci-stack-for-aws.git"
-
 setup_auth() {
-  if [[ -n "${GITHUB_TOKEN:-}" ]]; then
-    REMOTE_URL="https://x-access-token:${GITHUB_TOKEN}@github.com/buildkite/terraform-buildkite-elastic-ci-stack-for-aws.git"
-    echo "Using HTTPS with token for git push" >&2
-    return
-  fi
-
-  if [[ -z "${DEPLOY_KEY:-}" ]]; then
-    echo "Error: neither GITHUB_TOKEN nor DEPLOY_KEY is set" >&2
+  if [[ -z "${GITHUB_TOKEN:-}" ]]; then
+    echo "Error: GITHUB_TOKEN not set; required for git push and PR comments" >&2
     exit 1
   fi
 
-  echo "Setting up SSH for git operations..." >&2
-  mkdir -p ~/.ssh
-  chmod 700 ~/.ssh
-  echo "$DEPLOY_KEY" > ~/.ssh/deploy_key
-  chmod 600 ~/.ssh/deploy_key
-
-  cat > ~/.ssh/config <<EOF
-Host github.com
-  HostName github.com
-  IdentityFile ~/.ssh/deploy_key
-  IdentitiesOnly yes
-  StrictHostKeyChecking no
-  UserKnownHostsFile /dev/null
-EOF
-  chmod 600 ~/.ssh/config
+  REMOTE_URL="https://x-access-token:${GITHUB_TOKEN}@github.com/buildkite/terraform-buildkite-elastic-ci-stack-for-aws.git"
+  echo "Using HTTPS with token for git operations" >&2
 }
 
 setup_auth
@@ -131,7 +110,7 @@ post_pr_comment() {
   fi
 
   local pr_number="$BUILDKITE_PULL_REQUEST"
-  local api_url="https://api.github.com/repos/buildkite/terraform-buildkite-elastic-ci-stack-for-aws/pull/${pr_number}/comments"
+  local api_url="https://api.github.com/repos/buildkite/terraform-buildkite-elastic-ci-stack-for-aws/issues/${pr_number}/comments"
 
   echo "Posting PR comment to #${pr_number}" >&2
   curl -sS -X POST \
@@ -224,16 +203,31 @@ check_versions() {
     echo "Terraform version $tf_version is less than CloudFormation version $cf_version, this needs to be bumped to the latest CloudFormation version" >&2
     exit 1
   else
-    # TF Version is greater than the CloudFormation version, so we'll keep checking until the CloudFormation Template is published
-    setup_auth() {
-      if [[ -z "${GITHUB_TOKEN:-}" ]]; then
-        echo "Error: GITHUB_TOKEN not set; required for git push and PR comments" >&2
-        exit 1
+    # TF version is greater than CF version; wait for CF to catch up
+    while [ "$RETRY_COUNT" -lt "$MAX_RETRIES" ]; do
+      echo "TF version $tf_version is greater than CF version $cf_version; retrying in $RETRY_INTERVAL_IN_SECONDS seconds..." >&2
+      sleep "$RETRY_INTERVAL_IN_SECONDS"
+      RETRY_COUNT=$((RETRY_COUNT + 1))
+      cf_version=$(get_cloudformation_version)
+      if [[ "$tf_version" == "$cf_version" ]]; then
+        update_ami_mappings "$tf_version"
+        exit 0
       fi
+    done
 
-      REMOTE_URL="https://x-access-token:${GITHUB_TOKEN}@github.com/buildkite/terraform-buildkite-elastic-ci-stack-for-aws.git"
-      echo "Using HTTPS with token for git operations" >&2
-    }
+    echo "Timed out waiting for CloudFormation version to reach $tf_version after $MAX_RETRIES retries" >&2
+    exit 1
+  fi
+}
 
-    setup_auth
-  if [ "$RETRY_COUNT" -ge "$MAX_RETRIES" ]; then
+main() {
+  local tf_version
+  local cf_version
+
+  tf_version=$(get_tf_version)
+  cf_version=$(get_cloudformation_version)
+
+  check_versions "$tf_version" "$cf_version"
+}
+
+main "$@"
