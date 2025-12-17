@@ -14,7 +14,7 @@ steps:
   - label: "Update AMI Mappings"
     plugins:
       - aws-assume-role-with-web-identity#v1.4.0:
-          role-arn: arn:aws:iam::445615400570:role/pipeline-buildkite-terraform-buildkite-elastic-ci-stack-for-aws-release
+          role-arn: arn:aws:iam::445615400570:role/pipeline-terraform-buildkite-elastic-ci-stack-for-aws-release
           session-tags:
             - organization_slug
             - organization_id
@@ -42,7 +42,7 @@ steps:
   - label: "Update AMI Mappings"
     plugins:
       - aws-assume-role-with-web-identity#v1.4.0:
-          role-arn: arn:aws:iam::445615400570:role/pipeline-buildkite-terraform-buildkite-elastic-ci-stack-for-aws-release
+          role-arn: arn:aws:iam::445615400570:role/pipeline-terraform-buildkite-elastic-ci-stack-for-aws-release
           session-tags:
             - organization_slug
             - organization_id
@@ -64,4 +64,3 @@ steps:
       queue: "oss-deploy"
 EOF
 fi
-# To create a push
