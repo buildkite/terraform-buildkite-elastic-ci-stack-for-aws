@@ -176,7 +176,9 @@ resource "aws_iam_role_policy" "scaler_lambda_policy" {
         {
           Effect = "Allow"
           Action = [
-            "ec2:DescribeInstances"
+            "ec2:DescribeInstances",
+            "ec2:DescribeInstanceStatus",
+            "ssm:DescribeInstanceInformation"
           ]
           Resource = "*"
         }
