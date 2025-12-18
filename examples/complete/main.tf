@@ -14,7 +14,7 @@ provider "aws" {
 
 module "buildkite_agents" {
   source  = "buildkite/elastic-ci-stack-for-aws/buildkite"
-  version = "0.5.0"
+  version = "0.6.0"
 
   # Stack configuration
   stack_name = "production-buildkite-stack"
