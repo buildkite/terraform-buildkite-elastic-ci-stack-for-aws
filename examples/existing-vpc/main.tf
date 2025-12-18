@@ -26,7 +26,8 @@ data "aws_subnets" "private" {
 }
 
 module "buildkite_stack" {
-  source = "github.com/buildkite/terraform-buildkite-elastic-ci-stack-for-aws?ref=v0.4.0"
+  source  = "buildkite/elastic-ci-stack-for-aws/buildkite"
+  version = "0.5.0"
 
   stack_name            = "buildkite-existing-vpc"
   buildkite_queue       = "default"
