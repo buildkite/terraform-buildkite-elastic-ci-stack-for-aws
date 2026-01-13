@@ -35,14 +35,9 @@ resource "aws_lambda_function" "scaler" {
       INSTANCE_BUFFER           = tostring(var.instance_buffer)
       INCLUDE_WAITING           = var.scale_out_for_waiting_jobs ? "true" : "false"
 
-      # Lambda behavior
-      # Convert EventBridge schedule period to Go duration format for LAMBDA_INTERVAL
-      # EventBridge uses "1 minute" but Go expects "1m" or "60s"
-      LAMBDA_INTERVAL = replace(replace(var.scaler_event_schedule_period, " minute", "m"), " minutes", "m")
+      # Lambda behavior /  Polling configuration
+      LAMBDA_INTERVAL = var.scaler_min_poll_interval
       LAMBDA_TIMEOUT  = "110s" # Less than function timeout to allow graceful exit
-
-      # Polling configuration
-      MIN_POLL_INTERVAL = var.scaler_min_poll_interval
 
       # Elastic CI Mode (experimental)
       ELASTIC_CI_MODE = var.scaler_enable_elastic_ci_mode ? "true" : "false"
