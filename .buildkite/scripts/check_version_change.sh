@@ -31,7 +31,7 @@ steps:
           parameters:
             GITHUB_TOKEN: /pipelines/buildkite/terraform-buildkite-elastic-ci-stack-for-aws-release/GITHUB_TOKEN
       - docker#v5.13.0:
-          image: hashicorp/terraform:1.13
+          image: hashicorp/terraform:1.14
           workdir: "/workdir"
           entrypoint: "/bin/sh"
           command: ["-c", "if command -v apk >/dev/null 2>&1; then apk add --no-cache bash curl git yq jq; else echo 'apk not found: hashicorp/terraform image no longer Alpine; aborting AMI update step' >&2; exit 1; fi; bash .buildkite/scripts/update_amis.sh"]
