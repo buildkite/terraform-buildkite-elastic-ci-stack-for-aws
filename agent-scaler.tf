@@ -9,7 +9,7 @@ resource "aws_lambda_function" "scaler" {
   s3_key    = "buildkite-agent-scaler/v${local.buildkite_agent_scaler_version}/handler${var.lambda_architecture == "arm64" ? "-arm64" : ""}.zip"
 
   handler       = "bootstrap"
-  runtime       = "provided.al2"
+  runtime       = "provided.al2023"
   architectures = [var.lambda_architecture]
   timeout       = 120
   memory_size   = 128
