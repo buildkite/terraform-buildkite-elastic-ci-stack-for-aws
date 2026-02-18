@@ -47,7 +47,7 @@
         "^locals\\.tf$"
       ],
       "matchStrings": [
-        "cloudformation_stack_version\\s*=\\s*\"(?<currentValue>v?\\d+\\.\\d+\\.\\d+)\""
+        "cloudformation_stack_version\\s*=\\s*\"v(?<currentValue>\\d+\\.\\d+\\.\\d+)\""
       ],
       "datasourceTemplate": "github-releases",
       "depNameTemplate": "buildkite/elastic-ci-stack-for-aws",
