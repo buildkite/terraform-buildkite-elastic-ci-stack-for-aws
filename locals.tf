@@ -66,7 +66,7 @@ locals {
     eu-west-3                    = { linuxamd64 = "ami-037036978936b0a82", linuxarm64 = "ami-01d18fc608abb912d", windows = "ami-05cfa71991b7822dc" }
     eu-north-1                   = { linuxamd64 = "ami-07ee6d736eca681a9", linuxarm64 = "ami-0bf51bcd5b2dd9b48", windows = "ami-0a921b7e978828b89" }
     sa-east-1                    = { linuxamd64 = "ami-01f11a77ee61cbaf1", linuxarm64 = "ami-00eb950b384a0b4df", windows = "ami-08929d5b37f2f9351" }
-    cloudformation_stack_version = "v6.60.0"
+    cloudformation_stack_version = "v6.61.0"
   }
 
   # Region-specific Lambda deployment bucket
