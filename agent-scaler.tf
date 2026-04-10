@@ -37,7 +37,7 @@ resource "aws_lambda_function" "scaler" {
 
       # Lambda behavior /  Polling configuration
       LAMBDA_INTERVAL = var.scaler_min_poll_interval
-      LAMBDA_TIMEOUT  = "110s" # Less than function timeout to allow graceful exit
+      LAMBDA_TIMEOUT  = "50s" # Less than function timeout to allow graceful exit
 
       # Elastic CI Mode (experimental)
       ELASTIC_CI_MODE = var.scaler_enable_elastic_ci_mode ? "true" : "false"
