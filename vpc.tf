@@ -26,6 +26,10 @@ resource "aws_subnet" "subnet0" {
   tags = merge(local.common_tags, {
     Name = "${local.stack_name_full}-subnet0"
   })
+
+  lifecycle {
+    ignore_changes = [availability_zone]
+  }
 }
 
 resource "aws_subnet" "subnet1" {
@@ -36,6 +40,10 @@ resource "aws_subnet" "subnet1" {
   tags = merge(local.common_tags, {
     Name = "${local.stack_name_full}-subnet1"
   })
+
+  lifecycle {
+    ignore_changes = [availability_zone]
+  }
 }
 
 resource "aws_route_table" "routes" {
