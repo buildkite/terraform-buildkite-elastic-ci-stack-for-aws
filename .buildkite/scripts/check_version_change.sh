@@ -20,7 +20,7 @@ if git diff origin/main...HEAD -- locals.tf | grep -q 'cloudformation_stack_vers
 steps:
   - label: "Update AMI Mappings"
     plugins:
-      - aws-assume-role-with-web-identity#v1.4.0:
+      - aws-assume-role-with-web-identity#v1.6.0:
           role-arn: arn:aws:iam::445615400570:role/pipeline-terraform-buildkite-elastic-ci-stack-for-aws-release
           session-tags:
             - organization_slug
