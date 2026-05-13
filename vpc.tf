@@ -78,12 +78,11 @@ resource "aws_vpc_security_group_ingress_rule" "security_group_ssh_ingress" {
 }
 
 # VPC Endpoints for SSM connectivity
-resource "aws_vpc_endpoint" "ssm" {
+resource "aws_vpc_endpoint" "ssm_endpoint" {
   count               = local.create_vpc ? 1 : 0
   vpc_id              = aws_vpc.vpc[0].id
   service_name        = "com.amazonaws.${data.aws_region.current.id}.ssm"
   vpc_endpoint_type   = "Interface"
-  subnet_ids          = [for subnet in aws_subnet.subnets : subnet.id]
   security_group_ids  = [aws_security_group.vpc_endpoint_sg[0].id]
   private_dns_enabled = true
 
@@ -92,12 +91,17 @@ resource "aws_vpc_endpoint" "ssm" {
   })
 }
 
-resource "aws_vpc_endpoint" "ssmmessages" {
+resource "aws_vpc_endpoint_subnet_association" "ssm" {
+  for_each = aws_subnet.subnets
+  vpc_endpoint_id = aws_vpc_endpoint.ssm_endpoint[0].id
+  subnet_id       = aws_subnet.subnets[each.key].id
+}
+
+resource "aws_vpc_endpoint" "ssmmessages_endpoint" {
   count               = local.create_vpc ? 1 : 0
   vpc_id              = aws_vpc.vpc[0].id
   service_name        = "com.amazonaws.${data.aws_region.current.id}.ssmmessages"
   vpc_endpoint_type   = "Interface"
-  subnet_ids          = [for subnet in aws_subnet.subnets : subnet.id]
   security_group_ids  = [aws_security_group.vpc_endpoint_sg[0].id]
   private_dns_enabled = true
 
@@ -106,18 +110,29 @@ resource "aws_vpc_endpoint" "ssmmessages" {
   })
 }
 
-resource "aws_vpc_endpoint" "ec2messages" {
+resource "aws_vpc_endpoint_subnet_association" "ssmmessages" {
+  for_each = aws_subnet.subnets
+  vpc_endpoint_id = aws_vpc_endpoint.ssmmessages_endpoint[0].id
+  subnet_id       = aws_subnet.subnets[each.key].id
+}
+
+resource "aws_vpc_endpoint" "ec2messages_endpoint" {
   count               = local.create_vpc ? 1 : 0
   vpc_id              = aws_vpc.vpc[0].id
   service_name        = "com.amazonaws.${data.aws_region.current.id}.ec2messages"
   vpc_endpoint_type   = "Interface"
-  subnet_ids          = [for subnet in aws_subnet.subnets : subnet.id]
   security_group_ids  = [aws_security_group.vpc_endpoint_sg[0].id]
   private_dns_enabled = true
 
   tags = merge(local.common_tags, {
     Name = "${local.stack_name_full}-ec2messages-endpoint"
   })
+}
+
+resource "aws_vpc_endpoint_subnet_association" "ec2messages" {
+  for_each = aws_subnet.subnets
+  vpc_endpoint_id = aws_vpc_endpoint.ec2messages_endpoint[0].id
+  subnet_id       = aws_subnet.subnets[each.key].id
 }
 
 # Security group for VPC endpoints
