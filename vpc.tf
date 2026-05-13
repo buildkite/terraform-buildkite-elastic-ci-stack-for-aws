@@ -16,34 +16,14 @@ resource "aws_internet_gateway" "gateway" {
   })
 }
 
-
-
-resource "aws_subnet" "subnet0" {
-  count             = local.create_vpc ? 1 : 0
-  availability_zone = local.use_custom_azs ? element(split(",", var.availability_zones), 0) : element(data.aws_availability_zones.available.names, 0)
-  cidr_block        = "10.0.1.0/24"
+resource "aws_subnet" "subnets" {
+  for_each          = local.create_vpc ? { for idx, az in local.availability_zones : az => idx } : {}
+  availability_zone = each.key
+  cidr_block        = "10.0.${each.value}.0/24"
   vpc_id            = aws_vpc.vpc[0].id
   tags = merge(local.common_tags, {
-    Name = "${local.stack_name_full}-subnet0"
+    Name = "${local.stack_name_full}-subnet-${each.key}"
   })
-
-  lifecycle {
-    ignore_changes = [availability_zone]
-  }
-}
-
-resource "aws_subnet" "subnet1" {
-  count             = local.create_vpc ? 1 : 0
-  availability_zone = local.use_custom_azs ? element(split(",", var.availability_zones), 1) : element(data.aws_availability_zones.available.names, 1)
-  cidr_block        = "10.0.2.0/24"
-  vpc_id            = aws_vpc.vpc[0].id
-  tags = merge(local.common_tags, {
-    Name = "${local.stack_name_full}-subnet1"
-  })
-
-  lifecycle {
-    ignore_changes = [availability_zone]
-  }
 }
 
 resource "aws_route_table" "routes" {
@@ -59,15 +39,10 @@ resource "aws_route" "route_default" {
   route_table_id         = aws_route_table.routes[0].id
 }
 
-resource "aws_route_table_association" "subnet0_routes" {
-  count          = local.create_vpc ? 1 : 0
-  subnet_id      = aws_subnet.subnet0[0].id
-  route_table_id = aws_route_table.routes[0].id
-}
+resource "aws_route_table_association" "subnet_routes" {
+  for_each = aws_subnet.subnets
 
-resource "aws_route_table_association" "subnet1_routes" {
-  count          = local.create_vpc ? 1 : 0
-  subnet_id      = aws_subnet.subnet1[0].id
+  subnet_id      = aws_subnet.subnets[each.key].id
   route_table_id = aws_route_table.routes[0].id
 }
 
@@ -108,7 +83,7 @@ resource "aws_vpc_endpoint" "ssm" {
   vpc_id              = aws_vpc.vpc[0].id
   service_name        = "com.amazonaws.${data.aws_region.current.id}.ssm"
   vpc_endpoint_type   = "Interface"
-  subnet_ids          = [aws_subnet.subnet0[0].id, aws_subnet.subnet1[0].id]
+  subnet_ids          = [for subnet in aws_subnet.subnets : subnet.id]
   security_group_ids  = [aws_security_group.vpc_endpoint_sg[0].id]
   private_dns_enabled = true
 
@@ -122,7 +97,7 @@ resource "aws_vpc_endpoint" "ssmmessages" {
   vpc_id              = aws_vpc.vpc[0].id
   service_name        = "com.amazonaws.${data.aws_region.current.id}.ssmmessages"
   vpc_endpoint_type   = "Interface"
-  subnet_ids          = [aws_subnet.subnet0[0].id, aws_subnet.subnet1[0].id]
+  subnet_ids          = [for subnet in aws_subnet.subnets : subnet.id]
   security_group_ids  = [aws_security_group.vpc_endpoint_sg[0].id]
   private_dns_enabled = true
 
@@ -136,7 +111,7 @@ resource "aws_vpc_endpoint" "ec2messages" {
   vpc_id              = aws_vpc.vpc[0].id
   service_name        = "com.amazonaws.${data.aws_region.current.id}.ec2messages"
   vpc_endpoint_type   = "Interface"
-  subnet_ids          = [aws_subnet.subnet0[0].id, aws_subnet.subnet1[0].id]
+  subnet_ids          = [for subnet in aws_subnet.subnets : subnet.id]
   security_group_ids  = [aws_security_group.vpc_endpoint_sg[0].id]
   private_dns_enabled = true
 

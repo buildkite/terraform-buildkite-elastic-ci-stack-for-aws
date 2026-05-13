@@ -13,6 +13,7 @@ locals {
   create_vpc            = var.vpc_id == ""
   create_security_group = length(var.security_group_ids) == 0
   use_custom_azs        = var.availability_zones != ""
+  availability_zones    = local.use_custom_azs ? split(",", var.availability_zones) : data.aws_availability_zones.available.names
 
   # Secrets and artifacts bucket settings
   create_secrets_bucket = var.enable_secrets_plugin && var.secrets_bucket == ""

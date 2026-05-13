@@ -191,8 +191,7 @@ resource "aws_launch_template" "agent_launch_template" {
 resource "aws_autoscaling_group" "agent_auto_scale_group" {
   name = "${local.stack_name_full}-asg"
   vpc_zone_identifier = local.create_vpc ? [
-    aws_subnet.subnet0[0].id,
-    aws_subnet.subnet1[0].id
+    for subnet in aws_subnet.subnets : subnet.id
   ] : var.subnets
 
   mixed_instances_policy {
