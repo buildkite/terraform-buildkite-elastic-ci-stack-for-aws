@@ -5,6 +5,7 @@
 variable "stack_name" {
   description = <<-EOT
     Unique name for this Buildkite stack. Used as a prefix for all resource names to enable multiple stack deployments.
+    Must contain only alphanumeric characters and hyphens, and be 30 characters or less.
 
     WARNING: Changing this value after initial deployment will cause most resources to be destroyed and recreated,
     resulting in downtime and potential data loss. If the stack needs to be renamed, consider deploying a new stack and migrating workloads.
@@ -13,8 +14,8 @@ variable "stack_name" {
   default     = "buildkite-stack"
 
   validation {
-    condition     = can(regex("^[a-zA-Z0-9-]+$", var.stack_name)) && length(var.stack_name) <= 32
-    error_message = "Stack name must contain only alphanumeric characters and hyphens, and be 32 characters or less."
+    condition     = can(regex("^[a-zA-Z0-9-]+$", var.stack_name)) && length(var.stack_name) <= 30
+    error_message = "Stack name must contain only alphanumeric characters and hyphens, and be 30 characters or less."
   }
 }
 
