@@ -140,6 +140,10 @@ locals {
   # Stack naming and tagging
   stack_name_full = "${var.stack_name}-${random_id.stack_suffix.hex}"
 
+  # aws_iam_role.name_prefix must be <= 38 chars because the AWS provider appends
+  # a generated suffix and IAM role names must be <= 64 chars.
+  stop_buildkite_agents_role_name_prefix = substr("${local.stack_name_full}-stop-bk-", 0, 38)
+
   common_tags = merge(
     var.tags,
     local.enable_cost_tags ? {

@@ -269,7 +269,7 @@ resource "aws_iam_role_policy" "asg_process_suspender" {
 resource "aws_iam_role" "stop_buildkite_agents" {
   count = local.use_custom_stop_buildkite_agents_role ? 0 : (local.enable_graceful_shutdown ? 1 : 0)
 
-  name_prefix          = "${local.stack_name_full}-stop-bk-"
+  name_prefix          = local.stop_buildkite_agents_role_name_prefix
   permissions_boundary = local.use_permissions_boundary ? var.instance_role_permissions_boundary_arn : null
 
   assume_role_policy = jsonencode({
