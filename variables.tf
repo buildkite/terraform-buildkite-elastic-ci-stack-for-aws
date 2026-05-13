@@ -110,7 +110,7 @@ variable "buildkite_agent_tracing_backend" {
 }
 
 variable "buildkite_agent_cancel_grace_period" {
-  description = "The number of seconds a canceled or timed out job is given to gracefully terminate and upload its artifacts."
+  description = "The number of seconds a canceled or timed out job is given to gracefully terminate and upload its artifacts. Must be greater than buildkite_agent_signal_grace_period when that is enabled."
   type        = number
   default     = 60
 
@@ -121,7 +121,7 @@ variable "buildkite_agent_cancel_grace_period" {
 }
 
 variable "buildkite_agent_signal_grace_period" {
-  description = "The number of seconds given to a subprocess to handle being sent cancel-signal. After this period has elapsed, SIGKILL will be sent."
+  description = "The number of seconds given to a subprocess to handle being sent cancel-signal. After this period has elapsed, SIGKILL will be sent. Set to -1 to use the agent default. When set to 0 or greater, buildkite_agent_cancel_grace_period must be greater than this value."
   type        = number
   default     = -1
 
@@ -1131,6 +1131,15 @@ resource "terraform_data" "validate_token" {
     precondition {
       condition     = var.buildkite_agent_token != "" || var.buildkite_agent_token_parameter_store_path != ""
       error_message = "Either buildkite_agent_token or buildkite_agent_token_parameter_store_path must be provided."
+    }
+  }
+}
+
+resource "terraform_data" "validate_agent_grace_periods" {
+  lifecycle {
+    precondition {
+      condition     = var.buildkite_agent_signal_grace_period == -1 || var.buildkite_agent_cancel_grace_period > var.buildkite_agent_signal_grace_period
+      error_message = "buildkite_agent_cancel_grace_period must be greater than buildkite_agent_signal_grace_period when buildkite_agent_signal_grace_period is enabled. Increase buildkite_agent_cancel_grace_period or leave buildkite_agent_signal_grace_period set to -1."
     }
   }
 }
