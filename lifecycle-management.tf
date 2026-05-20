@@ -17,7 +17,7 @@ resource "aws_lambda_function" "az_rebalancing_suspender" {
 
 data "archive_file" "az_rebalancing_suspender" {
   type        = "zip"
-  output_path = "${path.module}/.terraform/lambda/az-rebalancing-suspender.zip"
+  output_path = "${path.module}/.terraform/lambda/${local.stack_name_full}-az-rebalancing-suspender.zip"
 
   source {
     content  = <<-PYTHON
@@ -100,7 +100,7 @@ data "archive_file" "stop_buildkite_agents" {
   count = local.enable_graceful_shutdown ? 1 : 0
 
   type        = "zip"
-  output_path = "${path.module}/.terraform/lambda/stop-buildkite-agents.zip"
+  output_path = "${path.module}/.terraform/lambda/${local.stack_name_full}-stop-buildkite-agents.zip"
 
   source {
     content  = <<-PYTHON
