@@ -78,9 +78,9 @@ locals {
 
   # ARM instance families: Graviton (a1, c6g*, c7g*, c8g, g5g, i4g, im4gn, is4gen, m6g*, m7g*, m8g*, r6g*, r7g*, r8g, t4g, x2gd)
   is_arm_instance = contains([
-    "a1", "c6g", "c6gd", "c6gn", "c7g", "c7gd", "c7gn", "c8g", "g5g",
+    "a1", "c6g", "c6gd", "c6gn", "c7g", "c7gd", "c7gn", "c8g", "c8gd", "g5g",
     "i4g", "im4gn", "is4gen", "m6g", "m6gd", "m7g", "m7gd", "m8g", "m8gd",
-    "r6g", "r6gd", "r7g", "r7gd", "r8g", "t4g", "x2gd"
+    "r6g", "r6gd", "r7g", "r7gd", "r8g", "r8gd", "t4g", "x2gd"
   ], local.instance_type_family)
 
   # Burstable instance families: t2, t3, t3a, t4g
