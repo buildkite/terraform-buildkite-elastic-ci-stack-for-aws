@@ -76,15 +76,19 @@ locals {
   # Detect ARM and burstable instances from instance type family
   instance_type_family = split(".", split(",", var.instance_types)[0])[0]
 
-  # ARM instance families: Graviton (a1, c6g*, c7g*, c8g, g5g, i4g, im4gn, is4gen, m6g*, m7g*, m8g*, r6g*, r7g*, r8g, t4g, x2gd)
-  is_arm_instance = contains([
-    "a1", "c6g", "c6gd", "c6gn", "c7g", "c7gd", "c7gn", "c8g", "c8gd", "g5g",
-    "i4g", "im4gn", "is4gen", "m6g", "m6gd", "m7g", "m7gd", "m8g", "m8gd",
-    "r6g", "r6gd", "r7g", "r7gd", "r8g", "r8gd", "t4g", "x2gd"
-  ], local.instance_type_family)
+  # ARM (AWS Graviton) families carry a "g" in the options position, right after
+  # the generation digit (e.g. c8gd, m8gn, r8gb, x8g, i8g, hpc7g, g5g, x2gd). a1
+  # is the original Graviton1 family and predates this convention, so it has no "g".
+  # https://docs.aws.amazon.com/ec2/latest/instancetypes/instance-type-names.html
+  is_arm_instance = (
+    local.instance_type_family == "a1" ||
+    can(regex("^[a-z]+[0-9]+g", local.instance_type_family))
+  )
 
-  # Burstable instance families: t2, t3, t3a, t4g
-  is_burstable_instance = contains(["t2", "t3", "t3a", "t4g"], local.instance_type_family)
+  # Burstable (T series) instances earn and spend CPU credits. The "t" series
+  # letter in the first position identifies them (t2, t3, t3a, t4g).
+  # https://docs.aws.amazon.com/ec2/latest/instancetypes/instance-type-names.html
+  is_burstable_instance = can(regex("^t[0-9]", local.instance_type_family))
 
   is_windows       = var.instance_operating_system == "windows"
   ami_architecture = local.is_windows ? "windows" : (local.is_arm_instance ? "linuxarm64" : "linuxamd64")
