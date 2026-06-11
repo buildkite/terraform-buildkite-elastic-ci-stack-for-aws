@@ -42,7 +42,10 @@ resource "aws_iam_role_policy_attachment" "instance_ecr_policy" {
 
 # Attach custom managed policies if configured
 resource "aws_iam_role_policy_attachment" "instance_managed_policies" {
-  for_each   = local.use_custom_iam_role ? toset([]) : (local.use_managed_policies ? toset(var.managed_policy_arns) : toset([]))
+  for_each = local.use_custom_iam_role ? {} : {
+    for i, arn in var.managed_policy_arns : tostring(i) => arn
+  }
+
   role       = aws_iam_role.iam_role[0].name
   policy_arn = each.value
 }
