@@ -36,9 +36,6 @@ locals {
   role_tag_list  = compact(split(",", var.instance_role_tags))
   role_tag_count = length(local.role_tag_list)
 
-  use_managed_policies = length(var.managed_policy_arns) > 0
-
-
   # Image ID selection and parameter store settings
   use_custom_ami    = var.image_id != ""
   use_ami_parameter = var.image_id_parameter != ""
