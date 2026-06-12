@@ -162,7 +162,7 @@ resource "aws_iam_role_policy" "scaler_lambda_policy" {
           Action = [
             "kms:Decrypt"
           ]
-          Resource = var.buildkite_agent_token_parameter_store_kms_key
+          Resource = "arn:aws:kms:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:key/${var.buildkite_agent_token_parameter_store_kms_key}"
         }
       ] : [],
       # Elastic CI Mode - Enhanced permissions for graceful scale-in
