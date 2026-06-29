@@ -184,18 +184,18 @@ See [Licence.md](Licence.md) (MIT)
 ## Requirements
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.0 |
 | <a name="requirement_archive"></a> [archive](#requirement\_archive) | ~> 2.0 |
-| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 5.0 |
+| <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 6.33.0 |
 | <a name="requirement_random"></a> [random](#requirement\_random) | ~> 3.0 |
 
 ## Providers
 
 | Name | Version |
-|------|---------|
+| ---- | ------- |
 | <a name="provider_archive"></a> [archive](#provider\_archive) | ~> 2.0 |
-| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 5.0 |
+| <a name="provider_aws"></a> [aws](#provider\_aws) | >= 6.33.0 |
 | <a name="provider_random"></a> [random](#provider\_random) | ~> 3.0 |
 | <a name="provider_terraform"></a> [terraform](#provider\_terraform) | n/a |
 
@@ -206,7 +206,7 @@ No modules.
 ## Resources
 
 | Name | Type |
-|------|------|
+| ---- | ---- |
 | [aws_autoscaling_group.agent_auto_scale_group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/autoscaling_group) | resource |
 | [aws_autoscaling_lifecycle_hook.instance_terminating](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/autoscaling_lifecycle_hook) | resource |
 | [aws_autoscaling_schedule.scheduled_scale_down_action](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/autoscaling_schedule) | resource |
@@ -282,7 +282,7 @@ No modules.
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
+| ---- | ----------- | ---- | ------- | :------: |
 | <a name="input_agent_endpoint"></a> [agent\_endpoint](#input\_agent\_endpoint) | API endpoint URL for Buildkite agent communication. Most customers shouldn't need to change this unless using a custom endpoint agreed with the Buildkite team. | `string` | `"https://agent.buildkite.com/v3"` | no |
 | <a name="input_agent_env_file_url"></a> [agent\_env\_file\_url](#input\_agent\_env\_file\_url) | Optional - HTTPS or S3 URL containing environment variables for the Buildkite agent process itself (not for builds). These variables configure agent behavior like proxy settings or debugging options. For build environment variables, use pipeline 'env' configuration instead. | `string` | `""` | no |
 | <a name="input_agents_per_instance"></a> [agents\_per\_instance](#input\_agents\_per\_instance) | Number of Buildkite agents to start on each EC2 instance. NOTE: If an agent crashes or is terminated, it won't be automatically restarted, leaving fewer active agents on that instance. The scale\_in\_idle\_period parameter controls when the entire instance terminates (when all agents are idle), not individual agent restarts. Consider enabling scaler\_enable\_elastic\_ci\_mode for better agent management, or use fewer agents per instance with more instances for high availability. | `number` | `1` | no |
@@ -337,6 +337,7 @@ No modules.
 | <a name="input_enable_ecr_credential_helper"></a> [enable\_ecr\_credential\_helper](#input\_enable\_ecr\_credential\_helper) | Enable Amazon ECR Credential Helper in ECR plugin for Docker authentication. Provides an alternative authentication method for ECR. | `bool` | `false` | no |
 | <a name="input_enable_ecr_plugin"></a> [enable\_ecr\_plugin](#input\_enable\_ecr\_plugin) | Enables ECR plugin for all pipelines. | `bool` | `true` | no |
 | <a name="input_enable_instance_storage"></a> [enable\_instance\_storage](#input\_enable\_instance\_storage) | Mount available NVMe Instance Storage at /mnt/ephemeral, and use it to store docker images and containers, and the build working directory. You must ensure that the instance types have instance storage available for this to have any effect. See https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-store-volumes.html | `bool` | `false` | no |
+| <a name="input_enable_nested_virtualization"></a> [enable\_nested\_virtualization](#input\_enable\_nested\_virtualization) | Enable nested virtualization on launch-template instances. Only supported on specific Intel instance types (see https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/amazon-ec2-nested-virtualization.html); the module default (t3.large) does not support it, so set instance\_types accordingly. Requires AWS provider >= 6.33.0. | `bool` | `false` | no |
 | <a name="input_enable_pre_exit_disk_cleanup"></a> [enable\_pre\_exit\_disk\_cleanup](#input\_enable\_pre\_exit\_disk\_cleanup) | Controls whether disk space check also runs in the pre-exit hook after jobs complete. Disk cleanup always runs in the environment hook when disk space is low. When enabled, the same check also runs in the pre-exit hook to reclaim resources generated during job execution. | `bool` | `false` | no |
 | <a name="input_enable_scheduled_scaling"></a> [enable\_scheduled\_scaling](#input\_enable\_scheduled\_scaling) | Enable scheduled scaling to automatically adjust min\_size based on time-based schedules | `bool` | `false` | no |
 | <a name="input_enable_secrets_plugin"></a> [enable\_secrets\_plugin](#input\_enable\_secrets\_plugin) | Enables S3 Secrets plugin for all pipelines. | `bool` | `true` | no |
@@ -410,7 +411,7 @@ No modules.
 ## Outputs
 
 | Name | Description |
-|------|-------------|
+| ---- | ----------- |
 | <a name="output_auto_scaling_group_arn"></a> [auto\_scaling\_group\_arn](#output\_auto\_scaling\_group\_arn) | ARN of the agent Auto Scaling Group |
 | <a name="output_auto_scaling_group_name"></a> [auto\_scaling\_group\_name](#output\_auto\_scaling\_group\_name) | Name of the agent Auto Scaling Group |
 | <a name="output_image_id"></a> [image\_id](#output\_image\_id) | AMI ID used by agent instances |

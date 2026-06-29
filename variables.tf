@@ -406,6 +406,12 @@ variable "enable_detailed_monitoring" {
   default     = false
 }
 
+variable "enable_nested_virtualization" {
+  description = "Enable nested virtualization on launch-template instances. Only supported on specific Intel instance types (see https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/amazon-ec2-nested-virtualization.html); the module default (t3.large) does not support it, so set instance_types accordingly. Requires AWS provider >= 6.33.0."
+  type        = bool
+  default     = false
+}
+
 # =============================================================================
 # INSTANCE PURCHASING CONFIGURATION
 # =============================================================================
