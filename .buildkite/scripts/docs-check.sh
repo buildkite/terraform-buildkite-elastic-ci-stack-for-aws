@@ -7,6 +7,7 @@ if ! command -v git &> /dev/null; then
 fi
 
 echo "Generating documentation..."
+terraform-docs --version
 echo "Current commit: $(git rev-parse HEAD 2>/dev/null || echo 'not a git repo')"
 echo "README.md before generation:"
 md5sum README.md || true

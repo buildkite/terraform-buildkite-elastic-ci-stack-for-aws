@@ -49,7 +49,7 @@ steps:
           - "README.md"
         plugins:
           - docker#v5.13.0:
-              image: "quay.io/terraform-docs/terraform-docs:latest"
+              image: "quay.io/terraform-docs/terraform-docs:latest-amd64"
               workdir: "/workdir"
               entrypoint: "/bin/sh"
 
