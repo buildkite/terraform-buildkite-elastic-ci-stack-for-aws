@@ -1,11 +1,9 @@
 #!/usr/bin/bash
 set -euo pipefail
 
-if [ ${BUILDKITE_PULL_REQUEST} == "false" ]; then
-  echo "Not a pull request, skipping version change check." >&2
-  exit 0
-fi
-
+# Detect if the cloudformation_stack_version has changed since main.
+# This runs on both PRs and direct pushes (e.g. Renovate commits), so AMI
+# mappings are always kept in sync with the stack version.
 git fetch --depth=1 origin main >&2
 
 if git diff origin/main...HEAD -- locals.tf | grep -q 'cloudformation_stack_version'; then
