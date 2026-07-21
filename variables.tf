@@ -48,13 +48,13 @@ variable "buildkite_agent_token_parameter_store_kms_key" {
 }
 
 variable "buildkite_agent_release" {
-  description = "Buildkite agent release channel to install. 'stable' = production-ready (recommended), 'beta' = pre-release with latest features, 'edge' = bleeding-edge development builds. Use 'stable' unless specific new features are required."
+  description = "Buildkite agent release channel to install. 'stable' = production-ready (recommended), 'beta' = pre-release with latest features, 'edge' = bleeding-edge development builds, 'oldstable' = previous major version of the buildkite-agent for compatibility testing. Use 'stable' unless specific new features or backward-compatibility needs are required."
   type        = string
   default     = "stable"
 
   validation {
-    condition     = contains(["stable", "beta", "edge"], var.buildkite_agent_release)
-    error_message = "buildkite_agent_release must be one of: stable, beta, edge."
+    condition     = contains(["stable", "beta", "edge", "oldstable"], var.buildkite_agent_release)
+    error_message = "buildkite_agent_release must be one of: stable, beta, edge, oldstable."
   }
 }
 
