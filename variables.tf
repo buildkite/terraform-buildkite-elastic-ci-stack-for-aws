@@ -891,6 +891,12 @@ variable "bootstrap_script_url" {
   default     = ""
 }
 
+variable "custom_user_data" {
+  description = "Optional - Unencoded custom user data for agent instances. When set, this replaces the module-managed Linux or Windows user data, so instance bootstrap inputs are not applied automatically."
+  type        = string
+  default     = null
+}
+
 variable "mount_tmpfs_at_tmp" {
   description = "Controls the filesystem mounted at /tmp. By default, /tmp is a tmpfs (memory-backed filesystem). Disabling this causes /tmp to be stored in the root filesystem."
   type        = bool
