@@ -71,7 +71,7 @@ locals {
 
   # Region-specific Lambda deployment bucket
   # us-east-1 uses "buildkite-lambdas", all other regions append the region suffix
-  agent_scaler_s3_bucket         = data.aws_region.current.id == "us-east-1" ? "buildkite-lambdas" : "buildkite-lambdas-${data.aws_region.current.id}"
+  agent_scaler_s3_bucket         = data.aws_region.current.region == "us-east-1" ? "buildkite-lambdas" : "buildkite-lambdas-${data.aws_region.current.region}"
   buildkite_agent_scaler_version = "1.12.0"
   # Detect ARM and burstable instances from instance type family
   instance_type_family = split(".", split(",", var.instance_types)[0])[0]
@@ -92,7 +92,7 @@ locals {
 
   is_windows       = var.instance_operating_system == "windows"
   ami_architecture = local.is_windows ? "windows" : (local.is_arm_instance ? "linuxarm64" : "linuxamd64")
-  selected_ami_id  = local.buildkite_ami_mapping[data.aws_region.current.id][local.ami_architecture]
+  selected_ami_id  = local.buildkite_ami_mapping[data.aws_region.current.region][local.ami_architecture]
 
   # Instance naming and timeout settings
   use_default_timeout      = var.instance_creation_timeout == ""
@@ -123,7 +123,7 @@ locals {
   signing_key_is_arn       = startswith(var.pipeline_signing_kms_key_id, "arn:")
 
   # Computed signing key ARN (for use in templates)
-  signing_key_arn = local.create_signing_key ? "arn:aws:kms:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:key/${aws_kms_key.pipeline_signing_kms_key[0].key_id}" : var.pipeline_signing_kms_key_id
+  signing_key_arn = local.create_signing_key ? "arn:aws:kms:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:key/${aws_kms_key.pipeline_signing_kms_key[0].key_id}" : var.pipeline_signing_kms_key_id
 
   # Computed agent token parameter ARN (for IAM policies)
   agent_token_parameter_arn = local.use_custom_token_path ? "arn:aws:ssm:*:*:parameter${var.buildkite_agent_token_parameter_store_path}" : "arn:aws:ssm:*:*:parameter/buildkite/elastic-ci-stack/${local.stack_name_full}/agent-token"
