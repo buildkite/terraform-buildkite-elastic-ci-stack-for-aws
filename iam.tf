@@ -191,7 +191,7 @@ resource "aws_iam_role_policy" "buildkite_agent_policy" {
           Sid      = "DecryptAgentToken"
           Effect   = "Allow"
           Action   = "kms:Decrypt"
-          Resource = "arn:aws:kms:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:key/${var.buildkite_agent_token_parameter_store_kms_key}"
+          Resource = "arn:aws:kms:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:key/${var.buildkite_agent_token_parameter_store_kms_key}"
         }
       ] : []
     )
@@ -336,7 +336,7 @@ resource "aws_iam_role_policy" "stop_buildkite_agents_ssm_document" {
     Statement = [{
       Effect   = "Allow"
       Action   = "ssm:SendCommand"
-      Resource = "arn:${data.aws_partition.current.partition}:ssm:${data.aws_region.current.id}::document/AWS-RunShellScript"
+      Resource = "arn:${data.aws_partition.current.partition}:ssm:${data.aws_region.current.region}::document/AWS-RunShellScript"
     }]
   })
 }
@@ -352,7 +352,7 @@ resource "aws_iam_role_policy" "stop_buildkite_agents_ssm_instances" {
     Statement = [{
       Effect   = "Allow"
       Action   = "ssm:SendCommand"
-      Resource = "arn:${data.aws_partition.current.partition}:ec2:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:instance/*"
+      Resource = "arn:${data.aws_partition.current.partition}:ec2:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:instance/*"
       Condition = {
         StringEquals = {
           "aws:ResourceTag/aws:autoscaling:groupName" = aws_autoscaling_group.agent_auto_scale_group.name

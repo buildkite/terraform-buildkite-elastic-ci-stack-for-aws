@@ -106,7 +106,7 @@ resource "aws_vpc_security_group_ingress_rule" "security_group_ssh_ingress" {
 resource "aws_vpc_endpoint" "ssm" {
   count               = local.create_vpc ? 1 : 0
   vpc_id              = aws_vpc.vpc[0].id
-  service_name        = "com.amazonaws.${data.aws_region.current.id}.ssm"
+  service_name        = "com.amazonaws.${data.aws_region.current.region}.ssm"
   vpc_endpoint_type   = "Interface"
   subnet_ids          = [aws_subnet.subnet0[0].id, aws_subnet.subnet1[0].id]
   security_group_ids  = [aws_security_group.vpc_endpoint_sg[0].id]
@@ -120,7 +120,7 @@ resource "aws_vpc_endpoint" "ssm" {
 resource "aws_vpc_endpoint" "ssmmessages" {
   count               = local.create_vpc ? 1 : 0
   vpc_id              = aws_vpc.vpc[0].id
-  service_name        = "com.amazonaws.${data.aws_region.current.id}.ssmmessages"
+  service_name        = "com.amazonaws.${data.aws_region.current.region}.ssmmessages"
   vpc_endpoint_type   = "Interface"
   subnet_ids          = [aws_subnet.subnet0[0].id, aws_subnet.subnet1[0].id]
   security_group_ids  = [aws_security_group.vpc_endpoint_sg[0].id]
@@ -134,7 +134,7 @@ resource "aws_vpc_endpoint" "ssmmessages" {
 resource "aws_vpc_endpoint" "ec2messages" {
   count               = local.create_vpc ? 1 : 0
   vpc_id              = aws_vpc.vpc[0].id
-  service_name        = "com.amazonaws.${data.aws_region.current.id}.ec2messages"
+  service_name        = "com.amazonaws.${data.aws_region.current.region}.ec2messages"
   vpc_endpoint_type   = "Interface"
   subnet_ids          = [aws_subnet.subnet0[0].id, aws_subnet.subnet1[0].id]
   security_group_ids  = [aws_security_group.vpc_endpoint_sg[0].id]
