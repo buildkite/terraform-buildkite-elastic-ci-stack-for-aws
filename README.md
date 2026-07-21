@@ -131,6 +131,15 @@ Changes specific to individual use cases should be maintained in forked reposito
 
 If you need to build your own AMIs take a look at the [elastic-ci-stack-for-aws](https://github.com/buildkite/elastic-ci-stack-for-aws#Development) repository and the [Custom images](https://buildkite.com/docs/agent/v3/aws/elastic-ci-stack/ec2-linux-and-windows/setup#custom-images) section of the [Buildkite Docs](https://buildkite.com/docs).
 
+### Custom AMI autoscaling
+
+Custom user data must:
+
+- Start the number of agents set by `agents_per_instance` (one by default), using `buildkite_queue`, `agent_endpoint`, and the configured token. The scaler uses this value when scaling out.
+- In the default scaler mode, set `disconnect-after-idle-timeout` to `scale_in_idle_period` and call `autoscaling:TerminateInstanceInAutoScalingGroup` after all agents stop. The managed instance role grants this action; custom roles must also grant it.
+- Run AWS Systems Manager Agent when `buildkite_agent_enable_graceful_shutdown` or `scaler_enable_elastic_ci_mode` is enabled.
+- With `scaler_enable_elastic_ci_mode`, expose a `buildkite-agent.service` that can be stopped through SSM. The scaler ignores `disable_scale_in`, stops selected agents, and reduces desired capacity. The service must still terminate its instance on exit because instance protection remains enabled.
+
 ## Support Policy
 
 We provide support for security and bug fixes on the current major release only.
