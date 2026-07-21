@@ -378,13 +378,13 @@ variable "cpu_credits" {
 }
 
 variable "image_id" {
-  description = "Optional - Custom AMI to use for instances (must be based on the stack's AMI)."
+  description = "Optional - Custom AMI to use for instances. Set custom_user_data when the AMI is not based on the stack's AMI."
   type        = string
   default     = ""
 }
 
 variable "image_id_parameter" {
-  description = "Optional - Custom AMI SSM Parameter to use for instances (must be based on the stack's AMI)."
+  description = "Optional - Custom AMI SSM Parameter to use for instances. Set custom_user_data when the AMI is not based on the stack's AMI."
   type        = string
   default     = ""
 }
