@@ -22,9 +22,10 @@ locals {
   use_artifacts_bucket  = var.artifacts_bucket != ""
 
   # Instance role, permissions boundary, and policy settings
-  use_custom_iam_role      = var.instance_role_arn != ""
-  use_custom_role_name     = var.instance_role_name != ""
-  use_permissions_boundary = var.instance_role_permissions_boundary_arn != ""
+  use_custom_iam_role              = var.instance_role_arn != ""
+  use_custom_role_name             = var.instance_role_name != ""
+  use_custom_instance_profile_name = var.instance_profile_name != ""
+  use_permissions_boundary         = var.instance_role_permissions_boundary_arn != ""
 
   custom_role_name = local.use_custom_iam_role ? element(split("/", var.instance_role_arn), length(split("/", var.instance_role_arn)) - 1) : ""
 
