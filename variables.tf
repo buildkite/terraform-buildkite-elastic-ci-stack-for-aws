@@ -639,6 +639,12 @@ variable "instance_role_name" {
   default     = ""
 }
 
+variable "instance_profile_name" {
+  description = "Optional - A name for the IAM instance profile attached to agent instances. Defaults to '<stack-name>-InstanceProfile' when not set."
+  type        = string
+  default     = ""
+}
+
 variable "instance_role_permissions_boundary_arn" {
   description = "Optional - The ARN of the policy used to set the permissions boundary for the role when creating a new role. Ignored when instance_role_arn is provided."
   type        = string

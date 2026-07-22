@@ -152,7 +152,7 @@ resource "aws_iam_role_policy" "scaler_lambda_policy" {
           Action = [
             "ssm:GetParameter"
           ]
-          Resource = local.use_custom_token_path ? "arn:aws:ssm:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:parameter${var.buildkite_agent_token_parameter_store_path}" : aws_ssm_parameter.buildkite_agent_token_parameter[0].arn
+          Resource = local.use_custom_token_path ? "arn:aws:ssm:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:parameter${var.buildkite_agent_token_parameter_store_path}" : aws_ssm_parameter.buildkite_agent_token_parameter[0].arn
         }
       ],
       # KMS for encrypted SSM parameter (if using customer-managed key)
@@ -162,7 +162,7 @@ resource "aws_iam_role_policy" "scaler_lambda_policy" {
           Action = [
             "kms:Decrypt"
           ]
-          Resource = "arn:aws:kms:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:key/${var.buildkite_agent_token_parameter_store_kms_key}"
+          Resource = "arn:aws:kms:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:key/${var.buildkite_agent_token_parameter_store_kms_key}"
         }
       ] : [],
       # Elastic CI Mode - Enhanced permissions for graceful scale-in
@@ -186,8 +186,8 @@ resource "aws_iam_role_policy" "scaler_lambda_policy" {
             "ssm:GetCommandInvocation"
           ]
           Resource = [
-            "arn:aws:ssm:${data.aws_region.current.id}::document/AWS-RunShellScript",
-            "arn:aws:ec2:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:instance/*"
+            "arn:aws:ssm:${data.aws_region.current.region}::document/AWS-RunShellScript",
+            "arn:aws:ec2:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:instance/*"
           ]
         }
       ] : [],
@@ -197,7 +197,7 @@ resource "aws_iam_role_policy" "scaler_lambda_policy" {
           Action = [
             "ec2:TerminateInstances"
           ]
-          Resource = "arn:aws:ec2:${data.aws_region.current.id}:${data.aws_caller_identity.current.account_id}:instance/*"
+          Resource = "arn:aws:ec2:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:instance/*"
           Condition = {
             StringEquals = {
               "ec2:ResourceTag/aws:autoscaling:groupName" = aws_autoscaling_group.agent_auto_scale_group.name

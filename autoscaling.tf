@@ -91,9 +91,9 @@ resource "aws_launch_template" "agent_launch_template" {
     stack_deployed_by                             = "terraform"
     scale_in_idle_period                          = var.scale_in_idle_period
     secrets_bucket                                = local.create_secrets_bucket ? aws_s3_bucket.managed_secrets_bucket[0].id : var.secrets_bucket
-    secrets_bucket_region                         = local.create_secrets_bucket ? data.aws_region.current.id : var.secrets_bucket_region
+    secrets_bucket_region                         = local.create_secrets_bucket ? data.aws_region.current.region : var.secrets_bucket_region
     artifacts_bucket                              = var.artifacts_bucket
-    artifacts_bucket_region                       = local.use_artifacts_bucket ? coalesce(var.artifacts_bucket_region, data.aws_region.current.id) : data.aws_region.current.id
+    artifacts_bucket_region                       = local.use_artifacts_bucket ? coalesce(var.artifacts_bucket_region, data.aws_region.current.region) : data.aws_region.current.region
     artifacts_s3_acl                              = var.artifacts_s3_acl
     agent_token_path                              = local.use_custom_token_path ? var.buildkite_agent_token_parameter_store_path : aws_ssm_parameter.buildkite_agent_token_parameter[0].name
     agents_per_instance                           = var.agents_per_instance
@@ -120,7 +120,7 @@ resource "aws_launch_template" "agent_launch_template" {
     purge_builds_on_disk_full                     = var.buildkite_purge_builds_on_disk_full ? "true" : "false"
     additional_sudo_permissions                   = var.buildkite_additional_sudo_permissions
     buildkite_windows_administrator               = var.buildkite_windows_administrator ? "true" : "false"
-    aws_region                                    = data.aws_region.current.id
+    aws_region                                    = data.aws_region.current.region
     enable_secrets_plugin                         = var.enable_secrets_plugin ? "true" : "false"
     secrets_plugin_skip_ssh_key_not_found_warning = var.secrets_plugin_skip_ssh_key_not_found_warning ? "true" : "false"
     enable_ecr_plugin                             = var.enable_ecr_plugin ? "true" : "false"
@@ -134,9 +134,9 @@ resource "aws_launch_template" "agent_launch_template" {
     stack_deployed_by                             = "terraform"
     scale_in_idle_period                          = var.scale_in_idle_period
     secrets_bucket                                = local.create_secrets_bucket ? aws_s3_bucket.managed_secrets_bucket[0].id : var.secrets_bucket
-    secrets_bucket_region                         = local.create_secrets_bucket ? data.aws_region.current.id : var.secrets_bucket_region
+    secrets_bucket_region                         = local.create_secrets_bucket ? data.aws_region.current.region : var.secrets_bucket_region
     artifacts_bucket                              = var.artifacts_bucket
-    artifacts_bucket_region                       = local.use_artifacts_bucket ? coalesce(var.artifacts_bucket_region, data.aws_region.current.id) : data.aws_region.current.id
+    artifacts_bucket_region                       = local.use_artifacts_bucket ? coalesce(var.artifacts_bucket_region, data.aws_region.current.region) : data.aws_region.current.region
     artifacts_s3_acl                              = var.artifacts_s3_acl
     agent_token_path                              = local.use_custom_token_path ? var.buildkite_agent_token_parameter_store_path : aws_ssm_parameter.buildkite_agent_token_parameter[0].name
     agents_per_instance                           = var.agents_per_instance
@@ -165,7 +165,7 @@ resource "aws_launch_template" "agent_launch_template" {
     terminate_instance_on_disk_full               = var.buildkite_terminate_instance_on_disk_full ? "true" : "false"
     purge_builds_on_disk_full                     = var.buildkite_purge_builds_on_disk_full ? "true" : "false"
     additional_sudo_permissions                   = var.buildkite_additional_sudo_permissions
-    aws_region                                    = data.aws_region.current.id
+    aws_region                                    = data.aws_region.current.region
     enable_secrets_plugin                         = var.enable_secrets_plugin ? "true" : "false"
     secrets_plugin_skip_ssh_key_not_found_warning = var.secrets_plugin_skip_ssh_key_not_found_warning ? "true" : "false"
     enable_ecr_plugin                             = var.enable_ecr_plugin ? "true" : "false"
