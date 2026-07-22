@@ -82,7 +82,7 @@ resource "aws_launch_template" "agent_launch_template" {
     )
   }
 
-  user_data = base64encode(var.custom_user_data != null ? var.custom_user_data : (local.is_windows ? templatefile("${path.module}/scripts/user-data-windows.ps1", {
+  user_data = base64encode(var.custom_user_data != "" ? var.custom_user_data : (local.is_windows ? templatefile("${path.module}/scripts/user-data-windows.ps1", {
     enable_docker_userns_remap                    = var.enable_docker_user_namespace_remap ? "true" : "false"
     enable_docker_experimental                    = var.enable_docker_experimental ? "true" : "false"
     docker_networking_protocol                    = var.docker_networking_protocol

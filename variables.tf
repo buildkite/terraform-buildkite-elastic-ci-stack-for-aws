@@ -894,7 +894,7 @@ variable "bootstrap_script_url" {
 variable "custom_user_data" {
   description = "Optional - Unencoded custom user data for agent instances. When set, this replaces the module-managed Linux or Windows user data, so instance bootstrap inputs are not applied automatically."
   type        = string
-  default     = null
+  default     = ""
 }
 
 variable "mount_tmpfs_at_tmp" {

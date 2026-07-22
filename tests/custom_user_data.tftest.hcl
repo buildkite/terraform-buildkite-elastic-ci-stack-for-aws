@@ -33,7 +33,14 @@ mock_provider "aws" {
 }
 
 mock_provider "archive" {}
-mock_provider "random" {}
+mock_provider "random" {
+  mock_resource "random_id" {
+    override_during = plan
+    defaults = {
+      hex = "01234567"
+    }
+  }
+}
 
 run "uses_custom_user_data_verbatim_before_encoding" {
   command = plan
@@ -49,17 +56,18 @@ run "uses_custom_user_data_verbatim_before_encoding" {
   }
 }
 
-run "empty_custom_user_data_still_overrides_managed_template" {
+run "empty_custom_user_data_uses_managed_template" {
   command = plan
 
   variables {
-    buildkite_agent_token = "test-token"
-    custom_user_data      = ""
+    buildkite_agent_token_parameter_store_path = "/buildkite/test-token"
+    custom_user_data                           = ""
+    secrets_bucket                             = "test-secrets-bucket"
   }
 
   assert {
-    condition     = aws_launch_template.agent_launch_template.user_data == ""
-    error_message = "An explicitly empty custom user data value should disable managed user data."
+    condition     = startswith(base64decode(aws_launch_template.agent_launch_template.user_data), "Content-Type: multipart/mixed")
+    error_message = "An empty custom_user_data value should render the managed user data."
   }
 }
 
