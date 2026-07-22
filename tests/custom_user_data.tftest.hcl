@@ -71,6 +71,25 @@ run "empty_custom_user_data_uses_managed_template" {
   }
 }
 
+run "default_renders_managed_template" {
+  command = plan
+
+  variables {
+    buildkite_agent_token_parameter_store_path = "/buildkite/test-token"
+    secrets_bucket                             = "test-secrets-bucket"
+  }
+
+  assert {
+    condition     = startswith(base64decode(aws_launch_template.agent_launch_template.user_data), "Content-Type: multipart/mixed")
+    error_message = "The default custom_user_data value should render the managed user data."
+  }
+
+  assert {
+    condition     = strcontains(base64decode(aws_launch_template.agent_launch_template.user_data), "/usr/local/bin/bk-install-elastic-stack.sh")
+    error_message = "Managed user data should invoke the agent bootstrap script."
+  }
+}
+
 run "custom_user_data_overrides_windows_template_too" {
   command = plan
 
