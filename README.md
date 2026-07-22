@@ -135,6 +135,8 @@ If you need to build your own AMIs take a look at the [elastic-ci-stack-for-aws]
 
 `custom_user_data` is base64-encoded without interpolation. Pass any module input values when constructing the string, for example with `templatefile(...)`.
 
+Base64 is not encryption. Custom user data is visible in Terraform plans and state. Fetch secrets at boot from SSM Parameter Store or Secrets Manager instead of embedding them.
+
 Custom user data must:
 
 - Start the number of agents set by `agents_per_instance` (one by default), using `buildkite_queue`, `agent_endpoint`, and the configured token. The scaler uses this value when scaling out.
