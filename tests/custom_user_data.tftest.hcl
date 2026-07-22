@@ -90,6 +90,42 @@ run "default_renders_managed_template" {
   }
 }
 
+run "accepts_custom_user_data_at_16_kib_limit" {
+  command = plan
+
+  variables {
+    buildkite_agent_token = "test-token"
+    custom_user_data      = join("", [for _ in range(1024) : "aaaaaaaaaaaaaaaa"])
+  }
+
+  assert {
+    condition     = length(base64decode(aws_launch_template.agent_launch_template.user_data)) == 16384
+    error_message = "custom_user_data at the 16 KiB EC2 limit should be accepted."
+  }
+}
+
+run "rejects_custom_user_data_over_16_kib_limit" {
+  command = plan
+
+  variables {
+    buildkite_agent_token = "test-token"
+    custom_user_data      = "${join("", [for _ in range(1024) : "aaaaaaaaaaaaaaaa"])}a"
+  }
+
+  expect_failures = [var.custom_user_data]
+}
+
+run "counts_multibyte_custom_user_data_in_bytes" {
+  command = plan
+
+  variables {
+    buildkite_agent_token = "test-token"
+    custom_user_data      = "${join("", [for _ in range(1024) : "éééééééé"])}é"
+  }
+
+  expect_failures = [var.custom_user_data]
+}
+
 run "custom_user_data_overrides_windows_template_too" {
   command = plan
 

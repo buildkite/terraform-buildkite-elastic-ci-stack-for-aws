@@ -895,6 +895,14 @@ variable "custom_user_data" {
   description = "Optional - Unencoded custom user data for agent instances. The module encodes this value using base64 without interpolation. When set, it replaces the module-managed Linux or Windows user data, so instance bootstrap inputs are not applied automatically."
   type        = string
   default     = ""
+
+  validation {
+    condition = (
+      length(base64encode(var.custom_user_data)) * 3 / 4 -
+      length(regexall("=", base64encode(var.custom_user_data)))
+    ) <= 16384
+    error_message = "custom_user_data must be 16 KiB (16,384 bytes) or less. Fetch larger bootstrap scripts at boot instead of embedding them."
+  }
 }
 
 variable "mount_tmpfs_at_tmp" {
