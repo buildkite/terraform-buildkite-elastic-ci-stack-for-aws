@@ -133,6 +133,8 @@ If you need to build your own AMIs take a look at the [elastic-ci-stack-for-aws]
 
 ### Custom AMI autoscaling
 
+`custom_user_data` is base64-encoded without interpolation. Pass any module input values when constructing the string, for example with `templatefile(...)`.
+
 Custom user data must:
 
 - Start the number of agents set by `agents_per_instance` (one by default), using `buildkite_queue`, `agent_endpoint`, and the configured token. The scaler uses this value when scaling out.
@@ -326,7 +328,7 @@ No modules.
 | <a name="input_cost_allocation_tag_name"></a> [cost\_allocation\_tag\_name](#input\_cost\_allocation\_tag\_name) | The name of the Cost Allocation Tag used for billing purposes. | `string` | `"CreatedBy"` | no |
 | <a name="input_cost_allocation_tag_value"></a> [cost\_allocation\_tag\_value](#input\_cost\_allocation\_tag\_value) | The value of the Cost Allocation Tag used for billing purposes. | `string` | `"buildkite-elastic-ci-stack-for-aws"` | no |
 | <a name="input_cpu_credits"></a> [cpu\_credits](#input\_cpu\_credits) | Credit option for CPU usage of burstable instances. Sets the CreditSpecification.CpuCredits property in the LaunchTemplate for T-class instance types (t2, t3, t3a, t4g). | `string` | `"unlimited"` | no |
-| <a name="input_custom_user_data"></a> [custom\_user\_data](#input\_custom\_user\_data) | Optional - Unencoded custom user data for agent instances. When set, this replaces the module-managed Linux or Windows user data, so instance bootstrap inputs are not applied automatically. | `string` | `""` | no |
+| <a name="input_custom_user_data"></a> [custom\_user\_data](#input\_custom\_user\_data) | Optional - Unencoded custom user data for agent instances. The module encodes this value using base64 without interpolation. When set, it replaces the module-managed Linux or Windows user data, so instance bootstrap inputs are not applied automatically. | `string` | `""` | no |
 | <a name="input_disable_scale_in"></a> [disable\_scale\_in](#input\_disable\_scale\_in) | Whether the desired count should ever be decreased on the Auto Scaling group. When set to true (default), the scaler will not reduce the Auto Scaling group's desired capacity, and instances are expected to self-terminate when idle. | `bool` | `true` | no |
 | <a name="input_docker_builder_prune_enabled"></a> [docker\_builder\_prune\_enabled](#input\_docker\_builder\_prune\_enabled) | Controls whether Docker builder cache is pruned during garbage collection. When enabled, Docker builder cache will run after Docker image pruning. | `bool` | `false` | no |
 | <a name="input_docker_fixed_cidr_v4"></a> [docker\_fixed\_cidr\_v4](#input\_docker\_fixed\_cidr\_v4) | Optional IPv4 CIDR block for Docker's fixed-cidr option. Restricts the IP range Docker uses for container networking on the default bridge. Must be a subset of docker\_ipv4\_address\_pool\_1. Leave empty to disable. Only applies to Linux instances, not Windows. | `string` | `""` | no |

@@ -892,7 +892,7 @@ variable "bootstrap_script_url" {
 }
 
 variable "custom_user_data" {
-  description = "Optional - Unencoded custom user data for agent instances. When set, this replaces the module-managed Linux or Windows user data, so instance bootstrap inputs are not applied automatically."
+  description = "Optional - Unencoded custom user data for agent instances. The module encodes this value using base64 without interpolation. When set, it replaces the module-managed Linux or Windows user data, so instance bootstrap inputs are not applied automatically."
   type        = string
   default     = ""
 }
