@@ -3,7 +3,7 @@ set -euo pipefail
 
 echo "--- Running terraform validate on all examples"
 
-EXAMPLES="basic complete existing-vpc scheduled-scaling spot-instances"
+EXAMPLES="basic complete custom-ami-debian-ubuntu existing-vpc scheduled-scaling spot-instances"
 EXIT_CODE=0
 
 for example in $EXAMPLES; do
