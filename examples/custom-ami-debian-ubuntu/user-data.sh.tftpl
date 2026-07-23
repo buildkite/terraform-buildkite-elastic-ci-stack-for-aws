@@ -85,7 +85,8 @@ aws autoscaling terminate-instance-in-auto-scaling-group \
   --should-decrement-desired-capacity \
   || aws autoscaling terminate-instance-in-auto-scaling-group \
     --region "$AWS_REGION" \
-    --instance-id "$INSTANCE_ID"
+    --instance-id "$INSTANCE_ID" \
+    --no-should-decrement-desired-capacity
 SCRIPT
 chmod 0755 /usr/local/bin/terminate-buildkite-instance
 
