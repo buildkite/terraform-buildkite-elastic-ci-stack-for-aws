@@ -6,6 +6,8 @@ resource "aws_iam_instance_profile" "iam_instance_profile" {
   name = local.use_custom_instance_profile_name ? var.instance_profile_name : "${local.stack_name_full}-InstanceProfile"
   path = "/"
   role = local.use_custom_iam_role ? local.custom_role_name : aws_iam_role.iam_role[0].name
+
+  tags = local.common_tags
 }
 
 resource "aws_iam_role" "iam_role" {
