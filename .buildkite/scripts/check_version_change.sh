@@ -28,7 +28,7 @@ steps:
       - aws-ssm#v1.1.0:
           parameters:
             GITHUB_TOKEN: /pipelines/buildkite/terraform-buildkite-elastic-ci-stack-for-aws-release/GITHUB_TOKEN
-      - docker#v5.13.0:
+      - docker#v5.14.0:
           image: hashicorp/terraform:1.15
           workdir: "/workdir"
           entrypoint: "/bin/sh"
