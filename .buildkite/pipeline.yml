@@ -16,6 +16,8 @@ steps:
           - "*.tf"
           - "*.tfvars"
           - "scripts/*"
+          - "tests/**"
+          - ".buildkite/scripts/validate.sh"
         plugins:
           - docker#v5.13.0:
               image: "hashicorp/terraform:1.15"

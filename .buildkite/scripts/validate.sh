@@ -7,5 +7,8 @@ terraform init -backend=false
 echo "Validating Terraform configuration..."
 terraform validate
 
-echo "✅ Terraform configuration is valid"
+echo "Running Terraform tests..."
+terraform test
+
+echo "✅ Terraform configuration is valid and tests passed"
 exit 0
