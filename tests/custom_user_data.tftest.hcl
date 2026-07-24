@@ -71,6 +71,21 @@ run "empty_custom_user_data_uses_managed_template" {
   }
 }
 
+run "null_custom_user_data_uses_managed_template" {
+  command = plan
+
+  variables {
+    buildkite_agent_token_parameter_store_path = "/buildkite/test-token"
+    custom_user_data                           = null
+    secrets_bucket                             = "test-secrets-bucket"
+  }
+
+  assert {
+    condition     = startswith(base64decode(aws_launch_template.agent_launch_template.user_data), "Content-Type: multipart/mixed")
+    error_message = "A null custom_user_data value should render the managed user data."
+  }
+}
+
 run "default_renders_managed_template" {
   command = plan
 
