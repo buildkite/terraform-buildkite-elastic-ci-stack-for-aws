@@ -4,7 +4,7 @@
 # Great for getting started or development environments.
 
 terraform {
-  required_version = ">= 1.0"
+  required_version = ">= 1.1"
 }
 
 module "buildkite_stack" {

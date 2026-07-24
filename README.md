@@ -131,6 +131,19 @@ Changes specific to individual use cases should be maintained in forked reposito
 
 If you need to build your own AMIs take a look at the [elastic-ci-stack-for-aws](https://github.com/buildkite/elastic-ci-stack-for-aws#Development) repository and the [Custom images](https://buildkite.com/docs/agent/v3/aws/elastic-ci-stack/ec2-linux-and-windows/setup#custom-images) section of the [Buildkite Docs](https://buildkite.com/docs).
 
+### Custom AMI autoscaling
+
+`custom_user_data` is base64-encoded without interpolation. Pass any module input values when constructing the string, for example with `templatefile(...)`.
+
+Base64 is not encryption. Custom user data is visible in Terraform plans and state. Fetch secrets at boot from SSM Parameter Store or Secrets Manager instead of embedding them.
+
+Custom user data must:
+
+- Start the number of agents set by `agents_per_instance` (one by default), using `buildkite_queue`, `agent_endpoint`, and the configured token. The scaler uses this value when scaling out.
+- In the default scaler mode, set `disconnect-after-idle-timeout` to `scale_in_idle_period` and call `autoscaling:TerminateInstanceInAutoScalingGroup` after all agents stop. The managed instance role grants this action; custom roles must also grant it.
+- Run AWS Systems Manager Agent when `buildkite_agent_enable_graceful_shutdown` or `scaler_enable_elastic_ci_mode` is enabled.
+- With `scaler_enable_elastic_ci_mode`, expose a `buildkite-agent.service` that can be stopped through SSM. The scaler ignores `disable_scale_in`, stops selected agents, and reduces desired capacity. The service must still terminate its instance on exit because instance protection remains enabled.
+
 ## Support Policy
 
 We provide support for security and bug fixes on the current major release only.
@@ -185,7 +198,7 @@ See [Licence.md](Licence.md) (MIT)
 
 | Name | Version |
 | ---- | ------- |
-| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.0 |
+| <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.1 |
 | <a name="requirement_archive"></a> [archive](#requirement\_archive) | ~> 2.0 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 6.33.0 |
 | <a name="requirement_random"></a> [random](#requirement\_random) | ~> 3.0 |
@@ -317,6 +330,7 @@ No modules.
 | <a name="input_cost_allocation_tag_name"></a> [cost\_allocation\_tag\_name](#input\_cost\_allocation\_tag\_name) | The name of the Cost Allocation Tag used for billing purposes. | `string` | `"CreatedBy"` | no |
 | <a name="input_cost_allocation_tag_value"></a> [cost\_allocation\_tag\_value](#input\_cost\_allocation\_tag\_value) | The value of the Cost Allocation Tag used for billing purposes. | `string` | `"buildkite-elastic-ci-stack-for-aws"` | no |
 | <a name="input_cpu_credits"></a> [cpu\_credits](#input\_cpu\_credits) | Credit option for CPU usage of burstable instances. Sets the CreditSpecification.CpuCredits property in the LaunchTemplate for T-class instance types (t2, t3, t3a, t4g). | `string` | `"unlimited"` | no |
+| <a name="input_custom_user_data"></a> [custom\_user\_data](#input\_custom\_user\_data) | Optional - Unencoded custom user data for agent instances. The module encodes this value using base64 without interpolation. When set, it replaces the module-managed Linux or Windows user data, so instance bootstrap inputs are not applied automatically. | `string` | `""` | no |
 | <a name="input_disable_scale_in"></a> [disable\_scale\_in](#input\_disable\_scale\_in) | Whether the desired count should ever be decreased on the Auto Scaling group. When set to true (default), the scaler will not reduce the Auto Scaling group's desired capacity, and instances are expected to self-terminate when idle. | `bool` | `true` | no |
 | <a name="input_docker_builder_prune_enabled"></a> [docker\_builder\_prune\_enabled](#input\_docker\_builder\_prune\_enabled) | Controls whether Docker builder cache is pruned during garbage collection. When enabled, Docker builder cache will run after Docker image pruning. | `bool` | `false` | no |
 | <a name="input_docker_fixed_cidr_v4"></a> [docker\_fixed\_cidr\_v4](#input\_docker\_fixed\_cidr\_v4) | Optional IPv4 CIDR block for Docker's fixed-cidr option. Restricts the IP range Docker uses for container networking on the default bridge. Must be a subset of docker\_ipv4\_address\_pool\_1. Leave empty to disable. Only applies to Linux instances, not Windows. | `string` | `""` | no |
@@ -342,8 +356,8 @@ No modules.
 | <a name="input_enable_scheduled_scaling"></a> [enable\_scheduled\_scaling](#input\_enable\_scheduled\_scaling) | Enable scheduled scaling to automatically adjust min\_size based on time-based schedules | `bool` | `false` | no |
 | <a name="input_enable_secrets_plugin"></a> [enable\_secrets\_plugin](#input\_enable\_secrets\_plugin) | Enables S3 Secrets plugin for all pipelines. | `bool` | `true` | no |
 | <a name="input_experimental_enable_resource_limits"></a> [experimental\_enable\_resource\_limits](#input\_experimental\_enable\_resource\_limits) | Experimental - If true, enables systemd resource limits for the Buildkite agent. This helps prevent resource exhaustion by limiting CPU, memory, and I/O usage. Useful for shared instances running multiple agents or resource-intensive builds. | `bool` | `false` | no |
-| <a name="input_image_id"></a> [image\_id](#input\_image\_id) | Optional - Custom AMI to use for instances (must be based on the stack's AMI). | `string` | `""` | no |
-| <a name="input_image_id_parameter"></a> [image\_id\_parameter](#input\_image\_id\_parameter) | Optional - Custom AMI SSM Parameter to use for instances (must be based on the stack's AMI). | `string` | `""` | no |
+| <a name="input_image_id"></a> [image\_id](#input\_image\_id) | Optional - Custom AMI to use for instances. Set custom\_user\_data when the AMI is not based on the stack's AMI. | `string` | `""` | no |
+| <a name="input_image_id_parameter"></a> [image\_id\_parameter](#input\_image\_id\_parameter) | Optional - Custom AMI SSM Parameter to use for instances. Set custom\_user\_data when the AMI is not based on the stack's AMI. | `string` | `""` | no |
 | <a name="input_imdsv2_tokens"></a> [imdsv2\_tokens](#input\_imdsv2\_tokens) | Security setting for EC2 instance metadata access. 'required' enforces secure token-based access (recommended for security), 'optional' allows both secure and legacy access methods. Use 'required' unless legacy applications require the older metadata service. | `string` | `"optional"` | no |
 | <a name="input_instance_buffer"></a> [instance\_buffer](#input\_instance\_buffer) | Number of idle instances to keep running. Lower values save costs, higher values reduce wait times for new jobs. | `number` | `0` | no |
 | <a name="input_instance_creation_timeout"></a> [instance\_creation\_timeout](#input\_instance\_creation\_timeout) | Optional - Timeout period for Auto Scaling Group Creation Policy. | `string` | `""` | no |

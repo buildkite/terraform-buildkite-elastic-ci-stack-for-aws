@@ -1,0 +1,100 @@
+#!/bin/bash
+# Terraform replaces the variables referenced by this template.
+# shellcheck disable=SC2154
+set -euo pipefail
+
+export DEBIAN_FRONTEND=noninteractive
+
+# Demonstration only: a production AMI would normally bake in the Buildkite
+# agent, AWS CLI v2, curl, and their supporting packages. Remove this install
+# section when the selected AMI already provides those dependencies.
+apt-get update
+apt-get install -y apt-transport-https ca-certificates curl gpg unzip
+
+case "$(uname -m)" in
+  x86_64) AWS_CLI_ARCH=x86_64 ;;
+  aarch64) AWS_CLI_ARCH=aarch64 ;;
+  *) echo "Unsupported architecture: $(uname -m)" >&2; exit 1 ;;
+esac
+AWS_CLI_DIR=$(mktemp -d)
+curl -fsSL "https://awscli.amazonaws.com/awscli-exe-linux-$AWS_CLI_ARCH.zip" -o "$AWS_CLI_DIR/awscliv2.zip"
+unzip -q "$AWS_CLI_DIR/awscliv2.zip" -d "$AWS_CLI_DIR"
+"$AWS_CLI_DIR/aws/install"
+rm -rf "$AWS_CLI_DIR"
+
+install -d -m 0755 /usr/share/keyrings
+curl -fsSL https://keys.openpgp.org/vks/v1/by-fingerprint/32A37959C2FA5C3C99EFBC32A79206696452D198 \
+  | gpg --dearmor --yes -o /usr/share/keyrings/buildkite-agent-archive-keyring.gpg
+
+echo "deb [signed-by=/usr/share/keyrings/buildkite-agent-archive-keyring.gpg] https://apt.buildkite.com/buildkite-agent stable main" \
+  > /etc/apt/sources.list.d/buildkite-agent.list
+
+apt-get update
+apt-get install -y buildkite-agent
+# End demonstration-only package installation.
+
+systemctl stop buildkite-agent.service || true
+
+IMDS_TOKEN=$(curl -fsS --retry 5 -X PUT \
+  -H "X-aws-ec2-metadata-token-ttl-seconds: 21600" \
+  http://169.254.169.254/latest/api/token)
+AWS_REGION=$(curl -fsS --retry 5 \
+  -H "X-aws-ec2-metadata-token: $IMDS_TOKEN" \
+  http://169.254.169.254/latest/meta-data/placement/region)
+AGENT_TOKEN=$(aws ssm get-parameter \
+  --region "$AWS_REGION" \
+  --name "${token_parameter_path}" \
+  --with-decryption \
+  --query Parameter.Value \
+  --output text)
+
+cat > /etc/buildkite-agent/buildkite-agent.cfg <<EOF
+token="$AGENT_TOKEN"
+name="%hostname-%spawn"
+tags="queue=${buildkite_queue},stack=${stack_name}"
+endpoint="${agent_endpoint}"
+spawn=${agents_per_instance}
+disconnect-after-idle-timeout=${scale_in_idle_period}
+build-path="/var/lib/buildkite-agent/builds"
+hooks-path="/etc/buildkite-agent/hooks"
+plugins-path="/etc/buildkite-agent/plugins"
+EOF
+chown buildkite-agent:buildkite-agent /etc/buildkite-agent/buildkite-agent.cfg
+chmod 0600 /etc/buildkite-agent/buildkite-agent.cfg
+unset AGENT_TOKEN
+
+cat > /usr/local/bin/terminate-buildkite-instance <<'SCRIPT'
+#!/bin/bash
+set -euo pipefail
+
+sleep 10
+
+IMDS_TOKEN=$(curl -fsS --retry 5 -X PUT \
+  -H "X-aws-ec2-metadata-token-ttl-seconds: 21600" \
+  http://169.254.169.254/latest/api/token)
+INSTANCE_ID=$(curl -fsS --retry 5 \
+  -H "X-aws-ec2-metadata-token: $IMDS_TOKEN" \
+  http://169.254.169.254/latest/meta-data/instance-id)
+AWS_REGION=$(curl -fsS --retry 5 \
+  -H "X-aws-ec2-metadata-token: $IMDS_TOKEN" \
+  http://169.254.169.254/latest/meta-data/placement/region)
+
+aws autoscaling terminate-instance-in-auto-scaling-group \
+  --region "$AWS_REGION" \
+  --instance-id "$INSTANCE_ID" \
+  --should-decrement-desired-capacity \
+  || aws autoscaling terminate-instance-in-auto-scaling-group \
+    --region "$AWS_REGION" \
+    --instance-id "$INSTANCE_ID" \
+    --no-should-decrement-desired-capacity
+SCRIPT
+chmod 0755 /usr/local/bin/terminate-buildkite-instance
+
+install -d -m 0755 /etc/systemd/system/buildkite-agent.service.d
+cat > /etc/systemd/system/buildkite-agent.service.d/terminate-instance.conf <<'EOF'
+[Service]
+ExecStopPost=/usr/local/bin/terminate-buildkite-instance
+EOF
+
+systemctl daemon-reload
+systemctl enable --now buildkite-agent.service

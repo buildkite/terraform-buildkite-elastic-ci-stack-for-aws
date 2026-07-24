@@ -378,13 +378,13 @@ variable "cpu_credits" {
 }
 
 variable "image_id" {
-  description = "Optional - Custom AMI to use for instances (must be based on the stack's AMI)."
+  description = "Optional - Custom AMI to use for instances. Set custom_user_data when the AMI is not based on the stack's AMI."
   type        = string
   default     = ""
 }
 
 variable "image_id_parameter" {
-  description = "Optional - Custom AMI SSM Parameter to use for instances (must be based on the stack's AMI)."
+  description = "Optional - Custom AMI SSM Parameter to use for instances. Set custom_user_data when the AMI is not based on the stack's AMI."
   type        = string
   default     = ""
 }
@@ -895,6 +895,21 @@ variable "bootstrap_script_url" {
   description = "Optional - HTTPS or S3 URL for a script to run on each instance during boot."
   type        = string
   default     = ""
+}
+
+variable "custom_user_data" {
+  description = "Optional - Unencoded custom user data for agent instances. The module encodes this value using base64 without interpolation. When set, it replaces the module-managed Linux or Windows user data, so instance bootstrap inputs are not applied automatically."
+  type        = string
+  default     = ""
+  nullable    = false
+
+  validation {
+    condition = (
+      length(base64encode(var.custom_user_data)) * 3 / 4 -
+      length(regexall("=", base64encode(var.custom_user_data)))
+    ) <= 16384
+    error_message = "custom_user_data must be 16 KiB (16,384 bytes) or less. Fetch larger bootstrap scripts at boot instead of embedding them."
+  }
 }
 
 variable "mount_tmpfs_at_tmp" {

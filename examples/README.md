@@ -33,6 +33,14 @@ Full-featured production configuration with all major options enabled.
 
 Suitable for production-ready deployments requiring advanced features, environments needing Spot instances and secrets management, or configurations requiring custom scaling parameters.
 
+### [Debian or Ubuntu custom AMI](./custom-ami-debian-ubuntu)
+
+Run agents on a Debian- or Ubuntu-based AMI using custom user data.
+
+- Install and configure the Buildkite agent at boot
+- Read the agent token from SSM Parameter Store
+- Configure agent-driven idle scale-in
+
 ### [Existing VPC](./existing-vpc)
 
 Deploy into an existing VPC with existing subnets.
