@@ -10,7 +10,7 @@ locals {
   }
 
   # VPC, subnet, and security group creation flags
-  create_vpc            = var.vpc_id == ""
+  create_vpc            = var.create_vpc != null ? var.create_vpc : var.vpc_id == ""
   create_security_group = length(var.security_group_ids) == 0
   use_custom_azs        = var.availability_zones != ""
 

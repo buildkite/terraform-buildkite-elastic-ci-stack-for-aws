@@ -559,6 +559,12 @@ variable "artifacts_s3_acl" {
 # NETWORK CONFIGURATION
 # =============================================================================
 
+variable "create_vpc" {
+  description = "Whether to create a VPC. If null, infer from vpc_id for backwards compatibility."
+  type        = bool
+  default     = null
+}
+
 variable "vpc_id" {
   description = "Optional - Id of an existing VPC to launch instances into. Leave blank to have a new VPC created."
   type        = string
@@ -1169,8 +1175,8 @@ resource "terraform_data" "validate_max_min_size" {
 resource "terraform_data" "validate_vpc_subnets" {
   lifecycle {
     precondition {
-      condition     = var.vpc_id == "" || length(var.subnets) >= 2
-      error_message = "If vpc_id is specified, at least 2 subnets must be provided."
+      condition     = local.create_vpc || (var.vpc_id != "" && length(var.subnets) >= 2)
+      error_message = "If not creating a VPC, vpc_id and at least 2 subnets must be provided."
     }
   }
 }
