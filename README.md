@@ -144,7 +144,11 @@ Buildkite builds and deploys the following AMIs to all our supported regions:
 
 - Amazon Linux 2023 (64-bit x86)
 - Amazon Linux 2023 (64-bit Arm)
+- Ubuntu 24.04 LTS (64-bit x86)
+- Ubuntu 24.04 LTS (64-bit Arm)
 - Windows Server 2022 (64-bit x86)
+
+Amazon Linux 2023 is the default for Linux instances. To use Ubuntu 24.04 LTS instead, set `linux_distribution = "ubuntu2404"`.
 
 ## Recommended reading
 
@@ -291,7 +295,7 @@ No modules.
 | <a name="input_artifacts_s3_acl"></a> [artifacts\_s3\_acl](#input\_artifacts\_s3\_acl) | Optional - ACL to use for S3 artifact uploads. | `string` | `"private"` | no |
 | <a name="input_asg_process_suspender_role_arn"></a> [asg\_process\_suspender\_role\_arn](#input\_asg\_process\_suspender\_role\_arn) | Optional - ARN of an existing IAM role to attach to the ASG process suspender Lambda function instead of creating a new role.<br/>When specified, the module will not create any IAM roles or policies for the ASG process suspender Lambda, and will use this role instead.<br/>The role must have all necessary permissions for the ASG process suspender Lambda to function correctly.<br/>This is useful when you want to share a single IAM role across multiple queues/stacks.<br/>See https://buildkite.com/docs/agent/v3/aws/elastic-ci-stack/ec2-linux-and-windows/managing-elastic-ci-stack#using-custom-iam-roles<br/>for required permissions and configuration examples. | `string` | `""` | no |
 | <a name="input_associate_public_ip_address"></a> [associate\_public\_ip\_address](#input\_associate\_public\_ip\_address) | Give instances public IP addresses for direct internet access. Set to false for a more isolated environment if the VPC has alternative outbound internet access configured. | `bool` | `true` | no |
-| <a name="input_authorized_users_url"></a> [authorized\_users\_url](#input\_authorized\_users\_url) | Optional - HTTPS or S3 URL to periodically download SSH authorized\_keys from, setting this will enable SSH ingress. authorized\_keys are applied to ec2-user. | `string` | `""` | no |
+| <a name="input_authorized_users_url"></a> [authorized\_users\_url](#input\_authorized\_users\_url) | Optional - HTTPS or S3 URL to periodically download SSH authorized\_keys from, setting this will enable SSH ingress. authorized\_keys are applied to the default login user (ec2-user on Amazon Linux, ubuntu on Ubuntu). | `string` | `""` | no |
 | <a name="input_availability_zones"></a> [availability\_zones](#input\_availability\_zones) | Optional - Comma separated list of AZs that subnets are created in (if subnets parameter is not specified). | `string` | `""` | no |
 | <a name="input_bootstrap_script_url"></a> [bootstrap\_script\_url](#input\_bootstrap\_script\_url) | Optional - HTTPS or S3 URL for a script to run on each instance during boot. | `string` | `""` | no |
 | <a name="input_buildkite_additional_sudo_permissions"></a> [buildkite\_additional\_sudo\_permissions](#input\_buildkite\_additional\_sudo\_permissions) | Optional - Comma-separated list of specific commands (full paths) that build jobs can run with sudo privileges. Include only commands essential for builds. Leave blank unless builds require specific system-level operations. | `string` | `""` | no |
@@ -355,9 +359,10 @@ No modules.
 | <a name="input_instance_role_permissions_boundary_arn"></a> [instance\_role\_permissions\_boundary\_arn](#input\_instance\_role\_permissions\_boundary\_arn) | Optional - The ARN of the policy used to set the permissions boundary for the role when creating a new role. Ignored when instance\_role\_arn is provided. | `string` | `""` | no |
 | <a name="input_instance_role_tags"></a> [instance\_role\_tags](#input\_instance\_role\_tags) | Optional - Comma-separated key=value pairs for instance IAM role tags (up to 5 tags). Example: 'Environment=production,Team=platform,Purpose=ci'. Note: Keys and values cannot contain '=' characters. Only applied when creating a new role, ignored when instance\_role\_arn is provided. | `string` | `""` | no |
 | <a name="input_instance_types"></a> [instance\_types](#input\_instance\_types) | EC2 instance types to use (comma-separated, up to 25). The first type listed is preferred for OnDemand instances. Additional types improve Spot instance availability but make costs less predictable. Examples: 't3.large' for light workloads, 'm5.xlarge,m5a.xlarge' for CPU-intensive builds, 'c5.2xlarge,c5.4xlarge' for compute-heavy tasks. | `string` | `"t3.large"` | no |
-| <a name="input_key_name"></a> [key\_name](#input\_key\_name) | Optional - SSH keypair used to access the Buildkite instances via ec2-user, setting this will enable SSH ingress. | `string` | `""` | no |
+| <a name="input_key_name"></a> [key\_name](#input\_key\_name) | Optional - SSH keypair used to access the Buildkite instances via the default login user (ec2-user on Amazon Linux, ubuntu on Ubuntu), setting this will enable SSH ingress. | `string` | `""` | no |
 | <a name="input_lambda_architecture"></a> [lambda\_architecture](#input\_lambda\_architecture) | CPU architecture for Lambda functions (x86\_64 or arm64). arm64 provides better price-performance but requires compatible dependencies. | `string` | `"x86_64"` | no |
 | <a name="input_lambda_log_retention_days"></a> [lambda\_log\_retention\_days](#input\_lambda\_log\_retention\_days) | The number of days to retain CloudWatch Logs for Lambda functions in the stack. | `number` | `1` | no |
+| <a name="input_linux_distribution"></a> [linux\_distribution](#input\_linux\_distribution) | The Linux distribution to run on the instances. Only applies when instance\_operating\_system is 'linux'. | `string` | `"amazonlinux2023"` | no |
 | <a name="input_managed_policy_arns"></a> [managed\_policy\_arns](#input\_managed\_policy\_arns) | Optional - List of managed IAM policy ARNs to attach to the instance role. | `list(string)` | `[]` | no |
 | <a name="input_max_size"></a> [max\_size](#input\_max\_size) | Maximum number of instances. Controls cost ceiling and prevents runaway scaling. | `number` | `10` | no |
 | <a name="input_min_size"></a> [min\_size](#input\_min\_size) | Minimum number of instances. Ensures baseline capacity for immediate job execution. | `number` | `0` | no |

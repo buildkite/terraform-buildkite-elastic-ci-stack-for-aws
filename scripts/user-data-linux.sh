@@ -30,15 +30,6 @@ BUILDKITE_ENABLE_INSTANCE_STORAGE="${enable_instance_storage}" \
 --==BOUNDARY==
 Content-Type: text/x-shellscript; charset="us-ascii"
 #!/bin/bash -v
-# Ensure SSM Agent is installed and running
-yum update -y
-yum install -y amazon-ssm-agent
-systemctl enable amazon-ssm-agent
-systemctl start amazon-ssm-agent
-systemctl status amazon-ssm-agent
---==BOUNDARY==
-Content-Type: text/x-shellscript; charset="us-ascii"
-#!/bin/bash -v
 BUILDKITE_STACK_NAME="${stack_name}" \
 BUILDKITE_STACK_VERSION="${stack_version}" \
 BUILDKITE_STACK_DEPLOYED_BY="${stack_deployed_by}" \
