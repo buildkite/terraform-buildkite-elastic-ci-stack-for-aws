@@ -148,8 +148,8 @@ update_ami_mappings() {
   echo "  buildkite_ami_mapping = {" > "$temp_mapping"
 
   # Use yq to parse YAML reliably, then format with awk for padding
-  echo "$yaml_content" | yq -r '.Mappings.AWSRegion2AMI | to_entries[] | "\(.key)|\(.value.linuxamd64)|\(.value.linuxarm64)|\(.value.windows)"' | \
-    awk -F'|' '{printf "    %-28s = { linuxamd64 = \"%-21s\", linuxarm64 = \"%-21s\", windows = \"%-21s\" }\n", $1, $2, $3, $4}' >> "$temp_mapping"
+  echo "$yaml_content" | yq -r '.Mappings.AWSRegion2AMI | to_entries[] | "\(.key)|\(.value.linuxamd64)|\(.value.linuxarm64)|\(.value.windows)|\(.value.ubuntu2404amd64)|\(.value.ubuntu2404arm64)"' | \
+    awk -F'|' '{printf "    %-28s = { linuxamd64 = \"%-21s\", linuxarm64 = \"%-21s\", windows = \"%-21s\", ubuntu2404amd64 = \"%-21s\", ubuntu2404arm64 = \"%-21s\" }\n", $1, $2, $3, $4, $5, $6}' >> "$temp_mapping"
 
   echo "    cloudformation_stack_version = \"$version\"" >> "$temp_mapping"
   echo "  }" >> "$temp_mapping"

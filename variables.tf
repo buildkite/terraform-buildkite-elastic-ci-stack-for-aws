@@ -360,6 +360,17 @@ variable "instance_operating_system" {
   }
 }
 
+variable "linux_distribution" {
+  description = "The Linux distribution to run on the instances. Only applies when instance_operating_system is 'linux'."
+  type        = string
+  default     = "amazonlinux2023"
+
+  validation {
+    condition     = contains(["amazonlinux2023", "ubuntu2404"], var.linux_distribution)
+    error_message = "linux_distribution must be 'amazonlinux2023' or 'ubuntu2404'."
+  }
+}
+
 variable "instance_name" {
   description = "Optional - Customize the EC2 instance Name tag."
   type        = string
@@ -604,13 +615,13 @@ variable "associate_public_ip_address" {
 # =============================================================================
 
 variable "key_name" {
-  description = "Optional - SSH keypair used to access the Buildkite instances via ec2-user, setting this will enable SSH ingress."
+  description = "Optional - SSH keypair used to access the Buildkite instances via the default login user (ec2-user on Amazon Linux, ubuntu on Ubuntu), setting this will enable SSH ingress."
   type        = string
   default     = ""
 }
 
 variable "authorized_users_url" {
-  description = "Optional - HTTPS or S3 URL to periodically download SSH authorized_keys from, setting this will enable SSH ingress. authorized_keys are applied to ec2-user."
+  description = "Optional - HTTPS or S3 URL to periodically download SSH authorized_keys from, setting this will enable SSH ingress. authorized_keys are applied to the default login user (ec2-user on Amazon Linux, ubuntu on Ubuntu)."
   type        = string
   default     = ""
 }
