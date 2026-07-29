@@ -4,7 +4,7 @@
 # Best for workloads that can tolerate occasional interruptions.
 
 terraform {
-  required_version = ">= 1.1"
+  required_version = ">= 1.4"
 }
 
 module "buildkite_stack" {
