@@ -89,7 +89,7 @@ Each example is a complete, working Terraform configuration:
 All examples require:
 
 - AWS CLI configured with appropriate credentials
-- Terraform >= 1.0
+- Terraform >= 1.1
 - A Buildkite organization and agent token
 
 ## Support

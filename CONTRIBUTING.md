@@ -51,7 +51,7 @@ When you open the PR, explain what changed and why. Link any related issues and 
 
 ### Prerequisites
 
-- [Terraform](https://www.terraform.io/downloads) >= 1.0
+- [Terraform](https://www.terraform.io/downloads) >= 1.1
 - [AWS CLI](https://aws.amazon.com/cli/) configured with credentials
 - [terraform-docs](https://terraform-docs.io/) for documentation
 - [pre-commit](https://pre-commit.com/) (optional but recommended)
