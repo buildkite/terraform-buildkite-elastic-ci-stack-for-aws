@@ -82,7 +82,7 @@ resource "aws_launch_template" "agent_launch_template" {
     )
   }
 
-  user_data = base64encode(local.is_windows ? templatefile("${path.module}/scripts/user-data-windows.ps1", {
+  user_data = base64encode(var.custom_user_data != "" ? var.custom_user_data : (local.is_windows ? templatefile("${path.module}/scripts/user-data-windows.ps1", {
     enable_docker_userns_remap                    = var.enable_docker_user_namespace_remap ? "true" : "false"
     enable_docker_experimental                    = var.enable_docker_experimental ? "true" : "false"
     docker_networking_protocol                    = var.docker_networking_protocol
@@ -192,7 +192,7 @@ resource "aws_launch_template" "agent_launch_template" {
     docker_fixed_cidr_v4                          = var.docker_fixed_cidr_v4
     docker_fixed_cidr_v6                          = var.docker_fixed_cidr_v6
     mount_tmpfs_at_tmp                            = var.mount_tmpfs_at_tmp ? "true" : "false"
-  }))
+  })))
 }
 
 resource "aws_autoscaling_group" "agent_auto_scale_group" {
