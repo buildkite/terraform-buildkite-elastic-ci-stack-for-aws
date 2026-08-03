@@ -5,7 +5,7 @@ steps:
         command: ".buildkite/scripts/format-check.sh"
         if_changed: "**.tf"
         plugins:
-          - docker#v5.13.0:
+          - docker#v5.14.0:
               image: "hashicorp/terraform:1.15"
               workdir: "/workdir"
               entrypoint: "/bin/sh"
@@ -19,7 +19,7 @@ steps:
           - "tests/**"
           - ".buildkite/scripts/validate.sh"
         plugins:
-          - docker#v5.13.0:
+          - docker#v5.14.0:
               image: "hashicorp/terraform:1.15"
               workdir: "/workdir"
               entrypoint: "/bin/sh"
@@ -30,7 +30,7 @@ steps:
           - "*.tf"
           - ".tflint.hcl"
         plugins:
-          - docker#v5.13.0:
+          - docker#v5.14.0:
               image: "ghcr.io/terraform-linters/tflint:latest"
               workdir: "/workdir"
               entrypoint: "/bin/sh"
@@ -39,7 +39,7 @@ steps:
         command: ".buildkite/scripts/tfsec.sh"
         if_changed: "*.tf"
         plugins:
-          - docker#v5.13.0:
+          - docker#v5.14.0:
               image: "aquasec/tfsec:latest"
               workdir: "/workdir"
               entrypoint: "/bin/sh"
@@ -50,7 +50,7 @@ steps:
           - "*.tf"
           - "README.md"
         plugins:
-          - docker#v5.13.0:
+          - docker#v5.14.0:
               image: "quay.io/terraform-docs/terraform-docs:latest-amd64"
               workdir: "/workdir"
               entrypoint: "/bin/sh"
@@ -61,7 +61,7 @@ steps:
         command: ".buildkite/scripts/examples-format-check.sh"
         if_changed: "examples/**"
         plugins:
-          - docker#v5.13.0:
+          - docker#v5.14.0:
               image: "hashicorp/terraform:1.15"
               workdir: "/workdir"
               entrypoint: "/bin/sh"
@@ -70,7 +70,7 @@ steps:
         command: ".buildkite/scripts/examples-validate.sh"
         if_changed: "examples/**"
         plugins:
-          - docker#v5.13.0:
+          - docker#v5.14.0:
               image: "hashicorp/terraform:1.15"
               workdir: "/workdir"
               entrypoint: "/bin/sh"
@@ -79,7 +79,7 @@ steps:
         command: ".buildkite/scripts/examples-tflint.sh"
         if_changed: "examples/**"
         plugins:
-          - docker#v5.13.0:
+          - docker#v5.14.0:
               image: "ghcr.io/terraform-linters/tflint:latest"
               workdir: "/workdir"
               entrypoint: "/bin/sh"
