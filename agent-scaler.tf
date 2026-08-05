@@ -43,7 +43,7 @@ resource "aws_lambda_function" "scaler" {
       ELASTIC_CI_MODE = var.scaler_enable_elastic_ci_mode ? "true" : "false"
 
       # CloudWatch metrics (optional)
-      CLOUDWATCH_METRICS = "false" # Can be made configurable if needed
+      CLOUDWATCH_METRICS = var.scaler_enable_cloudwatch_metrics ? "true" : "false"
     }
   }
 
@@ -163,6 +163,16 @@ resource "aws_iam_role_policy" "scaler_lambda_policy" {
             "kms:Decrypt"
           ]
           Resource = "arn:aws:kms:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:key/${var.buildkite_agent_token_parameter_store_kms_key}"
+        }
+      ] : [],
+      # CloudWatch metrics publishing
+      var.scaler_enable_cloudwatch_metrics ? [
+        {
+          Effect = "Allow"
+          Action = [
+            "cloudwatch:PutMetricData"
+          ]
+          Resource = "*"
         }
       ] : [],
       # Elastic CI Mode - Enhanced permissions for graceful scale-in

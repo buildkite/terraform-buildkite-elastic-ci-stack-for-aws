@@ -176,6 +176,12 @@ variable "buildkite_agent_scaler_serverless_arn" {
   default     = "arn:aws:serverlessrepo:us-east-1:172840064832:applications/buildkite-agent-scaler"
 }
 
+variable "scaler_enable_cloudwatch_metrics" {
+  description = "Publish Buildkite queue metrics (scheduled, running and waiting job counts) from the scaler Lambda to the CloudWatch 'Buildkite' namespace. Disabled by default."
+  type        = bool
+  default     = false
+}
+
 variable "scaler_enable_elastic_ci_mode" {
   description = "Experimental - Enable the Elastic CI Mode with enhanced features like graceful termination and dangling instance detection. Available since buildkite_agent_scaler_version 1.9.3"
   type        = bool
@@ -678,6 +684,7 @@ variable "scaler_lambda_role_arn" {
     Optional - ARN of an existing IAM role to attach to the scaler Lambda function instead of creating a new role.
     When specified, the module will not create any IAM roles or policies for the scaler Lambda, and will use this role instead.
     The role must have all necessary permissions for the scaler Lambda to function correctly.
+    This includes cloudwatch:PutMetricData when scaler_enable_cloudwatch_metrics is true, since the module cannot add it to a role it does not manage.
     This is useful when you want to share a single IAM role across multiple queues/stacks.
     See https://buildkite.com/docs/agent/v3/aws/elastic-ci-stack/ec2-linux-and-windows/managing-elastic-ci-stack#using-custom-iam-roles
     for required permissions and configuration examples.
