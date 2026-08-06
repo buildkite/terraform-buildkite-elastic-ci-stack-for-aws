@@ -73,6 +73,11 @@ run "disables_cloudwatch_metrics_by_default" {
     condition     = !strcontains(aws_iam_role_policy.scaler_lambda_policy[0].policy, "cloudwatch:PutMetricData")
     error_message = "The scaler Lambda role should not grant cloudwatch:PutMetricData when metrics are disabled."
   }
+
+  assert {
+    condition     = !strcontains(aws_iam_role_policy.scaler_lambda_policy[0].policy, "cloudwatch:namespace")
+    error_message = "The scaler Lambda role should not carry a CloudWatch namespace condition when metrics are disabled."
+  }
 }
 
 run "enables_cloudwatch_metrics_when_opted_in" {
@@ -91,5 +96,16 @@ run "enables_cloudwatch_metrics_when_opted_in" {
   assert {
     condition     = strcontains(aws_iam_role_policy.scaler_lambda_policy[0].policy, "cloudwatch:PutMetricData")
     error_message = "The scaler Lambda role should be able to publish CloudWatch metrics when they are enabled."
+  }
+
+  # Scoping the grant to the scaler's own namespace keeps the wildcard resource least-privilege
+  assert {
+    condition = length([
+      for statement in jsondecode(aws_iam_role_policy.scaler_lambda_policy[0].policy).Statement :
+      statement
+      if try(contains(statement.Action, "cloudwatch:PutMetricData"), false)
+      && try(statement.Condition.StringEquals["cloudwatch:namespace"], null) == "Buildkite"
+    ]) == 1
+    error_message = "The cloudwatch:PutMetricData grant should be conditioned on the Buildkite CloudWatch namespace."
   }
 }

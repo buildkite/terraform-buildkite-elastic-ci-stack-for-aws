@@ -166,6 +166,8 @@ resource "aws_iam_role_policy" "scaler_lambda_policy" {
         }
       ] : [],
       # CloudWatch metrics publishing
+      # The namespace matches the hardcoded cloudWatchMetricsNamespace const in
+      # buildkite-agent-scaler scaler/cloudwatch.go; revisit on scaler version bumps.
       var.scaler_enable_cloudwatch_metrics ? [
         {
           Effect = "Allow"
@@ -173,11 +175,11 @@ resource "aws_iam_role_policy" "scaler_lambda_policy" {
             "cloudwatch:PutMetricData"
           ]
           Resource = "*"
-		  Condition = {
-			StringEquals = {
-			  "cloudwatch:namespace" = "Buildkite"
-			}
-		}
+          Condition = {
+            StringEquals = {
+              "cloudwatch:namespace" = "Buildkite"
+            }
+          }
         }
       ] : [],
       # Elastic CI Mode - Enhanced permissions for graceful scale-in
