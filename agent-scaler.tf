@@ -173,6 +173,11 @@ resource "aws_iam_role_policy" "scaler_lambda_policy" {
             "cloudwatch:PutMetricData"
           ]
           Resource = "*"
+		  Condition = {
+			StringEquals = {
+			  "cloudwatch:namespace" = "Buildkite"
+			}
+		}
         }
       ] : [],
       # Elastic CI Mode - Enhanced permissions for graceful scale-in
