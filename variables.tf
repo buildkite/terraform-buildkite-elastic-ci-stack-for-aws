@@ -1168,6 +1168,12 @@ variable "tags" {
   default     = {}
 }
 
+variable "update_default_launch_template_version" {
+  description = "Whether to update the default launch template version."
+  type        = bool
+  default     = null
+}
+
 # =============================================================================
 # CROSS-VARIABLE VALIDATIONS
 # =============================================================================
