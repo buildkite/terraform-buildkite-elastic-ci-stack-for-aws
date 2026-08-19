@@ -1169,9 +1169,9 @@ variable "tags" {
 }
 
 variable "update_default_launch_template_version" {
-  description = "Whether to update the default launch template version."
+  description = "When true, Terraform sets the launch template default version to the latest version it creates. This stack's ASG already uses $Latest, so agent launches are unaffected; enable this for other consumers that launch the template with $Default."
   type        = bool
-  default     = null
+  default     = false
 }
 
 # =============================================================================
