@@ -7,6 +7,8 @@ data "aws_ssm_parameter" "ami" {
 resource "aws_launch_template" "agent_launch_template" {
   name = "${local.stack_name_full}-launch-template"
 
+  update_default_version = var.update_default_launch_template_version
+
   tags = local.common_tags
 
   network_interfaces {
