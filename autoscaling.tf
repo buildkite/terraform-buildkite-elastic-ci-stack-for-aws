@@ -265,6 +265,8 @@ resource "aws_autoscaling_schedule" "scheduled_scale_up_action" {
   autoscaling_group_name = aws_autoscaling_group.agent_auto_scale_group.name
   recurrence             = var.scale_up_schedule
   min_size               = var.scale_up_min_size
+  max_size               = -1
+  desired_capacity       = -1
   time_zone              = var.schedule_timezone
 }
 
@@ -274,5 +276,7 @@ resource "aws_autoscaling_schedule" "scheduled_scale_down_action" {
   autoscaling_group_name = aws_autoscaling_group.agent_auto_scale_group.name
   recurrence             = var.scale_down_schedule
   min_size               = var.scale_down_min_size
+  max_size               = -1
+  desired_capacity       = -1
   time_zone              = var.schedule_timezone
 }
