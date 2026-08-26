@@ -48,26 +48,26 @@ locals {
   # AMI mappings for Buildkite Agent - these are the latest built AMIs from elastic-ci-stack-for-aws
   # See https://github.com/buildkite/elastic-ci-stack-for-aws for source
   buildkite_ami_mapping = {
-    us-east-1                    = { linuxamd64 = "ami-07701120871bb45b7", linuxarm64 = "ami-0b55f314b7dbb4157", windows = "ami-0609cf3fbdcbadffe", ubuntu2404amd64 = "ami-0e389c224f18b0753", ubuntu2404arm64 = "ami-03ba77b3b9d459993" }
-    us-east-2                    = { linuxamd64 = "ami-0ff48c0ada31c199b", linuxarm64 = "ami-04b6323d2353ddae7", windows = "ami-0cdfeb53b73593a4f", ubuntu2404amd64 = "ami-07c9c5dfb8aad2a37", ubuntu2404arm64 = "ami-069923d5dde14186f" }
-    us-west-1                    = { linuxamd64 = "ami-0ac4991f7af1c943e", linuxarm64 = "ami-038db75e2913b2302", windows = "ami-09d01982bf23c48ea", ubuntu2404amd64 = "ami-031cde53d35f964f0", ubuntu2404arm64 = "ami-055e5422f75b26e07" }
-    us-west-2                    = { linuxamd64 = "ami-09ba24e3674137747", linuxarm64 = "ami-0f626a430bf06d3e7", windows = "ami-071082b864a96187e", ubuntu2404amd64 = "ami-0abe7e747a0ddee03", ubuntu2404arm64 = "ami-009265140fe160063" }
-    af-south-1                   = { linuxamd64 = "ami-06a47a882efee1432", linuxarm64 = "ami-07afefd379fb8d49f", windows = "ami-0436a15a8ffb0ec17", ubuntu2404amd64 = "ami-0f1161cc5d4394c5f", ubuntu2404arm64 = "ami-0635e8174321580c2" }
-    ap-east-1                    = { linuxamd64 = "ami-0f882d251bfbb9d5a", linuxarm64 = "ami-08215ce9a358274af", windows = "ami-0e2b0bdb2678750b6", ubuntu2404amd64 = "ami-0c61328a49582f112", ubuntu2404arm64 = "ami-0417ed73d043ad904" }
-    ap-south-1                   = { linuxamd64 = "ami-08d5d558f113cfd71", linuxarm64 = "ami-0e5d059b949006f12", windows = "ami-01b0585344b9229d2", ubuntu2404amd64 = "ami-0e3d240c7343c9d76", ubuntu2404arm64 = "ami-0edb0b7019398e0a8" }
-    ap-northeast-2               = { linuxamd64 = "ami-04e953639b306f5c4", linuxarm64 = "ami-0ff40c602c14d9d43", windows = "ami-0ede0c251e0328437", ubuntu2404amd64 = "ami-051ecd2a105ee7a7f", ubuntu2404arm64 = "ami-0dae1640677e7c31e" }
-    ap-northeast-1               = { linuxamd64 = "ami-07e95412764d93dc0", linuxarm64 = "ami-059b6b53b741644ca", windows = "ami-0020c9b338f9fb4c7", ubuntu2404amd64 = "ami-074952c9d101655bf", ubuntu2404arm64 = "ami-0b52f37111dd01709" }
-    ap-southeast-2               = { linuxamd64 = "ami-021c0d2a3838e5508", linuxarm64 = "ami-083b0ef8f916528d4", windows = "ami-05d1f76ce0518e0bc", ubuntu2404amd64 = "ami-0587dd553e6002620", ubuntu2404arm64 = "ami-042a79683ae4c6768" }
-    ap-southeast-1               = { linuxamd64 = "ami-038611e6155ec3500", linuxarm64 = "ami-0f5ca3296ef0c0e99", windows = "ami-0375f49f5adf23ea9", ubuntu2404amd64 = "ami-09826206b6f7b055f", ubuntu2404arm64 = "ami-08af1a99db398e270" }
-    ca-central-1                 = { linuxamd64 = "ami-09904f16c2054b0ca", linuxarm64 = "ami-02ffc328bc41c9035", windows = "ami-0f0524984e0cbebf3", ubuntu2404amd64 = "ami-085fbec0a9b5c8573", ubuntu2404arm64 = "ami-06fd9c61afd6ed7f5" }
-    eu-central-1                 = { linuxamd64 = "ami-020d91d6040e3d97d", linuxarm64 = "ami-01ca82f0ca93d4a89", windows = "ami-0c969526ae8821617", ubuntu2404amd64 = "ami-096457c78cf946a6e", ubuntu2404arm64 = "ami-091dd7da5f952f88f" }
-    eu-west-1                    = { linuxamd64 = "ami-092fea5011d324a6d", linuxarm64 = "ami-0fbaffc92d3c0bab7", windows = "ami-0513e814927a19ffd", ubuntu2404amd64 = "ami-04bc34ca5753fe2a9", ubuntu2404arm64 = "ami-0351bf8c77fbe24e6" }
-    eu-west-2                    = { linuxamd64 = "ami-05649fdf88dce23db", linuxarm64 = "ami-08966b4dc3013cbd4", windows = "ami-0749b1b89af699d20", ubuntu2404amd64 = "ami-0dc1e5e8786fe83ab", ubuntu2404arm64 = "ami-05513eb7f648c14a2" }
-    eu-south-1                   = { linuxamd64 = "ami-0564f5c05e40627ed", linuxarm64 = "ami-043c32988b1e2deeb", windows = "ami-0422f329ae43849d3", ubuntu2404amd64 = "ami-0b8ffbf961493c08a", ubuntu2404arm64 = "ami-076ad18211ab6b218" }
-    eu-west-3                    = { linuxamd64 = "ami-0ed15023ea402387b", linuxarm64 = "ami-07a4b8e644b0ef03f", windows = "ami-084e21ee48e6e29d1", ubuntu2404amd64 = "ami-0db6caaa0ca129379", ubuntu2404arm64 = "ami-0191800bbcfb454db" }
-    eu-north-1                   = { linuxamd64 = "ami-0a1f25ac9bb35a37d", linuxarm64 = "ami-05c5489a86a5eb7da", windows = "ami-092e9006b236e570e", ubuntu2404amd64 = "ami-0dcbf549a16918cc2", ubuntu2404arm64 = "ami-0cc700179e4989be6" }
-    sa-east-1                    = { linuxamd64 = "ami-02334735057902034", linuxarm64 = "ami-0fa528e720dc8c35f", windows = "ami-0cc40d82190164089", ubuntu2404amd64 = "ami-0781b4907e8b86f50", ubuntu2404arm64 = "ami-00676295d3540bb0a" }
-    cloudformation_stack_version = "v6.71.1"
+    us-east-1                    = { linuxamd64 = "ami-0706a08915b158fef", linuxarm64 = "ami-0db1704189b599489", windows = "ami-086d600e8d77f714a", ubuntu2404amd64 = "ami-0648251027ac18c49", ubuntu2404arm64 = "ami-0db25348e9f6627ac" }
+    us-east-2                    = { linuxamd64 = "ami-0c0a62caf534e8b5a", linuxarm64 = "ami-09b29c1c907ccfb02", windows = "ami-077f866b6c7441022", ubuntu2404amd64 = "ami-0332babc0886d4723", ubuntu2404arm64 = "ami-070e746d106d3de28" }
+    us-west-1                    = { linuxamd64 = "ami-04fdcf1584bc2e394", linuxarm64 = "ami-073423c2f4f03f7cb", windows = "ami-0c90798e224ec5b63", ubuntu2404amd64 = "ami-09850f695cc8eccf8", ubuntu2404arm64 = "ami-0e67d66e20c4da272" }
+    us-west-2                    = { linuxamd64 = "ami-0e2b50e8786676df0", linuxarm64 = "ami-0ec93a6605d16d574", windows = "ami-079756f27a0584e5d", ubuntu2404amd64 = "ami-0886d0272cf53b986", ubuntu2404arm64 = "ami-0f45b19a897cc60db" }
+    af-south-1                   = { linuxamd64 = "ami-0ecde5e1b27f9c64e", linuxarm64 = "ami-0a71e02bf164b1aba", windows = "ami-09bc104b77e91a7db", ubuntu2404amd64 = "ami-0bb9e590cfa26647b", ubuntu2404arm64 = "ami-0887ef3e459a2dd26" }
+    ap-east-1                    = { linuxamd64 = "ami-01068be14405888ed", linuxarm64 = "ami-0caa47766d516625f", windows = "ami-0c6f6d69454af1fe2", ubuntu2404amd64 = "ami-0096f40a42319bdba", ubuntu2404arm64 = "ami-0602f059d9ca1fc3c" }
+    ap-south-1                   = { linuxamd64 = "ami-03ac79cea4f7ff5fb", linuxarm64 = "ami-01485e04a9e774db0", windows = "ami-0649a782204b978be", ubuntu2404amd64 = "ami-0eed1bc089d02646b", ubuntu2404arm64 = "ami-09bea388aecac9656" }
+    ap-northeast-2               = { linuxamd64 = "ami-07c91ca1b4b6eec5e", linuxarm64 = "ami-0e2b7db490e6e2400", windows = "ami-0af9b027cfc164383", ubuntu2404amd64 = "ami-05ebb7aeef4f00299", ubuntu2404arm64 = "ami-0342cab1bf43ce812" }
+    ap-northeast-1               = { linuxamd64 = "ami-0e7da3070852efb1d", linuxarm64 = "ami-047f9a9588cabef12", windows = "ami-07ab3f766aa70dd81", ubuntu2404amd64 = "ami-097e4cb6ce7f17e7c", ubuntu2404arm64 = "ami-0543dcf7967fa31fe" }
+    ap-southeast-2               = { linuxamd64 = "ami-04e33681b630f2281", linuxarm64 = "ami-067039403becfe51d", windows = "ami-0364fc28be965a4a1", ubuntu2404amd64 = "ami-05875143cbcd1838d", ubuntu2404arm64 = "ami-05873a7a0ae9f7e27" }
+    ap-southeast-1               = { linuxamd64 = "ami-0f46922022c5600ab", linuxarm64 = "ami-03e13270d34873dec", windows = "ami-0085bee4f99160e9a", ubuntu2404amd64 = "ami-02097acdfc4072827", ubuntu2404arm64 = "ami-05ba195c322c5af06" }
+    ca-central-1                 = { linuxamd64 = "ami-0fae11a8543db8ec1", linuxarm64 = "ami-0b9f5302aecab36c1", windows = "ami-0669949f4bca519e1", ubuntu2404amd64 = "ami-0eb9cb3a53522d7d5", ubuntu2404arm64 = "ami-031f5fc5dbaa8c92f" }
+    eu-central-1                 = { linuxamd64 = "ami-0ae944a4580cb8385", linuxarm64 = "ami-03b5e9e386e267dff", windows = "ami-0983762285aeecfc0", ubuntu2404amd64 = "ami-04f5474a9403209b5", ubuntu2404arm64 = "ami-04e63f3466e4e60e9" }
+    eu-west-1                    = { linuxamd64 = "ami-0f4a27095d5dd441b", linuxarm64 = "ami-0f9403525fafd8331", windows = "ami-0d5faa2ebb2d2a30a", ubuntu2404amd64 = "ami-044e22727b09ddb02", ubuntu2404arm64 = "ami-0f282d9e4f5fc0a2f" }
+    eu-west-2                    = { linuxamd64 = "ami-0b067230ff2828f55", linuxarm64 = "ami-0993130e92c2f0acd", windows = "ami-0d209706569d34c6f", ubuntu2404amd64 = "ami-00ecb7e8d52e7ec8f", ubuntu2404arm64 = "ami-0f352ac88fbe758c5" }
+    eu-south-1                   = { linuxamd64 = "ami-01d1a5ff1cb593419", linuxarm64 = "ami-08c647f17648c4167", windows = "ami-04e08117dde399013", ubuntu2404amd64 = "ami-0ace0515cfea34f74", ubuntu2404arm64 = "ami-0a39519db3db41686" }
+    eu-west-3                    = { linuxamd64 = "ami-055902c9d10dd196a", linuxarm64 = "ami-0bfd70f2917f7e97a", windows = "ami-0a49c015713745a92", ubuntu2404amd64 = "ami-02040b06b5a90d6b6", ubuntu2404arm64 = "ami-005aa4d4cd87257e8" }
+    eu-north-1                   = { linuxamd64 = "ami-0e123ab96b3e4afe9", linuxarm64 = "ami-06b0af52e271e4c0e", windows = "ami-00f72dedd0d94eb67", ubuntu2404amd64 = "ami-03a00b6d2897f8bc3", ubuntu2404arm64 = "ami-0716f20b47c7421c2" }
+    sa-east-1                    = { linuxamd64 = "ami-0225cb390c5c272f6", linuxarm64 = "ami-069287f9bcfab8cfd", windows = "ami-0aaf16f27cf4db2ac", ubuntu2404amd64 = "ami-0b76a227d4c48f756", ubuntu2404arm64 = "ami-0c03cb242115da4e4" }
+    cloudformation_stack_version = "v6.71.2"
   }
 
   # Region-specific Lambda deployment bucket
