@@ -6,7 +6,7 @@ steps:
         if_changed: "**.tf"
         plugins:
           - docker#v5.14.0:
-              image: "hashicorp/terraform:1.15"
+              image: "hashicorp/terraform:1.16"
               workdir: "/workdir"
               entrypoint: "/bin/sh"
 
@@ -20,7 +20,7 @@ steps:
           - ".buildkite/scripts/validate.sh"
         plugins:
           - docker#v5.14.0:
-              image: "hashicorp/terraform:1.15"
+              image: "hashicorp/terraform:1.16"
               workdir: "/workdir"
               entrypoint: "/bin/sh"
 
@@ -62,7 +62,7 @@ steps:
         if_changed: "examples/**"
         plugins:
           - docker#v5.14.0:
-              image: "hashicorp/terraform:1.15"
+              image: "hashicorp/terraform:1.16"
               workdir: "/workdir"
               entrypoint: "/bin/sh"
 
@@ -71,7 +71,7 @@ steps:
         if_changed: "examples/**"
         plugins:
           - docker#v5.14.0:
-              image: "hashicorp/terraform:1.15"
+              image: "hashicorp/terraform:1.16"
               workdir: "/workdir"
               entrypoint: "/bin/sh"
 
