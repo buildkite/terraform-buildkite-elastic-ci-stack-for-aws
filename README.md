@@ -201,7 +201,7 @@ See [Licence.md](Licence.md) (MIT)
 ## Requirements
 
 | Name | Version |
-| ---- | ------- |
+|------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.4 |
 | <a name="requirement_archive"></a> [archive](#requirement\_archive) | ~> 2.0 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 6.33.0 |
@@ -210,7 +210,7 @@ See [Licence.md](Licence.md) (MIT)
 ## Providers
 
 | Name | Version |
-| ---- | ------- |
+|------|---------|
 | <a name="provider_archive"></a> [archive](#provider\_archive) | ~> 2.0 |
 | <a name="provider_aws"></a> [aws](#provider\_aws) | >= 6.33.0 |
 | <a name="provider_random"></a> [random](#provider\_random) | ~> 3.0 |
@@ -223,7 +223,7 @@ No modules.
 ## Resources
 
 | Name | Type |
-| ---- | ---- |
+|------|------|
 | [aws_autoscaling_group.agent_auto_scale_group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/autoscaling_group) | resource |
 | [aws_autoscaling_lifecycle_hook.instance_terminating](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/autoscaling_lifecycle_hook) | resource |
 | [aws_autoscaling_schedule.scheduled_scale_down_action](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/autoscaling_schedule) | resource |
@@ -299,7 +299,7 @@ No modules.
 ## Inputs
 
 | Name | Description | Type | Default | Required |
-| ---- | ----------- | ---- | ------- | :------: |
+|------|-------------|------|---------|:--------:|
 | <a name="input_agent_endpoint"></a> [agent\_endpoint](#input\_agent\_endpoint) | API endpoint URL for Buildkite agent communication. Most customers shouldn't need to change this unless using a custom endpoint agreed with the Buildkite team. | `string` | `"https://agent.buildkite.com/v3"` | no |
 | <a name="input_agent_env_file_url"></a> [agent\_env\_file\_url](#input\_agent\_env\_file\_url) | Optional - HTTPS or S3 URL containing environment variables for the Buildkite agent process itself (not for builds). These variables configure agent behavior like proxy settings or debugging options. For build environment variables, use pipeline 'env' configuration instead. | `string` | `""` | no |
 | <a name="input_agents_per_instance"></a> [agents\_per\_instance](#input\_agents\_per\_instance) | Number of Buildkite agents to start on each EC2 instance. NOTE: If an agent crashes or is terminated, it won't be automatically restarted, leaving fewer active agents on that instance. The scale\_in\_idle\_period parameter controls when the entire instance terminates (when all agents are idle), not individual agent restarts. Consider enabling scaler\_enable\_elastic\_ci\_mode for better agent management, or use fewer agents per instance with more instances for high availability. | `number` | `1` | no |
@@ -359,6 +359,7 @@ No modules.
 | <a name="input_enable_pre_exit_disk_cleanup"></a> [enable\_pre\_exit\_disk\_cleanup](#input\_enable\_pre\_exit\_disk\_cleanup) | Controls whether disk space check also runs in the pre-exit hook after jobs complete. Disk cleanup always runs in the environment hook when disk space is low. When enabled, the same check also runs in the pre-exit hook to reclaim resources generated during job execution. | `bool` | `false` | no |
 | <a name="input_enable_scheduled_scaling"></a> [enable\_scheduled\_scaling](#input\_enable\_scheduled\_scaling) | Enable scheduled scaling to automatically adjust min\_size based on time-based schedules | `bool` | `false` | no |
 | <a name="input_enable_secrets_plugin"></a> [enable\_secrets\_plugin](#input\_enable\_secrets\_plugin) | Enables S3 Secrets plugin for all pipelines. | `bool` | `true` | no |
+| <a name="input_enable_warm_pool"></a> [enable\_warm\_pool](#input\_enable\_warm\_pool) | Enable an Auto Scaling warm pool to keep pre-initialised instances ready, reducing scale-out latency for the agent fleet | `bool` | `false` | no |
 | <a name="input_experimental_enable_resource_limits"></a> [experimental\_enable\_resource\_limits](#input\_experimental\_enable\_resource\_limits) | Experimental - If true, enables systemd resource limits for the Buildkite agent. This helps prevent resource exhaustion by limiting CPU, memory, and I/O usage. Useful for shared instances running multiple agents or resource-intensive builds. | `bool` | `false` | no |
 | <a name="input_image_id"></a> [image\_id](#input\_image\_id) | Optional - Custom AMI to use for instances. Set custom\_user\_data when the AMI is not based on the stack's AMI. | `string` | `""` | no |
 | <a name="input_image_id_parameter"></a> [image\_id\_parameter](#input\_image\_id\_parameter) | Optional - Custom AMI SSM Parameter to use for instances. Set custom\_user\_data when the AMI is not based on the stack's AMI. | `string` | `""` | no |
@@ -429,11 +430,15 @@ No modules.
 | <a name="input_tags"></a> [tags](#input\_tags) | Map of custom tags to apply to all taggable resources. These tags are merged with the cost allocation tag (if enabled) and standard tags.<br/><br/>Example:<br/>tags = {<br/>  Environment = "production"<br/>  Team        = "platform"<br/>  Owner       = "ops-team"<br/>}<br/><br/>All resources will receive these tags plus:<br/>- ManagedBy = "Terraform" (standard)<br/>- Stack = "<stack-name>-<random-suffix>" (standard)<br/>- CreatedBy = "<cost-allocation-value>" (if enable\_cost\_allocation\_tags is set to true) | `map(string)` | `{}` | no |
 | <a name="input_update_default_launch_template_version"></a> [update\_default\_launch\_template\_version](#input\_update\_default\_launch\_template\_version) | When true, Terraform sets the launch template default version to the latest version it creates. This stack's ASG already uses $Latest, so agent launches are unaffected; enable this for other consumers that launch the template with $Default. | `bool` | `false` | no |
 | <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | Optional - Id of an existing VPC to launch instances into. Leave blank to have a new VPC created. | `string` | `""` | no |
+| <a name="input_warm_pool_max_group_prepared_capacity"></a> [warm\_pool\_max\_group\_prepared\_capacity](#input\_warm\_pool\_max\_group\_prepared\_capacity) | Maximum number of instances allowed in the warm pool plus the Auto Scaling group (only used when enable\_warm\_pool is true). Leave null to let AWS default it to max\_size | `number` | `null` | no |
+| <a name="input_warm_pool_min_size"></a> [warm\_pool\_min\_size](#input\_warm\_pool\_min\_size) | Minimum number of instances to maintain in the warm pool (only used when enable\_warm\_pool is true) | `number` | `0` | no |
+| <a name="input_warm_pool_reuse_on_scale_in"></a> [warm\_pool\_reuse\_on\_scale\_in](#input\_warm\_pool\_reuse\_on\_scale\_in) | Return instances to the warm pool on scale in instead of terminating them (only used when enable\_warm\_pool is true) | `bool` | `false` | no |
+| <a name="input_warm_pool_state"></a> [warm\_pool\_state](#input\_warm\_pool\_state) | State to keep warm pool instances in (only used when enable\_warm\_pool is true). Valid values: Stopped, Running, Hibernated | `string` | `"Stopped"` | no |
 
 ## Outputs
 
 | Name | Description |
-| ---- | ----------- |
+|------|-------------|
 | <a name="output_auto_scaling_group_arn"></a> [auto\_scaling\_group\_arn](#output\_auto\_scaling\_group\_arn) | ARN of the agent Auto Scaling Group |
 | <a name="output_auto_scaling_group_name"></a> [auto\_scaling\_group\_name](#output\_auto\_scaling\_group\_name) | Name of the agent Auto Scaling Group |
 | <a name="output_image_id"></a> [image\_id](#output\_image\_id) | AMI ID used by agent instances |
