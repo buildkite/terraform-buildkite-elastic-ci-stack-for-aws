@@ -340,6 +340,51 @@ variable "scale_down_min_size" {
   }
 }
 
+variable "enable_warm_pool" {
+  description = "Enable an Auto Scaling warm pool to keep pre-initialised instances ready, reducing scale-out latency for the agent fleet"
+  type        = bool
+  default     = false
+}
+
+variable "warm_pool_state" {
+  description = "State to keep warm pool instances in (only used when enable_warm_pool is true). Valid values: Stopped, Running, Hibernated"
+  type        = string
+  default     = "Stopped"
+
+  validation {
+    condition     = contains(["Stopped", "Running", "Hibernated"], var.warm_pool_state)
+    error_message = "warm_pool_state must be one of: Stopped, Running, Hibernated."
+  }
+}
+
+variable "warm_pool_min_size" {
+  description = "Minimum number of instances to maintain in the warm pool (only used when enable_warm_pool is true)"
+  type        = number
+  default     = 0
+
+  validation {
+    condition     = var.warm_pool_min_size >= 0
+    error_message = "warm_pool_min_size must be non-negative."
+  }
+}
+
+variable "warm_pool_max_group_prepared_capacity" {
+  description = "Maximum number of instances allowed in the warm pool plus the Auto Scaling group (only used when enable_warm_pool is true). Leave null to let AWS default it to max_size"
+  type        = number
+  default     = null
+
+  validation {
+    condition     = var.warm_pool_max_group_prepared_capacity == null || var.warm_pool_max_group_prepared_capacity >= 0
+    error_message = "warm_pool_max_group_prepared_capacity must be non-negative."
+  }
+}
+
+variable "warm_pool_reuse_on_scale_in" {
+  description = "Return instances to the warm pool on scale in instead of terminating them (only used when enable_warm_pool is true)"
+  type        = bool
+  default     = false
+}
+
 # =============================================================================
 # INSTANCE CONFIGURATION
 # =============================================================================
