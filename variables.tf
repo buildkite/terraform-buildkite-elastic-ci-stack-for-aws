@@ -222,6 +222,12 @@ variable "max_size" {
   }
 }
 
+variable "wait_for_capacity_timeout" {
+  description = "Maximum duration to wait for ASG instances to become healthy. Set to '0' to skip capacity waiting."
+  type        = string
+  default     = "10m"
+}
+
 variable "instance_buffer" {
   description = "Number of idle instances to keep running. Lower values save costs, higher values reduce wait times for new jobs."
   type        = number

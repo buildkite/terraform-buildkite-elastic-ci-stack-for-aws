@@ -429,6 +429,7 @@ No modules.
 | <a name="input_tags"></a> [tags](#input\_tags) | Map of custom tags to apply to all taggable resources. These tags are merged with the cost allocation tag (if enabled) and standard tags.<br/><br/>Example:<br/>tags = {<br/>  Environment = "production"<br/>  Team        = "platform"<br/>  Owner       = "ops-team"<br/>}<br/><br/>All resources will receive these tags plus:<br/>- ManagedBy = "Terraform" (standard)<br/>- Stack = "<stack-name>-<random-suffix>" (standard)<br/>- CreatedBy = "<cost-allocation-value>" (if enable\_cost\_allocation\_tags is set to true) | `map(string)` | `{}` | no |
 | <a name="input_update_default_launch_template_version"></a> [update\_default\_launch\_template\_version](#input\_update\_default\_launch\_template\_version) | When true, Terraform sets the launch template default version to the latest version it creates. This stack's ASG already uses $Latest, so agent launches are unaffected; enable this for other consumers that launch the template with $Default. | `bool` | `false` | no |
 | <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | Optional - Id of an existing VPC to launch instances into. Leave blank to have a new VPC created. | `string` | `""` | no |
+| <a name="input_wait_for_capacity_timeout"></a> [wait\_for\_capacity\_timeout](#input\_wait\_for\_capacity\_timeout) | Maximum duration to wait for ASG instances to become healthy. Set to '0' to skip capacity waiting. | `string` | `"10m"` | no |
 
 ## Outputs
 
