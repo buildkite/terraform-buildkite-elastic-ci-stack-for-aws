@@ -7,8 +7,24 @@ set -euo pipefail
 git fetch --depth=1 origin main >&2
 
 if git diff origin/main...HEAD -- locals.tf | grep -q 'cloudformation_stack_version'; then
-  echo "cloudformation_stack_version changed, uploading AMI update pipeline step..." >&2
+  echo "cloudformation_stack_version changed" >&2
 
+  # update_amis.sh only reads the latest template, so it can't update AMIs for
+  # an older major version (e.g. a final v6 release after v7). Those mappings
+  # have to be generated manually from the versioned template.
+  locals_tf=$(<locals.tf)
+  latest_template=$(curl -fsSL https://s3.amazonaws.com/buildkite-aws-stack/latest/aws-stack.yml)
+  [[ $locals_tf =~ cloudformation_stack_version[[:space:]]*=[[:space:]]*\"v([0-9]+)\. ]]
+  tf_major=${BASH_REMATCH[1]}
+  [[ $latest_template =~ v([0-9]+)\.[0-9]+\.[0-9]+ ]]
+  latest_major=${BASH_REMATCH[1]}
+
+  if (( tf_major < latest_major )); then
+    echo "Stack v${tf_major} is older than latest v${latest_major}, skipping AMI update. Generate mappings from the versioned template instead." >&2
+    exit 0
+  fi
+
+  echo "Uploading AMI update pipeline step..." >&2
 
 # TODO: Create a Docker image with git installed to avoid the apk add step entirely, but for now let's just use this image and iterate
 # Taking a look at the history of the terraform image, this has always been Alpine based, so shouldn't run into any issues with this, but a Dockerfile would be better, but blocked on this currently.
