@@ -21,10 +21,12 @@ To verify module v1 before upgrading production, deploy it as a separate module 
 
 Applying module v1 to an existing stack updates the launch template without replacing running instances. New instances use Agent v4, and existing instances keep Agent v3 until their agents stop, so jobs can run on either version during the rollout. Existing instances terminate after their agents are idle for `scale_in_idle_period`, and replacements use Agent v4.
 
-To finish sooner without interrupting jobs, send SIGTERM to the agents on instances launched before the upgrade. Each agent finishes its current job, exits, and terminates its instance. On Linux, the module's graceful shutdown uses:
+To finish sooner without interrupting jobs, stop the remaining Agent v3 agents with the [Buildkite CLI](https://buildkite.com/docs/platform/cli). Each agent finishes its current job before it stops, and its instance terminates once all of its agents have stopped. For example, for the `default` queue:
 
 ```bash
-sudo kill -s SIGTERM $(/bin/pidof buildkite-agent)
+bk agent list --tags queue=default --limit 1000 --output json \
+  | jq -r '.[] | select(.version | startswith("3.")) | .id' \
+  | bk agent stop
 ```
 
 ## Cancellation timing
