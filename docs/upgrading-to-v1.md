@@ -29,6 +29,8 @@ bk agent list --tags queue=default --limit 1000 --output json \
   | bk agent stop
 ```
 
+Windows instances at `min_size` restart Agent v3 instead of terminating, unless `buildkite_terminate_instance_after_job` is `true`. To replace them, set `min_size = 0` for the rollout, stop their agents, then restore `min_size`.
+
 ## Cancellation timing
 
 - `buildkite_agent_cancel_signal_timeout` controls how long the process has before SIGKILL.
