@@ -73,7 +73,9 @@ locals {
   # Region-specific Lambda deployment bucket
   # us-east-1 uses "buildkite-lambdas", all other regions append the region suffix
   agent_scaler_s3_bucket         = data.aws_region.current.region == "us-east-1" ? "buildkite-lambdas" : "buildkite-lambdas-${data.aws_region.current.region}"
-  buildkite_agent_scaler_version = "1.14.0"
+  buildkite_agent_scaler_version = "1.15.0"
+  # Created and updated by the scaler itself, as in the upstream scaler template
+  scaler_last_scale_in_parameter = "/buildkite-agent-scaler/${local.stack_name_full}/last-scale-in"
   # Detect ARM and burstable instances from instance type family
   instance_type_family = split(".", split(",", var.instance_types)[0])[0]
 

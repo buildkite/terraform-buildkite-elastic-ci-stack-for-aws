@@ -109,3 +109,40 @@ run "enables_cloudwatch_metrics_when_opted_in" {
     error_message = "The cloudwatch:PutMetricData grant should be conditioned on the Buildkite CloudWatch namespace."
   }
 }
+
+run "persists_scale_in_cooldown_with_managed_role" {
+  command = plan
+
+  variables {
+    buildkite_agent_token = "test-token"
+  }
+
+  assert {
+    condition     = aws_lambda_function.scaler[0].environment[0].variables["LAST_SCALE_IN_SSM_PARAMETER"] == local.scaler_last_scale_in_parameter
+    error_message = "The scaler should persist its scale-in cooldown when the module manages its role."
+  }
+
+  assert {
+    condition = length([
+      for statement in jsondecode(aws_iam_role_policy.scaler_lambda_policy[0].policy).Statement :
+      statement
+      if try(contains(statement.Action, "ssm:PutParameter"), false)
+      && endswith(statement.Resource, ":parameter${local.scaler_last_scale_in_parameter}")
+    ]) == 1
+    error_message = "The scaler role should be able to write only its own scale-in cooldown parameter."
+  }
+}
+
+run "skips_scale_in_cooldown_persistence_with_custom_role" {
+  command = plan
+
+  variables {
+    buildkite_agent_token  = "test-token"
+    scaler_lambda_role_arn = "arn:aws:iam::123456789012:role/custom-scaler"
+  }
+
+  assert {
+    condition     = aws_lambda_function.scaler[0].environment[0].variables["LAST_SCALE_IN_SSM_PARAMETER"] == ""
+    error_message = "A custom scaler role is not granted the cooldown parameter, so persistence should stay off."
+  }
+}

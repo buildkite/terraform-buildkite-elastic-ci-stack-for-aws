@@ -44,6 +44,10 @@ resource "aws_lambda_function" "scaler" {
 
       # CloudWatch metrics (optional)
       CLOUDWATCH_METRICS = var.scaler_enable_cloudwatch_metrics ? "true" : "false"
+
+      # Persist the scale-in cooldown across cold starts. Only the module-managed
+      # role is granted access, matching the upstream scaler template.
+      LAST_SCALE_IN_SSM_PARAMETER = local.use_custom_scaler_lambda_role ? "" : local.scaler_last_scale_in_parameter
     }
   }
 
@@ -153,6 +157,15 @@ resource "aws_iam_role_policy" "scaler_lambda_policy" {
             "ssm:GetParameter"
           ]
           Resource = local.use_custom_token_path ? "arn:aws:ssm:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:parameter${var.buildkite_agent_token_parameter_store_path}" : aws_ssm_parameter.buildkite_agent_token_parameter[0].arn
+        },
+        # SSM Parameter Store - Scale-in cooldown state
+        {
+          Effect = "Allow"
+          Action = [
+            "ssm:GetParameter",
+            "ssm:PutParameter"
+          ]
+          Resource = "arn:aws:ssm:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:parameter${local.scaler_last_scale_in_parameter}"
         }
       ],
       # KMS for encrypted SSM parameter (if using customer-managed key)
