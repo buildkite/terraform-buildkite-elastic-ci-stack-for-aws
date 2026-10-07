@@ -3,7 +3,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 5.0"
+      version = ">= 6.33.0"
     }
   }
 }
@@ -14,7 +14,7 @@ provider "aws" {
 
 module "buildkite_agents" {
   source  = "buildkite/elastic-ci-stack-for-aws/buildkite"
-  version = "0.6.7"
+  version = "1.0.0"
 
   # Stack configuration
   stack_name = "production-buildkite-stack"
@@ -24,11 +24,10 @@ module "buildkite_agents" {
   buildkite_queue                            = "production"
   buildkite_agent_tags                       = "environment=production,os=linux,docker=enabled"
   buildkite_agent_release                    = "stable"
-  buildkite_agent_timestamp_lines            = true
   buildkite_agent_enable_git_mirrors         = true
   buildkite_agent_disconnect_after_uptime    = 7200 # 2 hours
   buildkite_agent_enable_graceful_shutdown   = true
-  buildkite_agent_tracing_backend            = "datadog"
+  buildkite_agent_opentelemetry_tracing      = true
   agents_per_instance                        = 2
 
   # Auto-scaling configuration with Lambda scaler
