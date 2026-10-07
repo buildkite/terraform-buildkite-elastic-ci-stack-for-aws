@@ -9,7 +9,7 @@ terraform {
 
 module "buildkite_stack" {
   source  = "buildkite/elastic-ci-stack-for-aws/buildkite"
-  version = "0.6.7"
+  version = "1.0.0"
 
   stack_name            = "buildkite-scheduled"
   buildkite_queue       = "default"
