@@ -48,13 +48,13 @@ variable "buildkite_agent_token_parameter_store_kms_key" {
 }
 
 variable "buildkite_agent_release" {
-  description = "Buildkite agent release channel to install. 'stable' = production-ready (recommended), 'beta' = pre-release with latest features, 'edge' = bleeding-edge development builds, 'oldstable' = previous major version of the buildkite-agent for compatibility testing. Use 'stable' unless specific new features or backward-compatibility needs are required."
+  description = "Buildkite Agent v4 release channel to install. 'stable' = production-ready (recommended), 'beta' = pre-release with latest features, 'edge' = bleeding-edge development builds. Use 'stable' unless specific new features are required."
   type        = string
   default     = "stable"
 
   validation {
-    condition     = contains(["stable", "beta", "edge", "oldstable"], var.buildkite_agent_release)
-    error_message = "buildkite_agent_release must be one of: stable, beta, edge, oldstable."
+    condition     = contains(["stable", "beta", "edge"], var.buildkite_agent_release)
+    error_message = "buildkite_agent_release must be one of: stable, beta, edge. To keep Buildkite Agent v3, stay on module v0.x."
   }
 }
 
@@ -81,12 +81,6 @@ variable "buildkite_agent_tags" {
   default     = ""
 }
 
-variable "buildkite_agent_timestamp_lines" {
-  description = "Set to true to prepend timestamps to every line of output."
-  type        = bool
-  default     = false
-}
-
 variable "buildkite_agent_experiments" {
   description = "Optional - Agent experiments to enable, comma delimited. See https://github.com/buildkite/agent/blob/-/EXPERIMENTS.md."
   type        = string
@@ -99,36 +93,31 @@ variable "buildkite_agent_enable_git_mirrors" {
   default     = false
 }
 
-variable "buildkite_agent_tracing_backend" {
-  description = "Optional - The tracing backend to use for CI tracing. See https://buildkite.com/docs/agent/v3/tracing."
+variable "buildkite_agent_opentelemetry_tracing" {
+  description = "Enable OpenTelemetry tracing for the Buildkite Agent. Configure the OTLP exporter, such as OTEL_EXPORTER_OTLP_ENDPOINT, through agent_env_file_url. See https://buildkite.com/docs/agent/self-hosted/monitoring-and-observability/tracing."
+  type        = bool
+  default     = false
+}
+
+variable "buildkite_agent_cancel_signal_timeout" {
+  description = "How long a canceled or timed out job's process has to handle the cancel signal before the Buildkite Agent sends SIGKILL. Accepts duration strings such as '30s' and '1m30s'."
   type        = string
-  default     = ""
+  default     = "10s"
 
   validation {
-    condition     = contains(["", "datadog", "opentelemetry"], var.buildkite_agent_tracing_backend)
-    error_message = "buildkite_agent_tracing_backend must be one of: \"\", datadog, opentelemetry."
+    condition     = can(regex("^(0|([0-9]+(\\.[0-9]+)?(ns|us|ms|s|m|h))+)$", var.buildkite_agent_cancel_signal_timeout))
+    error_message = "buildkite_agent_cancel_signal_timeout must be a non-negative duration such as '30s' or '1m30s'."
   }
 }
 
-variable "buildkite_agent_cancel_grace_period" {
-  description = "The number of seconds a canceled or timed out job is given to gracefully terminate and upload its artifacts. Must be greater than buildkite_agent_signal_grace_period when that is enabled."
-  type        = number
-  default     = 60
+variable "buildkite_agent_cancel_cleanup_timeout" {
+  description = "Extra time for a stopping Buildkite Agent to upload logs and artifacts after the job process exits or is killed. Accepts duration strings such as '5s' and '1m30s'."
+  type        = string
+  default     = "5s"
 
   validation {
-    condition     = var.buildkite_agent_cancel_grace_period >= 1
-    error_message = "buildkite_agent_cancel_grace_period must be at least 1."
-  }
-}
-
-variable "buildkite_agent_signal_grace_period" {
-  description = "The number of seconds given to a subprocess to handle being sent cancel-signal. After this period has elapsed, SIGKILL will be sent. Set to -1 to use the agent default. When set to 0 or greater, buildkite_agent_cancel_grace_period must be greater than this value."
-  type        = number
-  default     = -1
-
-  validation {
-    condition     = var.buildkite_agent_signal_grace_period >= -1
-    error_message = "buildkite_agent_signal_grace_period must be -1 or greater."
+    condition     = can(regex("^(0|([0-9]+(\\.[0-9]+)?(ns|us|ms|s|m|h))+)$", var.buildkite_agent_cancel_cleanup_timeout))
+    error_message = "buildkite_agent_cancel_cleanup_timeout must be a non-negative duration such as '5s' or '1m30s'."
   }
 }
 
@@ -1183,15 +1172,6 @@ resource "terraform_data" "validate_token" {
     precondition {
       condition     = var.buildkite_agent_token != "" || var.buildkite_agent_token_parameter_store_path != ""
       error_message = "Either buildkite_agent_token or buildkite_agent_token_parameter_store_path must be provided."
-    }
-  }
-}
-
-resource "terraform_data" "validate_agent_grace_periods" {
-  lifecycle {
-    precondition {
-      condition     = var.buildkite_agent_signal_grace_period == -1 || var.buildkite_agent_cancel_grace_period > var.buildkite_agent_signal_grace_period
-      error_message = "buildkite_agent_cancel_grace_period must be greater than buildkite_agent_signal_grace_period when buildkite_agent_signal_grace_period is enabled. Increase buildkite_agent_cancel_grace_period or leave buildkite_agent_signal_grace_period set to -1."
     }
   }
 }

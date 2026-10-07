@@ -155,3 +155,81 @@ run "custom_user_data_overrides_windows_template_too" {
     error_message = "Custom user data should replace the managed Windows template."
   }
 }
+
+run "linux_user_data_uses_agent_v4_defaults" {
+  command = plan
+
+  variables {
+    buildkite_agent_token_parameter_store_path = "/buildkite/test-token"
+    secrets_bucket                             = "test-secrets-bucket"
+  }
+
+  assert {
+    condition = alltrue([for setting in [
+      "BUILDKITE_AGENT_OPENTELEMETRY_TRACING=\"false\"",
+      "BUILDKITE_AGENT_CANCEL_SIGNAL_TIMEOUT=\"10s\"",
+      "BUILDKITE_AGENT_CANCEL_CLEANUP_TIMEOUT=\"5s\"",
+    ] : strcontains(base64decode(aws_launch_template.agent_launch_template.user_data), setting)])
+    error_message = "Linux user data should pass the Agent v4 tracing and cancellation defaults."
+  }
+
+  assert {
+    condition = !anytrue([for setting in ["TIMESTAMP_LINES", "TRACING_BACKEND", "GRACE_PERIOD"] :
+    strcontains(base64decode(aws_launch_template.agent_launch_template.user_data), setting)])
+    error_message = "Linux user data should not pass settings removed in Agent v4."
+  }
+}
+
+run "windows_user_data_passes_agent_v4_settings" {
+  command = plan
+
+  variables {
+    buildkite_agent_token_parameter_store_path = "/buildkite/test-token"
+    secrets_bucket                             = "test-secrets-bucket"
+    instance_operating_system                  = "windows"
+    buildkite_agent_opentelemetry_tracing      = true
+    buildkite_agent_cancel_signal_timeout      = "1m30s"
+    buildkite_agent_cancel_cleanup_timeout     = "30s"
+  }
+
+  assert {
+    condition = alltrue([for setting in [
+      "$Env:BUILDKITE_AGENT_OPENTELEMETRY_TRACING=\"true\"",
+      "$Env:BUILDKITE_AGENT_CANCEL_SIGNAL_TIMEOUT=\"1m30s\"",
+      "$Env:BUILDKITE_AGENT_CANCEL_CLEANUP_TIMEOUT=\"30s\"",
+    ] : strcontains(base64decode(aws_launch_template.agent_launch_template.user_data), setting)])
+    error_message = "Windows user data should pass the configured Agent v4 tracing and cancellation settings."
+  }
+
+  assert {
+    condition = !anytrue([for setting in ["TIMESTAMP_LINES", "TRACING_BACKEND", "GRACE_PERIOD"] :
+    strcontains(base64decode(aws_launch_template.agent_launch_template.user_data), setting)])
+    error_message = "Windows user data should not pass settings removed in Agent v4."
+  }
+}
+
+run "rejects_oldstable_release" {
+  command = plan
+
+  variables {
+    buildkite_agent_token   = "test-token"
+    buildkite_agent_release = "oldstable"
+  }
+
+  expect_failures = [var.buildkite_agent_release]
+}
+
+run "rejects_cancel_timeouts_without_units" {
+  command = plan
+
+  variables {
+    buildkite_agent_token                  = "test-token"
+    buildkite_agent_cancel_signal_timeout  = "30"
+    buildkite_agent_cancel_cleanup_timeout = "-1s"
+  }
+
+  expect_failures = [
+    var.buildkite_agent_cancel_signal_timeout,
+    var.buildkite_agent_cancel_cleanup_timeout,
+  ]
+}
