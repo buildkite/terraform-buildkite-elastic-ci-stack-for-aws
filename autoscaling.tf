@@ -254,6 +254,19 @@ resource "aws_autoscaling_group" "agent_auto_scale_group" {
     }
   }
 
+  dynamic "warm_pool" {
+    for_each = var.enable_warm_pool ? [1] : []
+    content {
+      pool_state                  = var.warm_pool_state
+      min_size                    = var.warm_pool_min_size
+      max_group_prepared_capacity = var.warm_pool_max_group_prepared_capacity
+
+      instance_reuse_policy {
+        reuse_on_scale_in = var.warm_pool_reuse_on_scale_in
+      }
+    }
+  }
+
   lifecycle {
     ignore_changes = [suspended_processes]
   }
