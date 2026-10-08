@@ -231,6 +231,8 @@ resource "aws_autoscaling_group" "agent_auto_scale_group" {
   default_cooldown      = 60
   protect_from_scale_in = true
 
+  wait_for_capacity_timeout = var.wait_for_capacity_timeout
+
   termination_policies = [
     "OldestLaunchTemplate",
     "ClosestToNextInstanceHour"
