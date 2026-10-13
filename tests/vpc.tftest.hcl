@@ -44,6 +44,26 @@ mock_provider "random" {
 }
 
 
+run "infers_existing_vpc_from_vpc_id" {
+  command = plan
+
+  variables {
+    buildkite_agent_token = "test-token"
+    vpc_id                = "vpc-12345678"
+    subnets               = ["subnet-11111111", "subnet-22222222"]
+  }
+
+  assert {
+    condition     = length(aws_vpc.vpc) == 0
+    error_message = "Setting vpc_id without create_vpc should not create a VPC."
+  }
+
+  assert {
+    condition     = toset(aws_autoscaling_group.agent_auto_scale_group.vpc_zone_identifier) == toset(["subnet-11111111", "subnet-22222222"])
+    error_message = "Setting vpc_id without create_vpc should launch agents into the given subnets."
+  }
+}
+
 run "existing_vpc_created_in_same_plan" {
   command = plan
 
