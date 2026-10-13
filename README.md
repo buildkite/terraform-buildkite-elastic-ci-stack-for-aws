@@ -225,7 +225,6 @@ No modules.
 | Name | Type |
 | ---- | ---- |
 | [aws_autoscaling_group.agent_auto_scale_group](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/autoscaling_group) | resource |
-| [aws_autoscaling_lifecycle_hook.instance_terminating](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/autoscaling_lifecycle_hook) | resource |
 | [aws_autoscaling_schedule.scheduled_scale_down_action](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/autoscaling_schedule) | resource |
 | [aws_autoscaling_schedule.scheduled_scale_up_action](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/autoscaling_schedule) | resource |
 | [aws_cloudwatch_event_rule.scaler_schedule](https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudwatch_event_rule) | resource |
@@ -439,7 +438,7 @@ No modules.
 | <a name="output_instance_role_name"></a> [instance\_role\_name](#output\_instance\_role\_name) | Name of the IAM role attached to agent instances |
 | <a name="output_launch_template_id"></a> [launch\_template\_id](#output\_launch\_template\_id) | ID of the launch template used by the Auto Scaling Group |
 | <a name="output_launch_template_version"></a> [launch\_template\_version](#output\_launch\_template\_version) | Latest version of the launch template |
-| <a name="output_lifecycle_hook_name"></a> [lifecycle\_hook\_name](#output\_lifecycle\_hook\_name) | Name of the lifecycle hook for graceful termination |
+| <a name="output_lifecycle_hook_name"></a> [lifecycle\_hook\_name](#output\_lifecycle\_hook\_name) | Deprecated: always null. The module no longer creates an instance termination lifecycle hook. This output will be removed in a future major version. |
 | <a name="output_managed_secrets_bucket"></a> [managed\_secrets\_bucket](#output\_managed\_secrets\_bucket) | S3 bucket for secrets storage |
 | <a name="output_managed_secrets_logging_bucket"></a> [managed\_secrets\_logging\_bucket](#output\_managed\_secrets\_logging\_bucket) | S3 bucket for secrets bucket logging |
 | <a name="output_pipeline_signing_kms_key"></a> [pipeline\_signing\_kms\_key](#output\_pipeline\_signing\_kms\_key) | KMS key ARN for pipeline signing |

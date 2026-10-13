@@ -181,7 +181,7 @@ data "archive_file" "stop_buildkite_agents" {
 # Lambda invocation on ASG replacement
 # Note: Terraform doesn't have a direct equivalent to CloudFormation Custom Resources
 # that trigger on "Update" events. This is handled during terraform apply when the
-# ASG is replaced, using lifecycle hooks and the lambda invocation.
+# ASG is replaced, using the lambda invocation.
 resource "aws_lambda_invocation" "stop_buildkite_agents_on_replacement" {
   count = local.enable_graceful_shutdown ? 1 : 0
 
@@ -200,21 +200,4 @@ resource "aws_lambda_invocation" "stop_buildkite_agents_on_replacement" {
       aws_autoscaling_group.agent_auto_scale_group.name
     ]
   }
-}
-
-
-# Gives agents time to finish current jobs before termination
-resource "aws_autoscaling_lifecycle_hook" "instance_terminating" {
-  count = local.enable_graceful_shutdown ? 1 : 0
-
-  name                   = "${local.stack_name_full}-terminating-hook"
-  autoscaling_group_name = aws_autoscaling_group.agent_auto_scale_group.name
-  default_result         = "CONTINUE"
-  heartbeat_timeout      = 3600 # 1 hour for agents to finish jobs
-  lifecycle_transition   = "autoscaling:EC2_INSTANCE_TERMINATING"
-
-  notification_metadata = jsonencode({
-    stack_name = local.stack_name_full
-    queue      = var.buildkite_queue
-  })
 }
