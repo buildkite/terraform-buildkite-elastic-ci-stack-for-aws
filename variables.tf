@@ -565,6 +565,12 @@ variable "artifacts_s3_acl" {
 # NETWORK CONFIGURATION
 # =============================================================================
 
+variable "create_vpc" {
+  description = "Optional - Whether to create a new VPC. Leave null to create one only when vpc_id is blank. Set to false when vpc_id refers to a VPC created in the same Terraform run, since its ID is unknown until apply."
+  type        = bool
+  default     = null
+}
+
 variable "vpc_id" {
   description = "Optional - Id of an existing VPC to launch instances into. Leave blank to have a new VPC created."
   type        = string
@@ -1188,8 +1194,13 @@ resource "terraform_data" "validate_max_min_size" {
 resource "terraform_data" "validate_vpc_subnets" {
   lifecycle {
     precondition {
-      condition     = var.vpc_id == "" || length(var.subnets) >= 2
-      error_message = "If vpc_id is specified, at least 2 subnets must be provided."
+      condition     = local.create_vpc || (var.vpc_id != "" && length(var.subnets) >= 2)
+      error_message = "When not creating a VPC, vpc_id and at least 2 subnets must be provided."
+    }
+
+    precondition {
+      condition     = var.create_vpc != true || (var.vpc_id == "" && length(var.subnets) == 0)
+      error_message = "create_vpc = true cannot be combined with vpc_id or subnets."
     }
   }
 }
