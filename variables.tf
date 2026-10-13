@@ -407,9 +407,10 @@ variable "imdsv2_tokens" {
 }
 
 variable "imds_hop_limit" {
-  description = "HTTP PUT response hop limit for EC2 instance metadata requests. The default of 2 lets containers on a Docker bridge network reach the instance metadata service and use the instance role. Set to 1 with imdsv2_tokens = \"required\" to restrict instance metadata access to processes on the host."
+  description = "Hop limit for IMDSv2 token responses from the EC2 instance metadata service. It does not affect IMDSv1 requests. The default of 2 lets containers on a Docker bridge network get tokens and use the instance role. Set to 1 with imdsv2_tokens = \"required\" to restrict instance metadata access to the host network, which still includes containers using host networking."
   type        = number
   default     = 2
+  nullable    = false
 
   validation {
     condition     = var.imds_hop_limit >= 1 && var.imds_hop_limit <= 64 && floor(var.imds_hop_limit) == var.imds_hop_limit
