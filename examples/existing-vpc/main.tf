@@ -27,7 +27,7 @@ data "aws_subnets" "private" {
 
 module "buildkite_stack" {
   source  = "buildkite/elastic-ci-stack-for-aws/buildkite"
-  version = "1.0.0"
+  version = "1.1.0"
 
   stack_name            = "buildkite-existing-vpc"
   buildkite_queue       = "default"
