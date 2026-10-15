@@ -157,6 +157,7 @@ resource "aws_launch_template" "agent_launch_template" {
     agent_signing_failure_behavior                = var.pipeline_signing_verification_failure_behavior
     queue                                         = var.buildkite_queue
     agent_enable_git_mirrors                      = var.buildkite_agent_enable_git_mirrors ? "true" : "false"
+    git_mirror_seed_bucket                        = local.has_git_mirror_seed_bucket ? var.git_mirror_seed_bucket : ""
     bootstrap_script_url                          = var.bootstrap_script_url
     agent_env_file_url                            = var.agent_env_file_url
     enable_instance_storage                       = var.enable_instance_storage ? "true" : "false"
