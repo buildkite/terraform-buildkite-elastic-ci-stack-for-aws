@@ -566,7 +566,7 @@ variable "artifacts_s3_acl" {
 # =============================================================================
 
 variable "create_vpc" {
-  description = "Optional - Whether to create a new VPC. Leave null to create one only when vpc_id is blank. Set to false when vpc_id refers to a VPC created in the same Terraform run, since its ID is unknown until apply."
+  description = "Optional - Whether to create a new VPC. Defaults to creating a VPC unless vpc_id is set. Set to false when vpc_id is only known after apply, such as a VPC created in the same Terraform run."
   type        = bool
   default     = null
 }
