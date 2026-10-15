@@ -21,6 +21,10 @@ locals {
   has_secrets_bucket    = local.create_secrets_bucket || local.use_existing_secrets
   use_artifacts_bucket  = var.artifacts_bucket != ""
 
+  # The AMI only seeds git mirrors on Linux, and only when mirrors are enabled.
+  has_git_mirror_seed_bucket = !local.is_windows && var.buildkite_agent_enable_git_mirrors && var.git_mirror_seed_bucket != ""
+  git_mirror_seeds_prefix    = "git-mirror-seeds"
+
   # Instance role, permissions boundary, and policy settings
   use_custom_iam_role              = var.instance_role_arn != ""
   use_custom_role_name             = var.instance_role_name != ""

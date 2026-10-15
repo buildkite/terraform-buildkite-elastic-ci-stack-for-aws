@@ -55,6 +55,7 @@ BUILDKITE_AGENT_VERIFICATION_KEY_PATH="${agent_verification_jwks_path}" \
 BUILDKITE_AGENT_JOB_VERIFICATION_NO_SIGNATURE_BEHAVIOR="${agent_signing_failure_behavior}" \
 BUILDKITE_QUEUE="${queue}" \
 BUILDKITE_AGENT_ENABLE_GIT_MIRRORS="${agent_enable_git_mirrors}" \
+BUILDKITE_GIT_MIRROR_SEED_BUCKET="${git_mirror_seed_bucket}" \
 BUILDKITE_ELASTIC_BOOTSTRAP_SCRIPT="${bootstrap_script_url}" \
 BUILDKITE_ENV_FILE_URL=${agent_env_file_url} \
 BUILDKITE_ENABLE_INSTANCE_STORAGE="${enable_instance_storage}" \

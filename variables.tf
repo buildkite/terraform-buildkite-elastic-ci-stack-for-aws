@@ -93,6 +93,12 @@ variable "buildkite_agent_enable_git_mirrors" {
   default     = false
 }
 
+variable "git_mirror_seed_bucket" {
+  description = "Optional - Name of an existing S3 bucket that holds git mirror seed archives under the git-mirror-seeds/ prefix, one archive (.tar, .tar.gz, or .zip) per repository, named after the agent's mirror directory for that repository. Only used when buildkite_agent_enable_git_mirrors is true. Each archive is extracted into the git mirrors path at instance boot, before the agent starts. If blank, or if archives cannot be fetched, git mirrors start empty as usual. Instances that use a custom instance_role_arn must be granted access to this bucket separately. Linux instances only."
+  type        = string
+  default     = ""
+}
+
 variable "buildkite_agent_opentelemetry_tracing" {
   description = "Enable OpenTelemetry tracing for the Buildkite Agent. Configure the OTLP exporter, such as OTEL_EXPORTER_OTLP_ENDPOINT, through agent_env_file_url. See https://buildkite.com/docs/agent/self-hosted/monitoring-and-observability/tracing."
   type        = bool

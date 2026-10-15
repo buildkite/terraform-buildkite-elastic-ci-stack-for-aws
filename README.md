@@ -81,6 +81,33 @@ See the [examples/](./examples/) directory for more use cases.
 - Resource limits are disabled by default
 - Values can be specified as percentages or absolute values (for memory-related parameters)
 
+## Git Mirrors
+
+Set `buildkite_agent_enable_git_mirrors = true` to make the agent keep a local git mirror of each repository. The agent clones builds from the mirror, which makes checkouts faster.
+
+A new instance starts with an empty mirror, so its first checkout of each repository is a full clone. To avoid this, set `git_mirror_seed_bucket` to an S3 bucket that holds seed archives. At boot, before the agent starts, the instance extracts each archive into the git mirrors path.
+
+| Variable                             | Description                                   | Default |
+| ------------------------------------ | --------------------------------------------- | ------- |
+| `buildkite_agent_enable_git_mirrors` | Enable git mirrors in the agent               | `false` |
+| `git_mirror_seed_bucket`             | S3 bucket that holds git mirror seed archives | `""`    |
+
+### Seed archive layout
+
+- Put one archive per repository under the `git-mirror-seeds/` prefix.
+- Use the `.tar`, `.tar.gz`, or `.zip` format.
+- Name each archive after the agent's mirror directory for that repository. The agent builds that name from the repository URL by replacing every non-alphanumeric character with `-`, for example `git-mirror-seeds/https---github-com-my-org-my-repo-git.tar.gz`.
+- Each archive must contain that directory as its single top-level entry, and the directory must be a bare git mirror.
+- Build the mirror from the same repository URL that Buildkite uses. On a mismatch the agent rewrites the remote, then runs `fsck` and `gc` across the whole mirror on first use, which is slow.
+
+### Notes
+
+- Seeding runs on Linux instances only.
+- Seeding is best effort. If an archive is missing or invalid, the agent logs a warning and clones the mirror as usual.
+- Seeding skips any mirror that already exists on the instance.
+- The module grants the instance role read access to the bucket. Grant that access yourself when you set `instance_role_arn`.
+- Seeding adds time to instance boot. Increase `scale_out_cooldown_period` or `min_size` if large archives delay the first job.
+
 ## Scheduled Scaling
 
 The Elastic CI Stack supports time-based scaling to automatically adjust the minimum number of instances based on your team's working hours. This feature helps optimize costs by scaling down during off-hours while allowing users the ability to proactively scale up capacity ahead of expected increasing capacity requirements.
@@ -357,6 +384,7 @@ No modules.
 | <a name="input_enable_scheduled_scaling"></a> [enable\_scheduled\_scaling](#input\_enable\_scheduled\_scaling) | Enable scheduled scaling to automatically adjust min\_size based on time-based schedules | `bool` | `false` | no |
 | <a name="input_enable_secrets_plugin"></a> [enable\_secrets\_plugin](#input\_enable\_secrets\_plugin) | Enables S3 Secrets plugin for all pipelines. | `bool` | `true` | no |
 | <a name="input_experimental_enable_resource_limits"></a> [experimental\_enable\_resource\_limits](#input\_experimental\_enable\_resource\_limits) | Experimental - If true, enables systemd resource limits for the Buildkite agent. This helps prevent resource exhaustion by limiting CPU, memory, and I/O usage. Useful for shared instances running multiple agents or resource-intensive builds. | `bool` | `false` | no |
+| <a name="input_git_mirror_seed_bucket"></a> [git\_mirror\_seed\_bucket](#input\_git\_mirror\_seed\_bucket) | Optional - Name of an existing S3 bucket that holds git mirror seed archives under the git-mirror-seeds/ prefix, one archive (.tar, .tar.gz, or .zip) per repository, named after the agent's mirror directory for that repository. Only used when buildkite\_agent\_enable\_git\_mirrors is true. Each archive is extracted into the git mirrors path at instance boot, before the agent starts. If blank, or if archives cannot be fetched, git mirrors start empty as usual. Instances that use a custom instance\_role\_arn must be granted access to this bucket separately. Linux instances only. | `string` | `""` | no |
 | <a name="input_image_id"></a> [image\_id](#input\_image\_id) | Optional - Custom AMI to use for instances. Set custom\_user\_data when the AMI is not based on the stack's AMI. | `string` | `""` | no |
 | <a name="input_image_id_parameter"></a> [image\_id\_parameter](#input\_image\_id\_parameter) | Optional - Custom AMI SSM Parameter to use for instances. Set custom\_user\_data when the AMI is not based on the stack's AMI. | `string` | `""` | no |
 | <a name="input_imds_hop_limit"></a> [imds\_hop\_limit](#input\_imds\_hop\_limit) | Hop limit for IMDSv2 token responses from the EC2 instance metadata service. It does not affect IMDSv1 requests. The default of 2 lets containers on a Docker bridge network get tokens and use the instance role. Set to 1 with imdsv2\_tokens = "required" to restrict instance metadata access to the host network, which still includes containers using host networking. | `number` | `2` | no |
