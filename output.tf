@@ -61,8 +61,8 @@ output "scaler_log_group" {
 
 # Lifecycle Management Outputs
 output "lifecycle_hook_name" {
-  description = "Name of the lifecycle hook for graceful termination"
-  value       = local.enable_graceful_shutdown ? aws_autoscaling_lifecycle_hook.instance_terminating[0].name : null
+  description = "Deprecated: always null. The module no longer creates an instance termination lifecycle hook. This output will be removed in a future major version."
+  value       = null
 }
 
 # Launch Template / AMI Outputs
