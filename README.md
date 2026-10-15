@@ -120,7 +120,7 @@ A new instance starts with an empty mirror, so its first checkout of each reposi
 - Seeding is best effort. If an archive is missing or invalid, the agent logs a warning and clones the mirror as usual.
 - Seeding skips any mirror that already exists on the instance.
 - The module grants the instance role read access to the bucket. Grant that access yourself when you set `instance_role_arn`.
-- Seeding adds time to instance boot. Increase `scale_out_cooldown_period` or `min_size` if large archives delay the first job.
+- Seeding adds time to instance boot, so the first job on a new instance waits for extraction to finish. If large archives make this delay noticeable, raise `min_size` to keep seeded instances warm.
 
 ## Scheduled Scaling
 
