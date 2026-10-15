@@ -48,6 +48,20 @@ module "buildkite_stack" {
 
 The current release is ![](https://img.shields.io/github/release/buildkite/terraform-buildkite-elastic-ci-stack-for-aws.svg). See [Releases](https://github.com/buildkite/terraform-buildkite-elastic-ci-stack-for-aws/releases) for older releases.
 
+### Using an existing VPC
+
+Set `vpc_id` and at least two `subnets` to launch agents into an existing VPC. If that VPC is created in the same Terraform run, also set `create_vpc = false`. Its ID isn't known until apply, so the module can't otherwise tell whether to create a VPC of its own:
+
+```hcl
+module "buildkite_stack" {
+  # ...
+
+  create_vpc = false
+  vpc_id     = aws_vpc.ci.id
+  subnets    = [aws_subnet.a.id, aws_subnet.b.id]
+}
+```
+
 > Although the stack creates its own VPC by default, Buildkite highly recommends following best practices by setting up a separate development AWS account and using role switching and consolidated billing — see the [Delegate Access Across AWS Accounts tutorial](http://docs.aws.amazon.com/IAM/latest/UserGuide/tutorial_cross-account-with-roles.html) for more information.
 
 ## Security
@@ -331,6 +345,7 @@ No modules.
 | <a name="input_cost_allocation_tag_name"></a> [cost\_allocation\_tag\_name](#input\_cost\_allocation\_tag\_name) | The name of the Cost Allocation Tag used for billing purposes. | `string` | `"CreatedBy"` | no |
 | <a name="input_cost_allocation_tag_value"></a> [cost\_allocation\_tag\_value](#input\_cost\_allocation\_tag\_value) | The value of the Cost Allocation Tag used for billing purposes. | `string` | `"buildkite-elastic-ci-stack-for-aws"` | no |
 | <a name="input_cpu_credits"></a> [cpu\_credits](#input\_cpu\_credits) | Credit option for CPU usage of burstable instances. Sets the CreditSpecification.CpuCredits property in the LaunchTemplate for T-class instance types (t2, t3, t3a, t4g). | `string` | `"unlimited"` | no |
+| <a name="input_create_vpc"></a> [create\_vpc](#input\_create\_vpc) | Optional - Whether to create a new VPC. Defaults to creating a VPC unless vpc\_id is set. Set to false when vpc\_id is only known after apply, such as a VPC created in the same Terraform run. | `bool` | `null` | no |
 | <a name="input_custom_user_data"></a> [custom\_user\_data](#input\_custom\_user\_data) | Optional - Unencoded custom user data for agent instances. The module encodes this value using base64 without interpolation. When set, it replaces the module-managed Linux or Windows user data, so instance bootstrap inputs are not applied automatically. | `string` | `""` | no |
 | <a name="input_disable_scale_in"></a> [disable\_scale\_in](#input\_disable\_scale\_in) | Whether the desired count should ever be decreased on the Auto Scaling group. When set to true (default), the scaler will not reduce the Auto Scaling group's desired capacity, and instances are expected to self-terminate when idle. | `bool` | `true` | no |
 | <a name="input_docker_builder_prune_enabled"></a> [docker\_builder\_prune\_enabled](#input\_docker\_builder\_prune\_enabled) | Controls whether Docker builder cache is pruned during garbage collection. When enabled, Docker builder cache will run after Docker image pruning. | `bool` | `false` | no |
