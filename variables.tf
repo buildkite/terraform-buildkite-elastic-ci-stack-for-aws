@@ -406,6 +406,18 @@ variable "imdsv2_tokens" {
   }
 }
 
+variable "imds_hop_limit" {
+  description = "Hop limit for IMDSv2 token responses from the EC2 instance metadata service. It does not affect IMDSv1 requests. The default of 2 lets containers on a Docker bridge network get tokens and use the instance role. Set to 1 with imdsv2_tokens = \"required\" to restrict instance metadata access to the host network, which still includes containers using host networking."
+  type        = number
+  default     = 2
+  nullable    = false
+
+  validation {
+    condition     = var.imds_hop_limit >= 1 && var.imds_hop_limit <= 64 && floor(var.imds_hop_limit) == var.imds_hop_limit
+    error_message = "imds_hop_limit must be a whole number from 1 to 64."
+  }
+}
+
 variable "enable_detailed_monitoring" {
   description = "Enable detailed EC2 monitoring."
   type        = bool

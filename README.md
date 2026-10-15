@@ -56,7 +56,7 @@ This repository hasn't been reviewed by security researchers. Therefore, exercis
 
 Anyone with commit access to your codebase (including third-party pull-requests if you've enabled them in Buildkite) will have access to your secrets bucket files.
 
-Also, keep in mind the EC2 HTTP metadata server is available from within builds, which means builds act with the same IAM permissions as the instance.
+Also, keep in mind the EC2 HTTP metadata server is available from within builds, which means builds act with the same IAM permissions as the instance. By default, containers on a Docker bridge network can also reach it. To restrict it to the host network, set `imds_hop_limit = 1` and `imdsv2_tokens = "required"`. Containers using host networking keep access.
 
 ## Experimental Resource Limits
 
@@ -360,6 +360,7 @@ No modules.
 | <a name="input_experimental_enable_resource_limits"></a> [experimental\_enable\_resource\_limits](#input\_experimental\_enable\_resource\_limits) | Experimental - If true, enables systemd resource limits for the Buildkite agent. This helps prevent resource exhaustion by limiting CPU, memory, and I/O usage. Useful for shared instances running multiple agents or resource-intensive builds. | `bool` | `false` | no |
 | <a name="input_image_id"></a> [image\_id](#input\_image\_id) | Optional - Custom AMI to use for instances. Set custom\_user\_data when the AMI is not based on the stack's AMI. | `string` | `""` | no |
 | <a name="input_image_id_parameter"></a> [image\_id\_parameter](#input\_image\_id\_parameter) | Optional - Custom AMI SSM Parameter to use for instances. Set custom\_user\_data when the AMI is not based on the stack's AMI. | `string` | `""` | no |
+| <a name="input_imds_hop_limit"></a> [imds\_hop\_limit](#input\_imds\_hop\_limit) | Hop limit for IMDSv2 token responses from the EC2 instance metadata service. It does not affect IMDSv1 requests. The default of 2 lets containers on a Docker bridge network get tokens and use the instance role. Set to 1 with imdsv2\_tokens = "required" to restrict instance metadata access to the host network, which still includes containers using host networking. | `number` | `2` | no |
 | <a name="input_imdsv2_tokens"></a> [imdsv2\_tokens](#input\_imdsv2\_tokens) | Security setting for EC2 instance metadata access. 'required' enforces secure token-based access (recommended for security), 'optional' allows both secure and legacy access methods. Use 'required' unless legacy applications require the older metadata service. | `string` | `"optional"` | no |
 | <a name="input_instance_buffer"></a> [instance\_buffer](#input\_instance\_buffer) | Number of idle instances to keep running. Lower values save costs, higher values reduce wait times for new jobs. | `number` | `0` | no |
 | <a name="input_instance_creation_timeout"></a> [instance\_creation\_timeout](#input\_instance\_creation\_timeout) | Optional - Timeout period for Auto Scaling Group Creation Policy. | `string` | `""` | no |
