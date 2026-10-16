@@ -28,7 +28,7 @@ Alternatively, jump straight in:
 ```hcl
 module "buildkite_stack" {
   source = "buildkite/elastic-ci-stack-for-aws/buildkite"
-  version = "1.1.0"
+  version = "1.2.0"
 
   stack_name            = "my-buildkite-stack"
   buildkite_queue       = "default"
