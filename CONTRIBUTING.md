@@ -108,12 +108,58 @@ terraform-docs markdown table . --output-file README.md
 
 ## Release Process
 
-Releases are managed by maintainers. The process includes:
+Maintainers cut releases from `main`. A release is a `vX.Y.Z` Git tag on a `main` commit whose CI passed.
 
-1. Version bump in relevant files
-2. Update CHANGELOG.md
-3. Create GitHub release with notes
-4. Tag the release (semantic versioning)
+> [!IMPORTANT]
+> The Terraform Registry publishes a new module version as soon as a `vX.Y.Z` tag is pushed. Publishing a GitHub release creates its tag, so it publishes the version too. Published versions can't be changed, so every change in a release must be on `main` before you publish the GitHub release.
+
+### 1. Choose the version
+
+Compare `main` with the previous release (`https://github.com/buildkite/terraform-buildkite-elastic-ci-stack-for-aws/compare/vA.B.C...main`) and choose the release type:
+
+| Release type | Use when | Examples |
+| --- | --- | --- |
+| Major (`vX.0.0`) | Upgrading can break an existing configuration or deployment, or needs manual steps | Removing or renaming an input variable or output; changing a default incompatibly; a new Buildkite Agent major version; a new Elastic CI Stack for AWS major version |
+| Minor (`vX.Y.0`) | New behavior that existing configurations don't need to change for | A new input variable whose default keeps existing behavior; a new output; AMIs from a new Elastic CI Stack for AWS minor version |
+| Patch (`vX.Y.Z`) | Backwards-compatible fixes only | Bug fixes; AMIs from a new Elastic CI Stack for AWS patch version; documentation |
+
+If the changes span more than one type, use the largest. If you're unsure, use the larger type.
+
+Tags always have a leading `v` (for example `v1.2.0`). This process covers stable releases only.
+
+### 2. Merge prerequisites
+
+Merge these before the release:
+
+- **AMIs.** To ship AMIs from a newer [Elastic CI Stack for AWS](https://github.com/buildkite/elastic-ci-stack-for-aws/releases) release, merge the Renovate pull request that updates `cloudformation_stack_version` and `buildkite_ami_mapping` in `locals.tf`.
+- **Major releases only.** Land these with the breaking change:
+  - Add `docs/upgrading-to-vX.md` and link it from `README.md`.
+  - Set the module example in `README.md` to `version = "~> X.0"`.
+
+There is no version to bump for minor and patch releases. `README.md` and the examples pin `~> X.0`, so they pick up new minor and patch versions without changes.
+
+### 3. Publish the GitHub release
+
+Draft the release on the `main` commit you're releasing:
+
+```bash
+gh release create vX.Y.Z --draft --target COMMIT_SHA --title vX.Y.Z --generate-notes
+```
+
+Review the draft notes:
+
+- Keep the upgrade callout from the previous release at the top. For a major release, write a new one that links `docs/upgrading-to-vX.md`.
+- Move pull requests that only change CI, linting or other repository tooling under an `### Internal` heading.
+
+Then publish the draft. Publishing creates the `vX.Y.Z` tag, and the Terraform Registry publishes the version.
+
+### 4. Check the release
+
+- `vX.Y.Z` appears on the [Terraform Registry](https://registry.terraform.io/modules/buildkite/elastic-ci-stack-for-aws/buildkite) within a few minutes. If it doesn't, select **Resync Module** under **Manage Module** on the registry page.
+- Fetch the published tag with `git fetch origin tag vX.Y.Z`, then check that `git rev-parse 'vX.Y.Z^{commit}'` matches the commit you released.
+- **Major releases only:** the examples use the registry module, so they can't pin `~> X.0` until it's published. Merge the Renovate pull request that updates them, or update `version` in `examples/*/main.tf` yourself.
+
+If anything is wrong after the release is published, don't move or delete the tag. Fix it on `main` and release a new patch version.
 
 ## Questions?
 

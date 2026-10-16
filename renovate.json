@@ -12,7 +12,7 @@
     {
       "matchDatasources": ["terraform-module"],
       "groupName": "terraform modules",
-      "rangeStrategy": "bump"
+      "rangeStrategy": "replace"
     }
   ],
   "customManagers": [
@@ -27,18 +27,6 @@
       "datasourceTemplate": "github-releases",
       "depNameTemplate": "buildkite/buildkite-agent-scaler",
       "extractVersionTemplate": "^v?(?<version>.*)$",
-      "versioningTemplate": "semver"
-    },
-    {
-      "customType": "regex",
-      "fileMatch": [
-        "^README\\.md$"
-      ],
-      "matchStrings": [
-        "version\\s*=\\s*\"(?<currentValue>\\d+\\.\\d+\\.\\d+)\""
-      ],
-      "datasourceTemplate": "terraform-module",
-      "depNameTemplate": "buildkite/elastic-ci-stack-for-aws/buildkite",
       "versioningTemplate": "semver"
     },
     {
