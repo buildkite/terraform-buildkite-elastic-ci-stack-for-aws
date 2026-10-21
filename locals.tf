@@ -71,7 +71,7 @@ locals {
     eu-west-3                    = { linuxamd64 = "ami-044d2dd9ef24a0368", linuxarm64 = "ami-0b33ba7f9caa2f705", windows = "ami-0917323d7c4deab8b", ubuntu2404amd64 = "ami-0174071716a1964b9", ubuntu2404arm64 = "ami-0831a273c6d43fbe1" }
     eu-north-1                   = { linuxamd64 = "ami-0e1b4a184c7c636c3", linuxarm64 = "ami-09a008f3a5598274d", windows = "ami-0af9f156e2fd2f640", ubuntu2404amd64 = "ami-00020050bbf754fc0", ubuntu2404arm64 = "ami-06487133e060cd3da" }
     sa-east-1                    = { linuxamd64 = "ami-0e2da52b85f33873c", linuxarm64 = "ami-0d0fa59184be6b4ca", windows = "ami-0dd5451fa04b1e997", ubuntu2404amd64 = "ami-03cfb79a3dfe094d6", ubuntu2404arm64 = "ami-0f8130d156ea3c0e0" }
-    cloudformation_stack_version = "v7.7.0"
+    cloudformation_stack_version = "v7.8.0"
   }
 
   # Region-specific Lambda deployment bucket
