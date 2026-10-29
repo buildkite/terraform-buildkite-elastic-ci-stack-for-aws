@@ -80,6 +80,8 @@ module "buildkite_stack" {
 }
 ```
 
+If you move an ARN from `managed_policy_arns` into `managed_policies`, use the ARN as its key, such as `"arn:aws:iam::123456789012:policy/deploy" = aws_iam_policy.deploy.arn`. Terraform then keeps the existing attachment. Under any other key, Terraform detaches and re-attaches the policy, and the two steps can run in parallel, which can leave the policy detached.
+
 ## Security
 
 This repository hasn't been reviewed by security researchers. Therefore, exercise caution and careful thought with what credentials you make available to your builds.
