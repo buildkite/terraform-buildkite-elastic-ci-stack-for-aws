@@ -41,8 +41,13 @@ locals {
   role_tag_list  = compact(split(",", var.instance_role_tags))
   role_tag_count = length(local.role_tag_list)
 
-  use_managed_policies = length(var.managed_policy_arns) > 0
-
+  # managed_policy_arns entries stay keyed by ARN so existing attachments keep
+  # their state addresses. managed_policies entries are keyed by the caller's
+  # static names, so their ARNs can be unknown until apply.
+  instance_managed_policies = merge(
+    { for arn in toset(var.managed_policy_arns) : arn => arn },
+    var.managed_policies,
+  )
 
   # Image ID selection and parameter store settings
   use_custom_ami    = var.image_id != ""

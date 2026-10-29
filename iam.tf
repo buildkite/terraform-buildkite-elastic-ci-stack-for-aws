@@ -44,9 +44,16 @@ resource "aws_iam_role_policy_attachment" "instance_ecr_policy" {
 
 # Attach custom managed policies if configured
 resource "aws_iam_role_policy_attachment" "instance_managed_policies" {
-  for_each   = local.use_custom_iam_role ? toset([]) : (local.use_managed_policies ? toset(var.managed_policy_arns) : toset([]))
+  for_each   = local.use_custom_iam_role ? {} : local.instance_managed_policies
   role       = aws_iam_role.iam_role[0].name
   policy_arn = each.value
+
+  lifecycle {
+    precondition {
+      condition     = length([for arn in values(local.instance_managed_policies) : arn if arn == each.value]) == 1
+      error_message = "Each policy ARN can appear only once across managed_policy_arns and managed_policies."
+    }
+  }
 }
 
 # Inline policy for Buildkite agent permissions

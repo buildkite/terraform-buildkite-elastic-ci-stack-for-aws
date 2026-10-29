@@ -64,6 +64,22 @@ module "buildkite_stack" {
 
 > Although the stack creates its own VPC by default, Buildkite highly recommends following best practices by setting up a separate development AWS account and using role switching and consolidated billing — see the [Delegate Access Across AWS Accounts tutorial](http://docs.aws.amazon.com/IAM/latest/UserGuide/tutorial_cross-account-with-roles.html) for more information.
 
+### Attaching managed policies to the instance role
+
+Set `managed_policy_arns` to attach existing managed policies to the agents' instance role. If a policy is created in the same Terraform run, add it to `managed_policies` instead. Its ARN isn't known until apply, so the module keys the attachment by the name you choose:
+
+```hcl
+module "buildkite_stack" {
+  # ...
+
+  managed_policy_arns = ["arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"]
+
+  managed_policies = {
+    deploy = aws_iam_policy.deploy.arn
+  }
+}
+```
+
 ## Security
 
 This repository hasn't been reviewed by security researchers. Therefore, exercise caution and careful thought with what credentials you make available to your builds.
@@ -418,7 +434,8 @@ No modules.
 | <a name="input_lambda_architecture"></a> [lambda\_architecture](#input\_lambda\_architecture) | CPU architecture for Lambda functions (x86\_64 or arm64). arm64 provides better price-performance but requires compatible dependencies. | `string` | `"x86_64"` | no |
 | <a name="input_lambda_log_retention_days"></a> [lambda\_log\_retention\_days](#input\_lambda\_log\_retention\_days) | The number of days to retain CloudWatch Logs for Lambda functions in the stack. | `number` | `1` | no |
 | <a name="input_linux_distribution"></a> [linux\_distribution](#input\_linux\_distribution) | The Linux distribution to run on the instances. Only applies when instance\_operating\_system is 'linux'. | `string` | `"amazonlinux2023"` | no |
-| <a name="input_managed_policy_arns"></a> [managed\_policy\_arns](#input\_managed\_policy\_arns) | Optional - List of managed IAM policy ARNs to attach to the instance role. | `list(string)` | `[]` | no |
+| <a name="input_managed_policies"></a> [managed\_policies](#input\_managed\_policies) | Optional - Map of managed IAM policy ARNs to attach to the instance role, keyed by names you choose. Use this instead of managed\_policy\_arns when an ARN isn't known until apply, such as a policy created in the same Terraform run. Keys must be known at plan time. | `map(string)` | `{}` | no |
+| <a name="input_managed_policy_arns"></a> [managed\_policy\_arns](#input\_managed\_policy\_arns) | Optional - List of managed IAM policy ARNs to attach to the instance role. Every ARN must be known at plan time; use managed\_policies for policies created in the same Terraform run. | `list(string)` | `[]` | no |
 | <a name="input_max_size"></a> [max\_size](#input\_max\_size) | Maximum number of instances. Controls cost ceiling and prevents runaway scaling. | `number` | `10` | no |
 | <a name="input_min_size"></a> [min\_size](#input\_min\_size) | Minimum number of instances. Ensures baseline capacity for immediate job execution. | `number` | `0` | no |
 | <a name="input_mount_tmpfs_at_tmp"></a> [mount\_tmpfs\_at\_tmp](#input\_mount\_tmpfs\_at\_tmp) | Controls the filesystem mounted at /tmp. By default, /tmp is a tmpfs (memory-backed filesystem). Disabling this causes /tmp to be stored in the root filesystem. | `bool` | `true` | no |
