@@ -53,7 +53,7 @@ When you open the PR, explain what changed and why. Link any related issues and 
 
 - [Terraform](https://www.terraform.io/downloads) >= 1.11
 - [AWS CLI](https://aws.amazon.com/cli/) configured with credentials
-- [terraform-docs](https://terraform-docs.io/) for documentation
+- [terraform-docs](https://terraform-docs.io/) 0.24.0 for documentation (matching CI)
 - [pre-commit](https://pre-commit.com/) (optional but recommended)
 
 ### Local Testing
@@ -89,6 +89,14 @@ Every variable needs a description. If it's complex, add examples to help people
 
 ```bash
 terraform-docs markdown table . --output-file README.md
+```
+
+CI checks that the root README's generated Terraform reference is up to date without modifying it. After changing root module inputs, outputs, or requirements, regenerate the reference and commit the README with your changes.
+
+To run the same check locally from the repository root:
+
+```bash
+.buildkite/scripts/docs-check.sh
 ```
 
 ## Project Structure
