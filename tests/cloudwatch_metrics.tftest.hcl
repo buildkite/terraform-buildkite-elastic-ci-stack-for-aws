@@ -31,14 +31,7 @@ mock_provider "aws" {
     }
   }
 
-  # The scaler policy interpolates these ARNs, so they must be known at plan time
-  mock_resource "aws_cloudwatch_log_group" {
-    override_during = plan
-    defaults = {
-      arn = "arn:aws:logs:us-east-1:123456789012:log-group:/aws/lambda/test-scaler"
-    }
-  }
-
+  # The scaler policy interpolates this ARN, so it must be known at plan time
   mock_resource "aws_ssm_parameter" {
     override_during = plan
     defaults = {
@@ -54,6 +47,24 @@ mock_provider "random" {
     defaults = {
       hex = "01234567"
     }
+  }
+}
+
+run "uses_managed_policy_for_scaler_logging" {
+  command = plan
+
+  variables {
+    buildkite_agent_token = "test-token"
+  }
+
+  assert {
+    condition     = aws_iam_role_policy_attachment.scaler_lambda_policy[0].policy_arn == "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+    error_message = "The scaler role should retain AWSLambdaBasicExecutionRole for CloudWatch Logs permissions."
+  }
+
+  assert {
+    condition     = !strcontains(aws_iam_role_policy.scaler_lambda_policy[0].policy, "logs:")
+    error_message = "CloudWatch Logs permissions should come from the managed policy, not redundant inline grants."
   }
 }
 
@@ -139,6 +150,11 @@ run "skips_scale_in_cooldown_persistence_with_custom_role" {
   variables {
     buildkite_agent_token  = "test-token"
     scaler_lambda_role_arn = "arn:aws:iam::123456789012:role/custom-scaler"
+  }
+
+  assert {
+    condition     = length(aws_iam_role_policy_attachment.scaler_lambda_policy) == 0
+    error_message = "The module should not attach logging permissions to a custom scaler role."
   }
 
   assert {
