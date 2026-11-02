@@ -119,7 +119,7 @@ resource "aws_iam_role" "scaler_lambda_role" {
   tags = local.common_tags
 }
 
-#tfsec:ignore:aws-iam-no-policy-wildcards Lambda requires CloudWatch Logs CreateLogGroup permission with wildcard for dynamic log group creation
+#tfsec:ignore:aws-iam-no-policy-wildcards Auto Scaling describe actions require wildcard resources
 resource "aws_iam_role_policy" "scaler_lambda_policy" {
   count = local.use_custom_scaler_lambda_role ? 0 : (local.has_variable_size ? 1 : 0)
 
@@ -130,16 +130,6 @@ resource "aws_iam_role_policy" "scaler_lambda_policy" {
     Version = "2012-10-17"
     Statement = concat(
       [
-        # CloudWatch Logs
-        {
-          Effect = "Allow"
-          Action = [
-            "logs:CreateLogGroup",
-            "logs:CreateLogStream",
-            "logs:PutLogEvents"
-          ]
-          Resource = "${aws_cloudwatch_log_group.scaler_lambda_logs[0].arn}:*"
-        },
         # Auto Scaling - Core scaler permissions
         {
           Effect = "Allow"
@@ -239,6 +229,7 @@ resource "aws_iam_role_policy" "scaler_lambda_policy" {
   })
 }
 
+# CloudWatch Logs permissions come from this managed policy, not the inline policy.
 resource "aws_iam_role_policy_attachment" "scaler_lambda_policy" {
   count = local.use_custom_scaler_lambda_role ? 0 : (local.has_variable_size ? 1 : 0)
 
