@@ -49,9 +49,13 @@ steps:
         if_changed:
           - "*.tf"
           - "README.md"
+          - ".terraform-docs.yml"
+          - ".terraform.lock.hcl"
+          - ".buildkite/scripts/docs-check.sh"
+          - ".buildkite/pipeline.yml"
         plugins:
           - docker#v5.14.0:
-              image: "quay.io/terraform-docs/terraform-docs:latest-amd64"
+              image: "quay.io/terraform-docs/terraform-docs:0.24.0-amd64"
               workdir: "/workdir"
               entrypoint: "/bin/sh"
 
