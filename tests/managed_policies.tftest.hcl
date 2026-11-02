@@ -96,3 +96,38 @@ run "rejects_policy_in_both_inputs" {
 
   expect_failures = [aws_iam_role_policy_attachment.instance_managed_policies]
 }
+
+run "rejects_managed_policies_key_that_replaces_list_arn" {
+  command = plan
+
+  variables {
+    buildkite_agent_token = "test-token"
+    managed_policy_arns   = ["arn:aws:iam::123456789012:policy/deploy"]
+    managed_policies = {
+      "arn:aws:iam::123456789012:policy/deploy" = "arn:aws:iam::123456789012:policy/other"
+    }
+  }
+
+  expect_failures = [aws_iam_role_policy_attachment.instance_managed_policies]
+}
+
+run "allows_managed_policies_key_matching_list_arn" {
+  command = plan
+
+  variables {
+    buildkite_agent_token = "test-token"
+    managed_policy_arns   = ["arn:aws:iam::123456789012:policy/deploy"]
+    managed_policies = {
+      "arn:aws:iam::123456789012:policy/deploy" = "arn:aws:iam::123456789012:policy/deploy"
+    }
+  }
+
+  # The README's migration path: keeping the ARN as the key keeps the
+  # existing attachment's state address.
+  assert {
+    condition = { for key, attachment in aws_iam_role_policy_attachment.instance_managed_policies : key => attachment.policy_arn } == {
+      "arn:aws:iam::123456789012:policy/deploy" = "arn:aws:iam::123456789012:policy/deploy"
+    }
+    error_message = "A managed_policies entry keyed by its own ARN should merge with the matching managed_policy_arns entry."
+  }
+}

@@ -48,13 +48,20 @@ resource "aws_iam_role_policy_attachment" "instance_managed_policies" {
   role       = aws_iam_role.iam_role[0].name
   policy_arn = each.value
 
-  # The duplicate check lives here rather than in a terraform_data validator so
-  # it runs before each attachment is created, including ARNs only known at
-  # apply, and adds no resource to existing stacks' plans.
+  # These checks live here rather than in a terraform_data validator so they
+  # run before each attachment is created, including ARNs only known at apply,
+  # and add no resource to existing stacks' plans.
   lifecycle {
     precondition {
       condition     = !contains([for key, arn in local.instance_managed_policies : arn if key != each.key], each.value)
       error_message = "Each policy ARN can appear only once across managed_policy_arns and managed_policies."
+    }
+
+    # merge() lets a managed_policies key replace a managed_policy_arns entry
+    # with the same ARN, which would silently drop that ARN's attachment.
+    precondition {
+      condition     = !contains(var.managed_policy_arns, each.key) || each.value == each.key
+      error_message = "A managed_policies key that matches an ARN in managed_policy_arns must map to that same ARN."
     }
   }
 }
