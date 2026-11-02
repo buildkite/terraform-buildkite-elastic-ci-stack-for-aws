@@ -748,9 +748,15 @@ variable "stop_buildkite_agents_role_arn" {
 }
 
 variable "managed_policy_arns" {
-  description = "Optional - List of managed IAM policy ARNs to attach to the instance role."
+  description = "Optional - List of managed IAM policy ARNs to attach to the instance role. Every ARN must be known at plan time; use managed_policies for policies created in the same Terraform run."
   type        = list(string)
   default     = []
+}
+
+variable "managed_policies" {
+  description = "Optional - Map of managed IAM policy ARNs to attach to the instance role, keyed by names you choose. Use this instead of managed_policy_arns when an ARN isn't known until apply, such as a policy created in the same Terraform run. Keys must be known at plan time."
+  type        = map(string)
+  default     = {}
 }
 
 # =============================================================================
