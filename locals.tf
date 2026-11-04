@@ -126,7 +126,9 @@ locals {
 
   # Buildkite agent token and parameter store settings
   use_custom_token_path    = var.buildkite_agent_token_parameter_store_path != ""
+  token_path_is_arn        = startswith(var.buildkite_agent_token_parameter_store_path, "arn:")
   use_custom_token_kms     = var.buildkite_agent_token_parameter_store_kms_key != ""
+  token_kms_key_is_arn     = startswith(var.buildkite_agent_token_parameter_store_kms_key, "arn:")
   create_token_parameter   = var.buildkite_agent_token_parameter_store_path == ""
   enable_graceful_shutdown = var.buildkite_agent_enable_graceful_shutdown
 
@@ -141,7 +143,13 @@ locals {
   signing_key_arn = local.create_signing_key ? "arn:aws:kms:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:key/${aws_kms_key.pipeline_signing_kms_key[0].key_id}" : var.pipeline_signing_kms_key_id
 
   # Computed agent token parameter ARN (for IAM policies)
-  agent_token_parameter_arn = local.use_custom_token_path ? "arn:aws:ssm:*:*:parameter${var.buildkite_agent_token_parameter_store_path}" : "arn:aws:ssm:*:*:parameter/buildkite/elastic-ci-stack/${local.stack_name_full}/agent-token"
+  # A parameter shared from another account is referenced by its full ARN.
+  agent_token_parameter_arn = local.token_path_is_arn ? var.buildkite_agent_token_parameter_store_path : (
+    local.use_custom_token_path ? "arn:aws:ssm:*:*:parameter${var.buildkite_agent_token_parameter_store_path}" : "arn:aws:ssm:*:*:parameter/buildkite/elastic-ci-stack/${local.stack_name_full}/agent-token"
+  )
+
+  # Computed agent token KMS key ARN (for IAM policies). A key in another account must be given as an ARN.
+  agent_token_kms_key_arn = local.token_kms_key_is_arn ? var.buildkite_agent_token_parameter_store_kms_key : "arn:aws:kms:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:key/${var.buildkite_agent_token_parameter_store_kms_key}"
 
   # Determine AMI ID from custom, parameter, or Buildkite mapping
   computed_ami_id = local.use_custom_ami ? var.image_id : (local.use_ami_parameter ? data.aws_ssm_parameter.ami[0].value : local.selected_ami_id)

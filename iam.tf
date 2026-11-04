@@ -242,7 +242,7 @@ resource "aws_iam_role_policy" "buildkite_agent_policy" {
           Sid      = "DecryptAgentToken"
           Effect   = "Allow"
           Action   = "kms:Decrypt"
-          Resource = "arn:aws:kms:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:key/${var.buildkite_agent_token_parameter_store_kms_key}"
+          Resource = local.agent_token_kms_key_arn
         }
       ] : []
     )

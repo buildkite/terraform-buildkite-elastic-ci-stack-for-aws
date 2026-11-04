@@ -146,7 +146,9 @@ resource "aws_iam_role_policy" "scaler_lambda_policy" {
           Action = [
             "ssm:GetParameter"
           ]
-          Resource = local.use_custom_token_path ? "arn:aws:ssm:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:parameter${var.buildkite_agent_token_parameter_store_path}" : aws_ssm_parameter.buildkite_agent_token_parameter[0].arn
+          Resource = local.token_path_is_arn ? var.buildkite_agent_token_parameter_store_path : (
+            local.use_custom_token_path ? "arn:aws:ssm:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:parameter${var.buildkite_agent_token_parameter_store_path}" : aws_ssm_parameter.buildkite_agent_token_parameter[0].arn
+          )
         },
         # SSM Parameter Store - Scale-in cooldown state
         {
@@ -165,7 +167,7 @@ resource "aws_iam_role_policy" "scaler_lambda_policy" {
           Action = [
             "kms:Decrypt"
           ]
-          Resource = "arn:aws:kms:${data.aws_region.current.region}:${data.aws_caller_identity.current.account_id}:key/${var.buildkite_agent_token_parameter_store_kms_key}"
+          Resource = local.agent_token_kms_key_arn
         }
       ] : [],
       # CloudWatch metrics publishing
