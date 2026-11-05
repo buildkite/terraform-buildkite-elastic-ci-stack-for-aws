@@ -31,18 +31,22 @@ variable "buildkite_agent_token" {
 }
 
 variable "buildkite_agent_token_parameter_store_path" {
-  description = "Optional - Path to Buildkite agent token stored in AWS Systems Manager Parameter Store (e.g., '/buildkite/agent-token'). If provided, this overrides the buildkite_agent_token field. Recommended for better security instead of hardcoding tokens."
+  description = "Optional - Path to Buildkite agent token stored in AWS Systems Manager Parameter Store (e.g., '/buildkite/agent-token'), or the ARN of a parameter shared from another account through AWS RAM (e.g., 'arn:aws:ssm:us-east-1:123456789012:parameter/buildkite/agent-token'). If provided, this overrides the buildkite_agent_token field. Recommended for better security instead of hardcoding tokens."
   type        = string
   default     = ""
 
   validation {
-    condition     = var.buildkite_agent_token_parameter_store_path == "" || can(regex("^/[a-zA-Z0-9_.\\-/]+$", var.buildkite_agent_token_parameter_store_path))
-    error_message = "buildkite_agent_token_parameter_store_path must start with '/' when provided."
+    condition = (
+      var.buildkite_agent_token_parameter_store_path == "" ||
+      can(regex("^/[a-zA-Z0-9_.\\-/]+$", var.buildkite_agent_token_parameter_store_path)) ||
+      can(regex("^arn:aws:ssm:[a-z0-9-]+:[0-9]{12}:parameter/[a-zA-Z0-9_.\\-/]+$", var.buildkite_agent_token_parameter_store_path))
+    )
+    error_message = "buildkite_agent_token_parameter_store_path must start with '/' or be an SSM parameter ARN when provided."
   }
 }
 
 variable "buildkite_agent_token_parameter_store_kms_key" {
-  description = "Optional - AWS KMS key ID used to encrypt the SSM parameter."
+  description = "Optional - AWS KMS key ID or ARN used to encrypt the SSM parameter. Use the key ARN when the parameter is shared from another account."
   type        = string
   default     = ""
 }
