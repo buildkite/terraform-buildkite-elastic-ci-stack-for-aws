@@ -518,7 +518,7 @@ variable "root_volume_throughput" {
 variable "root_volume_iops" {
   description = "If the root_volume_type is gp3, io1, or io2, the number of IOPS to provision for the root volume."
   type        = number
-  default     = 1000
+  default     = 3000
 
   validation {
     condition     = var.root_volume_iops >= 100 && var.root_volume_iops <= 64000
