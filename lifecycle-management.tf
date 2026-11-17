@@ -12,7 +12,7 @@ resource "aws_lambda_function" "az_rebalancing_suspender" {
   filename         = data.archive_file.az_rebalancing_suspender.output_path
   source_code_hash = data.archive_file.az_rebalancing_suspender.output_base64sha256
 
-  tags = local.common_tags
+  tags = merge(local.common_tags, { "lucid:resource" = "lambda-bk-${var.buildkite_queue}-az-rebalancing-suspender" })
 }
 
 data "archive_file" "az_rebalancing_suspender" {
@@ -93,7 +93,7 @@ resource "aws_lambda_function" "stop_buildkite_agents" {
   filename         = data.archive_file.stop_buildkite_agents[0].output_path
   source_code_hash = data.archive_file.stop_buildkite_agents[0].output_base64sha256
 
-  tags = local.common_tags
+  tags = merge(local.common_tags, { "lucid:resource" = "lambda-bk-${var.buildkite_queue}-stop-buildkite-agents" })
 }
 
 data "archive_file" "stop_buildkite_agents" {

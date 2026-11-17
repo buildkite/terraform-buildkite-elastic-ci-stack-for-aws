@@ -53,7 +53,7 @@ resource "aws_lambda_function" "scaler" {
     aws_iam_role_policy_attachment.scaler_lambda_policy[0]
   ]
 
-  tags = local.common_tags
+  tags = merge(local.common_tags, { "lucid:resource" = "lambda-bk-${var.buildkite_queue}-scaler" })
 }
 
 #tfsec:ignore:aws-cloudwatch-log-group-customer-key Using default encryption for CloudWatch Logs; CMK can be added by users if required
