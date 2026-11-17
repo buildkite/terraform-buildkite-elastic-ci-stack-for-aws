@@ -344,13 +344,109 @@ variable "scale_down_min_size" {
 # =============================================================================
 
 variable "instance_types" {
-  description = "EC2 instance types to use (comma-separated, up to 25). The first type listed is preferred for OnDemand instances. Additional types improve Spot instance availability but make costs less predictable. Examples: 't3.large' for light workloads, 'm5.xlarge,m5a.xlarge' for CPU-intensive builds, 'c5.2xlarge,c5.4xlarge' for compute-heavy tasks."
+  description = "EC2 instance types to use (comma-separated, up to 25). The first type listed is preferred for OnDemand instances. Additional types improve Spot instance availability but make costs less predictable. Examples: 't3.large' for light workloads, 'm5.xlarge,m5a.xlarge' for CPU-intensive builds, 'c5.2xlarge,c5.4xlarge' for compute-heavy tasks. Ignored when instance_requirements is set."
   type        = string
   default     = "t3.large"
 
   validation {
     condition     = can(regex("^[\\w-\\.]+(,[\\w-\\.]*){0,24}$", var.instance_types)) && length(var.instance_types) >= 1
     error_message = "instance_types must contain 1-25 instance types separated by commas. No space before/after the comma."
+  }
+}
+
+variable "instance_requirements" {
+  description = "Optional - Select instance types by attributes instead of listing them in instance_types. vcpu_count and memory_mib are required; the other attributes map to the InstanceRequirements of the Auto Scaling group's mixed instances policy, and unset attributes use the AWS defaults. When set, instance_types is ignored and the launch template has no instance type. Set instance_architecture to choose the AMI, because Auto Scaling only launches instance types that match the AMI's architecture. cpu_credits is not applied, so any T instances use the account's default credit specification. See https://docs.aws.amazon.com/autoscaling/ec2/APIReference/API_InstanceRequirements.html"
+  type = object({
+    vcpu_count = object({
+      min = number
+      max = optional(number)
+    })
+    memory_mib = object({
+      min = number
+      max = optional(number)
+    })
+    accelerator_count = optional(object({
+      min = optional(number)
+      max = optional(number)
+    }))
+    accelerator_manufacturers = optional(set(string))
+    accelerator_names         = optional(set(string))
+    accelerator_total_memory_mib = optional(object({
+      min = optional(number)
+      max = optional(number)
+    }))
+    accelerator_types      = optional(set(string))
+    allowed_instance_types = optional(set(string))
+    bare_metal             = optional(string)
+    baseline_ebs_bandwidth_mbps = optional(object({
+      min = optional(number)
+      max = optional(number)
+    }))
+    burstable_performance                                   = optional(string)
+    cpu_manufacturers                                       = optional(set(string))
+    excluded_instance_types                                 = optional(set(string))
+    instance_generations                                    = optional(set(string))
+    local_storage                                           = optional(string)
+    local_storage_types                                     = optional(set(string))
+    max_spot_price_as_percentage_of_optimal_on_demand_price = optional(number)
+    memory_gib_per_vcpu = optional(object({
+      min = optional(number)
+      max = optional(number)
+    }))
+    network_bandwidth_gbps = optional(object({
+      min = optional(number)
+      max = optional(number)
+    }))
+    network_interface_count = optional(object({
+      min = optional(number)
+      max = optional(number)
+    }))
+    on_demand_max_price_percentage_over_lowest_price = optional(number)
+    require_hibernate_support                        = optional(bool)
+    spot_max_price_percentage_over_lowest_price      = optional(number)
+    total_local_storage_gb = optional(object({
+      min = optional(number)
+      max = optional(number)
+    }))
+  })
+  default = null
+
+  validation {
+    condition = var.instance_requirements == null ? true : (
+      var.instance_requirements.allowed_instance_types == null ||
+      var.instance_requirements.excluded_instance_types == null
+    )
+    error_message = "instance_requirements can set allowed_instance_types or excluded_instance_types, not both."
+  }
+
+  validation {
+    condition = var.instance_requirements == null ? true : (
+      var.instance_requirements.spot_max_price_percentage_over_lowest_price == null ||
+      var.instance_requirements.max_spot_price_as_percentage_of_optimal_on_demand_price == null
+    )
+    error_message = "instance_requirements can set spot_max_price_percentage_over_lowest_price or max_spot_price_as_percentage_of_optimal_on_demand_price, not both."
+  }
+
+  validation {
+    condition = var.instance_requirements == null ? true : alltrue([
+      for value in [
+        var.instance_requirements.bare_metal,
+        var.instance_requirements.burstable_performance,
+        var.instance_requirements.local_storage,
+      ] : value == null ? true : contains(["included", "excluded", "required"], value)
+    ])
+    error_message = "instance_requirements bare_metal, burstable_performance and local_storage must each be 'included', 'excluded' or 'required'."
+  }
+}
+
+variable "instance_architecture" {
+  description = "Optional - CPU architecture of the stack's AMI: 'x86_64' or 'arm64'. When unset, it is inferred from the first instance type in instance_types, or is 'x86_64' when instance_requirements is set. Windows always uses the x86_64 AMI. Has no effect when image_id or image_id_parameter sets the AMI."
+  type        = string
+  default     = null
+
+  validation {
+    condition     = var.instance_architecture == null ? true : contains(["x86_64", "arm64"], var.instance_architecture)
+    error_message = "instance_architecture must be 'x86_64' or 'arm64'."
   }
 }
 
@@ -383,7 +479,7 @@ variable "instance_name" {
 }
 
 variable "cpu_credits" {
-  description = "Credit option for CPU usage of burstable instances. Sets the CreditSpecification.CpuCredits property in the LaunchTemplate for T-class instance types (t2, t3, t3a, t4g)."
+  description = "Credit option for CPU usage of burstable instances. Sets the CreditSpecification.CpuCredits property in the LaunchTemplate for T-class instance types (t2, t3, t3a, t4g). Not applied with instance_requirements, because the launch template then has no instance type; T instances use the account's default credit specification."
   type        = string
   default     = "unlimited"
 
@@ -467,7 +563,7 @@ variable "on_demand_percentage" {
 }
 
 variable "spot_allocation_strategy" {
-  description = "Strategy for selecting Spot instance types to minimize interruptions and costs. 'capacity-optimized' (recommended) chooses types with the most available capacity. 'price-capacity-optimized' balances low prices with availability. 'lowest-price' prioritizes cost savings. 'capacity-optimized-prioritized' follows instance_types order while optimizing for capacity."
+  description = "Strategy for selecting Spot instance types to minimize interruptions and costs. 'capacity-optimized' (recommended) chooses types with the most available capacity. 'price-capacity-optimized' balances low prices with availability. 'lowest-price' prioritizes cost savings. 'capacity-optimized-prioritized' follows instance_types order while optimizing for capacity, and can't be used with instance_requirements."
   type        = string
   default     = "capacity-optimized"
 
