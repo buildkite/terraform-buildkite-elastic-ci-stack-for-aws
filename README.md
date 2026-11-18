@@ -219,8 +219,11 @@ Buildkite builds and deploys the following AMIs to all our supported regions:
 - Ubuntu 24.04 LTS (64-bit x86)
 - Ubuntu 24.04 LTS (64-bit Arm)
 - Windows Server 2022 (64-bit x86)
+- Windows Server 2025 (64-bit x86)
 
 Amazon Linux 2023 is the default for Linux instances. To use Ubuntu 24.04 LTS instead, set `linux_distribution = "ubuntu2404"`.
+
+Windows Server 2022 is the default for Windows instances. To use Windows Server 2025 instead, set `windows_server_version = "2025"`. The Windows Server 2025 AMIs boot in UEFI mode, so they need a Nitro-based instance type that supports UEFI. Xen-based and bare metal instance types are not supported.
 
 ## Recommended reading
 
@@ -489,6 +492,7 @@ No modules.
 | <a name="input_tags"></a> [tags](#input\_tags) | Map of custom tags to apply to all taggable resources. These tags are merged with the cost allocation tag (if enabled) and standard tags.<br/><br/>Example:<br/>tags = {<br/>  Environment = "production"<br/>  Team        = "platform"<br/>  Owner       = "ops-team"<br/>}<br/><br/>All resources will receive these tags plus:<br/>- ManagedBy = "Terraform" (standard)<br/>- Stack = "<stack-name>-<random-suffix>" (standard)<br/>- CreatedBy = "<cost-allocation-value>" (if enable\_cost\_allocation\_tags is set to true) | `map(string)` | `{}` | no |
 | <a name="input_update_default_launch_template_version"></a> [update\_default\_launch\_template\_version](#input\_update\_default\_launch\_template\_version) | When true, Terraform sets the launch template default version to the latest version it creates. This stack's ASG already uses $Latest, so agent launches are unaffected; enable this for other consumers that launch the template with $Default. | `bool` | `false` | no |
 | <a name="input_vpc_id"></a> [vpc\_id](#input\_vpc\_id) | Optional - Id of an existing VPC to launch instances into. Leave blank to have a new VPC created. | `string` | `""` | no |
+| <a name="input_windows_server_version"></a> [windows\_server\_version](#input\_windows\_server\_version) | The Windows Server version to run on the instances. Only applies when instance\_operating\_system is 'windows'. Windows Server 2025 boots in UEFI mode, so it requires a Nitro-based instance type that supports UEFI (not Xen-based or bare metal instance types). | `string` | `"2022"` | no |
 
 ## Outputs
 
