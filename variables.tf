@@ -376,6 +376,17 @@ variable "linux_distribution" {
   }
 }
 
+variable "windows_server_version" {
+  description = "The Windows Server version to run on the instances. Only applies when instance_operating_system is 'windows'. Windows Server 2025 boots in UEFI mode, so it requires a Nitro-based instance type that supports UEFI (not Xen-based or bare metal instance types)."
+  type        = string
+  default     = "2022"
+
+  validation {
+    condition     = contains(["2022", "2025"], var.windows_server_version)
+    error_message = "windows_server_version must be '2022' or '2025'."
+  }
+}
+
 variable "instance_name" {
   description = "Optional - Customize the EC2 instance Name tag."
   type        = string
