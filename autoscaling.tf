@@ -23,7 +23,11 @@ resource "aws_launch_template" "agent_launch_template" {
     arn = aws_iam_instance_profile.iam_instance_profile.arn
   }
 
-  instance_type = split(",", var.instance_types)[0]
+  # A mixed instances group with instance requirements needs no launch template
+  # instance type, and an override can't set both InstanceRequirements and InstanceType.
+  # https://docs.aws.amazon.com/autoscaling/ec2/userguide/advanced-settings-for-your-launch-template.html
+  # https://docs.aws.amazon.com/autoscaling/ec2/APIReference/API_LaunchTemplateOverrides.html
+  instance_type = local.use_instance_requirements ? null : split(",", var.instance_types)[0]
 
   dynamic "cpu_options" {
     for_each = var.enable_nested_virtualization ? [1] : []
@@ -207,6 +211,12 @@ resource "aws_autoscaling_group" "agent_auto_scale_group" {
 
   mixed_instances_policy {
     instances_distribution {
+      # Instance type lists keep AWS's "prioritized" default, so the first type
+      # is preferred for On-Demand. AWS rejects "prioritized" with instance
+      # requirements, and the provider keeps the value from state when this is
+      # unset, so it is set explicitly in both modes.
+      # https://docs.aws.amazon.com/autoscaling/ec2/APIReference/API_InstancesDistribution.html
+      on_demand_allocation_strategy            = local.use_instance_requirements ? "lowest-price" : "prioritized"
       on_demand_base_capacity                  = var.on_demand_base_capacity
       on_demand_percentage_above_base_capacity = var.on_demand_percentage
       spot_allocation_strategy                 = var.spot_allocation_strategy
@@ -219,9 +229,98 @@ resource "aws_autoscaling_group" "agent_auto_scale_group" {
       }
 
       dynamic "override" {
-        for_each = split(",", var.instance_types)
+        for_each = local.use_instance_requirements ? [] : split(",", var.instance_types)
         content {
           instance_type = trim(override.value, " ")
+        }
+      }
+
+      dynamic "override" {
+        for_each = local.use_instance_requirements ? [var.instance_requirements] : []
+        content {
+          instance_requirements {
+            vcpu_count {
+              min = override.value.vcpu_count.min
+              max = override.value.vcpu_count.max
+            }
+
+            memory_mib {
+              min = override.value.memory_mib.min
+              max = override.value.memory_mib.max
+            }
+
+            dynamic "accelerator_count" {
+              for_each = override.value.accelerator_count == null ? [] : [override.value.accelerator_count]
+              content {
+                min = accelerator_count.value.min
+                max = accelerator_count.value.max
+              }
+            }
+
+            dynamic "accelerator_total_memory_mib" {
+              for_each = override.value.accelerator_total_memory_mib == null ? [] : [override.value.accelerator_total_memory_mib]
+              content {
+                min = accelerator_total_memory_mib.value.min
+                max = accelerator_total_memory_mib.value.max
+              }
+            }
+
+            dynamic "baseline_ebs_bandwidth_mbps" {
+              for_each = override.value.baseline_ebs_bandwidth_mbps == null ? [] : [override.value.baseline_ebs_bandwidth_mbps]
+              content {
+                min = baseline_ebs_bandwidth_mbps.value.min
+                max = baseline_ebs_bandwidth_mbps.value.max
+              }
+            }
+
+            dynamic "memory_gib_per_vcpu" {
+              for_each = override.value.memory_gib_per_vcpu == null ? [] : [override.value.memory_gib_per_vcpu]
+              content {
+                min = memory_gib_per_vcpu.value.min
+                max = memory_gib_per_vcpu.value.max
+              }
+            }
+
+            dynamic "network_bandwidth_gbps" {
+              for_each = override.value.network_bandwidth_gbps == null ? [] : [override.value.network_bandwidth_gbps]
+              content {
+                min = network_bandwidth_gbps.value.min
+                max = network_bandwidth_gbps.value.max
+              }
+            }
+
+            dynamic "network_interface_count" {
+              for_each = override.value.network_interface_count == null ? [] : [override.value.network_interface_count]
+              content {
+                min = network_interface_count.value.min
+                max = network_interface_count.value.max
+              }
+            }
+
+            dynamic "total_local_storage_gb" {
+              for_each = override.value.total_local_storage_gb == null ? [] : [override.value.total_local_storage_gb]
+              content {
+                min = total_local_storage_gb.value.min
+                max = total_local_storage_gb.value.max
+              }
+            }
+
+            accelerator_manufacturers                               = override.value.accelerator_manufacturers
+            accelerator_names                                       = override.value.accelerator_names
+            accelerator_types                                       = override.value.accelerator_types
+            allowed_instance_types                                  = override.value.allowed_instance_types
+            bare_metal                                              = override.value.bare_metal
+            burstable_performance                                   = override.value.burstable_performance
+            cpu_manufacturers                                       = override.value.cpu_manufacturers
+            excluded_instance_types                                 = override.value.excluded_instance_types
+            instance_generations                                    = override.value.instance_generations
+            local_storage                                           = override.value.local_storage
+            local_storage_types                                     = override.value.local_storage_types
+            max_spot_price_as_percentage_of_optimal_on_demand_price = override.value.max_spot_price_as_percentage_of_optimal_on_demand_price
+            on_demand_max_price_percentage_over_lowest_price        = override.value.on_demand_max_price_percentage_over_lowest_price
+            require_hibernate_support                               = override.value.require_hibernate_support
+            spot_max_price_percentage_over_lowest_price             = override.value.spot_max_price_percentage_over_lowest_price
+          }
         }
       }
     }
@@ -257,6 +356,14 @@ resource "aws_autoscaling_group" "agent_auto_scale_group" {
 
   lifecycle {
     ignore_changes = [suspended_processes]
+
+    # Prioritized allocation follows the order of instance type overrides, which
+    # instance requirements don't have, so AWS rejects it for these groups.
+    # https://docs.aws.amazon.com/autoscaling/ec2/APIReference/API_InstancesDistribution.html
+    precondition {
+      condition     = !(local.use_instance_requirements && var.spot_allocation_strategy == "capacity-optimized-prioritized")
+      error_message = "spot_allocation_strategy 'capacity-optimized-prioritized' can't be used with instance_requirements. Choose another strategy, such as 'price-capacity-optimized'."
+    }
   }
 }
 

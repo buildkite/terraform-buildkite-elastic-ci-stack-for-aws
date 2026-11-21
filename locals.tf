@@ -85,6 +85,11 @@ locals {
   buildkite_agent_scaler_version = "1.16.1"
   # Created and updated by the scaler itself, as in the upstream scaler template
   scaler_last_scale_in_parameter = "/buildkite-agent-scaler/${local.stack_name_full}/last-scale-in"
+  # Attribute-based instance type selection replaces the instance_types list
+  # with a single InstanceRequirements override on the Auto Scaling group.
+  # https://docs.aws.amazon.com/autoscaling/ec2/userguide/create-mixed-instances-group-attribute-based-instance-type-selection.html
+  use_instance_requirements = var.instance_requirements != null
+
   # Detect ARM and burstable instances from instance type family
   instance_type_family = split(".", split(",", var.instance_types)[0])[0]
 
@@ -92,15 +97,28 @@ locals {
   # the generation digit (e.g. c8gd, m8gn, r8gb, x8g, i8g, hpc7g, g5g, x2gd). a1
   # is the original Graviton1 family and predates this convention, so it has no "g".
   # https://docs.aws.amazon.com/ec2/latest/instancetypes/instance-type-names.html
-  is_arm_instance = (
-    local.instance_type_family == "a1" ||
-    can(regex("^[a-z]+[0-9]+g", local.instance_type_family))
+  #
+  # With instance requirements, Auto Scaling launches instance types that match
+  # the architecture of the launch template's AMI, so the AMI comes from
+  # instance_architecture (x86_64 by default) rather than from an instance type.
+  # https://docs.aws.amazon.com/autoscaling/ec2/APIReference/API_InstanceRequirements.html
+  is_arm_instance = var.instance_architecture != null ? var.instance_architecture == "arm64" : (
+    local.use_instance_requirements ? false : (
+      local.instance_type_family == "a1" ||
+      can(regex("^[a-z]+[0-9]+g", local.instance_type_family))
+    )
   )
 
   # Burstable (T series) instances earn and spend CPU credits. The "t" series
   # letter in the first position identifies them (t2, t3, t3a, t4g).
   # https://docs.aws.amazon.com/ec2/latest/instancetypes/instance-type-names.html
-  is_burstable_instance = can(regex("^t[0-9]", local.instance_type_family))
+  #
+  # The AWS provider sends a launch template's CreditSpecification only when the
+  # template's instance type is burstable. With instance requirements the
+  # template has no instance type, so cpu_credits is not applied and T instances
+  # use the account's default credit specification.
+  # https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/burstable-performance-instances-how-to.html
+  is_burstable_instance = local.use_instance_requirements ? false : can(regex("^t[0-9]", local.instance_type_family))
 
   is_windows = var.instance_operating_system == "windows"
   is_ubuntu  = !local.is_windows && var.linux_distribution == "ubuntu2404"
