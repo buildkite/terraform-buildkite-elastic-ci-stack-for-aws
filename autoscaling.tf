@@ -53,6 +53,8 @@ resource "aws_launch_template" "agent_launch_template" {
       encrypted   = var.root_volume_encrypted ? "true" : "false"
       throughput  = local.is_gp3_volume ? var.root_volume_throughput : null
       iops        = local.supports_iops ? var.root_volume_iops : null
+
+      volume_initialization_rate = var.root_volume_initialization_rate
     }
   }
 

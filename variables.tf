@@ -537,6 +537,17 @@ variable "root_volume_iops" {
   }
 }
 
+variable "root_volume_initialization_rate" {
+  description = "Optional - Rate in MiB/s at which EBS downloads the root volume's snapshot blocks from Amazon S3 after launch (Provisioned Rate for Volume Initialization). Leave unset to keep the default initialization. Billed per GiB of snapshot data; see https://docs.aws.amazon.com/ebs/latest/userguide/initalize-volume.html."
+  type        = number
+  default     = null
+
+  validation {
+    condition     = var.root_volume_initialization_rate == null ? true : var.root_volume_initialization_rate >= 100 && var.root_volume_initialization_rate <= 300
+    error_message = "root_volume_initialization_rate must be between 100 and 300."
+  }
+}
+
 variable "root_volume_encrypted" {
   description = "Indicates whether the EBS volume is encrypted."
   type        = bool
