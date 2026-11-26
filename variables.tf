@@ -193,6 +193,12 @@ variable "scaler_event_schedule_period" {
   default     = "1 minute"
 }
 
+variable "scaler_event_schedule_jitter" {
+  description = "Maximum deterministic delay per Auto Scaling group before a scheduled scaler invocation polls shared APIs. Use Go duration syntax (e.g., '30s') to stagger scaler invocations. A zero duration ('0s') disables jitter."
+  type        = string
+  default     = "0s"
+}
+
 variable "scaler_min_poll_interval" {
   description = "Minimum time between auto-scaler checks for new build jobs (e.g., '30s', '1m')."
   type        = string

@@ -36,8 +36,9 @@ resource "aws_lambda_function" "scaler" {
       INCLUDE_WAITING           = var.scale_out_for_waiting_jobs ? "true" : "false"
 
       # Lambda behavior /  Polling configuration
-      LAMBDA_INTERVAL = var.scaler_min_poll_interval
-      LAMBDA_TIMEOUT  = "50s" # Less than function timeout to allow graceful exit
+      LAMBDA_INTERVAL           = var.scaler_min_poll_interval
+      LAMBDA_TIMEOUT            = "50s" # Less than function timeout to allow graceful exit
+      LAMBDA_STARTUP_JITTER_MAX = var.scaler_event_schedule_jitter
 
       # Elastic CI Mode (experimental)
       ELASTIC_CI_MODE = var.scaler_enable_elastic_ci_mode ? "true" : "false"
