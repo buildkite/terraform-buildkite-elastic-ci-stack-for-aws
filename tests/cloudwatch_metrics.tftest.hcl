@@ -81,6 +81,11 @@ run "disables_cloudwatch_metrics_by_default" {
   }
 
   assert {
+    condition     = lookup(aws_lambda_function.scaler[0].environment[0].variables, "LAMBDA_STARTUP_JITTER_MAX", null) == "0s"
+    error_message = "LAMBDA_STARTUP_JITTER_MAX should default to 0s (no jitter)."
+  }
+
+  assert {
     condition     = !strcontains(aws_iam_role_policy.scaler_lambda_policy[0].policy, "cloudwatch:PutMetricData")
     error_message = "The scaler Lambda role should not grant cloudwatch:PutMetricData when metrics are disabled."
   }
@@ -160,5 +165,36 @@ run "skips_scale_in_cooldown_persistence_with_custom_role" {
   assert {
     condition     = aws_lambda_function.scaler[0].environment[0].variables["LAST_SCALE_IN_SSM_PARAMETER"] == ""
     error_message = "A custom scaler role is not granted the cooldown parameter, so persistence should stay off."
+  }
+}
+
+run "passes_configured_scaler_event_schedule_jitter" {
+  command = plan
+
+  variables {
+    buildkite_agent_token        = "test-token"
+    scaler_event_schedule_jitter = "30s"
+  }
+
+  assert {
+    condition     = lookup(aws_lambda_function.scaler[0].environment[0].variables, "LAMBDA_STARTUP_JITTER_MAX", null) == "30s"
+    error_message = "LAMBDA_STARTUP_JITTER_MAX should receive the configured Go duration unchanged."
+  }
+}
+
+run "does_not_create_scaler_for_fixed_size_standard_mode_with_jitter" {
+  command = plan
+
+  variables {
+    buildkite_agent_token         = "test-token"
+    scaler_enable_elastic_ci_mode = false
+    scaler_event_schedule_jitter  = "30s"
+    min_size                      = 2
+    max_size                      = 2
+  }
+
+  assert {
+    condition     = length(aws_lambda_function.scaler) == 0 && length(aws_cloudwatch_event_rule.scaler_schedule) == 0
+    error_message = "Jitter should not create a scaler Lambda or schedule for a fixed-size standard-mode stack."
   }
 }
