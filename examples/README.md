@@ -74,6 +74,17 @@ Cost-optimized configuration using primarily Spot instances with on-demand basel
 
 Suitable for cost optimization priorities, workloads tolerant of interruptions, or development and testing environments.
 
+### [Attribute-Based Instance Type Selection](./attribute-based-instance-selection)
+
+Select instance types by vCPU count and memory instead of listing them.
+
+- `instance_requirements` instead of `instance_types`
+- Explicit AMI architecture with `instance_architecture`
+- Price-capacity-optimized Spot allocation strategy
+- Automatic use of new instance types that match
+
+Suitable for Spot-heavy fleets that need many instance types, or teams that don't want to maintain an instance type list.
+
 ## Using Examples
 
 Each example is a complete, working Terraform configuration:
